@@ -1,0 +1,26 @@
+{
+  "name": "komet-js",
+  "version": "1.0.0",
+  "description": "Its Komet but for JS!",
+  "main": "index.js",
+  "dependencies": {
+    "discord.js": "^12.1.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": ".ping"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hax4dazy/Komet-JS.git"
+  },
+  "keywords": [
+    "Discord-JS"
+  ],
+  "author": "Hax4dayz",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hax4dazy/Komet-JS/issues"
+  },
+  "homepage": "https://github.com/hax4dazy/Komet-JS#readme"
+}
