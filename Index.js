@@ -4,15 +4,12 @@ const client = new Discord.Client();
 client.commands = new Discord.Collection();
 const { MessageEmbed } = require('discord.js')
 const {prefix, token, SetStatusCommand} = require('./config.json');
+const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+const { nopermreply, BootSuccessful, DmRespondMessage} = require('./strings.json');
 
 //Bootup check
 client.once('ready', () => {
 	console.log('Ready!');
-	console.log('Version: '+version)
-	fs.readFile('./allow-incoming.config', function(err, data){
-		if(err)console.log(err)
-		if (data == 'reject'){client.user.setStatus("online");const status = 'Listening to errors | .help'}else{const status = 'Listening to errors | .help'}
-	})
 		  var today = new Date();
 				var date = today.getMonth()+1+'-'+(today.getDate())+'-'+today.getFullYear();
 				var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
@@ -25,7 +22,7 @@ client.once('ready', () => {
 					{ name: 'Current date/time: ', value: dateTime, inline: true },
 				)
 				.setTimestamp()
-				.setFooter('Mod Mail | Version '+version)
+				.setFooter('Komet-JS')
 				global.modlog = client.channels.cache.get(`${BotLog}`);
 				modlog.send(StartupEmbed);
 				return;
@@ -57,3 +54,28 @@ client.on('message', message => {
 
 //Login
 client.login(token);
+
+for (const file of commandFiles) {
+	const command = require(`./commands/${file}`);
+
+	// set a new item in the Collection
+	// with the key as the command name and the value as the exported module
+	client.commands.set(command.name, command);
+}
+
+//this is the code for the /commands folder
+client.on('message', message => {
+	if (!message.content.startsWith(prefix) || message.author.bot) return;
+
+	const args = message.content.slice(prefix.length).split(/ +/);
+	const command = args.shift().toLowerCase();
+
+	if (!client.commands.has(command)) return;
+
+	try {
+		client.commands.get(command).execute(message, args);
+	} catch (error) {
+		console.error(error);
+		message.reply('there was an error trying to execute that command!');
+	}
+});
