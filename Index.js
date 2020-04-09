@@ -2,31 +2,75 @@ const fs = require('fs');
 const Discord = require('discord.js');
 const client = new Discord.Client();
 client.commands = new Discord.Collection();
-const { MessageEmbed } = require('discord.js')
-const {prefix, token, SetStatusCommand} = require('./config.json');
+const { MessageEmbed } = require('discord.js');
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
-const { nopermreply, BootSuccessful, DmRespondMessage} = require('./strings.json');
+global.version = '1.0.0'
+
+const {	prefix, 
+	Token,
+	SetStatusCommand,
+} = require('./config.json');
+
+const { BotLog, 
+	MessageLog, 
+	RequirePermissons, 
+	StaffRoleID,
+} = require('./info.json');
+
+const { NoPermReply, 
+	BootSuccessful
+} = require('./strings.json');
 
 //Bootup check
 client.once('ready', () => {
+	client.emit('CheckForNewDay')
 	console.log('Ready!');
-		  var today = new Date();
-				var date = today.getMonth()+1+'-'+(today.getDate())+'-'+today.getFullYear();
-				var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-				global.dateTime = date+' '+time;
-				const StartupEmbed = new Discord.MessageEmbed()
-				.setColor('#00FF00')
-				.setTitle('Bot Started')
-				.setDescription(`${BootSuccessful}`)
-				.addFields(
-					{ name: 'Current date/time: ', value: dateTime, inline: true },
-				)
-				.setTimestamp()
-				.setFooter('Komet-JS')
-				global.modlog = client.channels.cache.get(`${BotLog}`);
-				modlog.send(StartupEmbed);
-				return;
-				
+	console.log('Version: '+version)
+	var today = new Date();
+	var date = today.getMonth()+1+'-'+(today.getDate())+'-'+today.getFullYear();
+	var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+	global.dateTime = date+' '+time;
+		const StartupEmbed = new Discord.MessageEmbed()
+			.setColor('#00FF00')
+			.setTitle('Bot Started')
+			.setDescription(`${BootSuccessful}`)
+			.addFields(
+				{ name: 'Current date/time: ', value: dateTime, inline: true },
+					)
+			.setTimestamp()
+			.setFooter('Komet-JS | Version '+version)
+		global.modlog = client.channels.cache.get(`${BotLog}`);
+		modlog.send(StartupEmbed);
+				//Check for updates
+				const https = require('https');
+				const file = fs.createWriteStream("version.txt"); 
+				const request = https.get("https://raw.githubusercontent.com/hax4dazy/Komet-JS/master/version/latestversion.txt?token=AD4A7UU4PQGTAPHLXGRGAYC6TB27I", function(response) {
+				response.pipe(file);
+				const changedfile = fs.createWriteStream("changelog.txt"); 
+				const changedrequest = https.get("https://raw.githubusercontent.com/hax4dazy/Komet-JS/master/version/changelog.txt?token=AD4A7UT4G7FIZEOEZCER5DC6TB3BC", function(changedresponse) {
+				changedresponse.pipe(changedfile);
+				fs.readFile('./changelog.txt', function(err, data){
+				const changelog = data.toString()
+				fs.readFile('./version.txt', function(err, data){
+					const latestversion = data.toString().replace(/[\r\n]+/g, '');
+				 	if(version != latestversion){
+					const UpdateAvailableEmbed = new Discord.MessageEmbed()
+					.setTitle('Update Available')
+					.setColor('ffa500')
+					.setDescription(`An update is available.\nLatest version: ${latestversion}\nYour version: ${version}`)
+					.addField('Changelog',changelog,false)
+					.setTimestamp()
+					.setFooter('Komet-JS | Version '+version)
+					modlog.send(UpdateAvailableEmbed);
+					}
+							try {
+								fs.unlinkSync(`./version.txt`)
+								fs.unlinkSync(`./changelog.txt`)
+					  			} catch(err) {
+								console.error(err)
+					  }
+				})})})})
+									 
 });
 
 
@@ -53,7 +97,7 @@ client.on('message', message => {
 })
 
 //Login
-client.login(token);
+client.login(Token);
 
 for (const file of commandFiles) {
 	const command = require(`./commands/${file}`);
