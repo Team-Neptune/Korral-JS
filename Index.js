@@ -4,7 +4,7 @@ const client = new Discord.Client();
 client.commands = new Discord.Collection();
 const { MessageEmbed } = require('discord.js');
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
-global.version = '1.0.0'
+global.version = '4.2.0'
 
 const {	prefix, 
 	Token,
@@ -20,6 +20,8 @@ const { BotLog,
 const { NoPermReply, 
 	BootSuccessful
 } = require('./strings.json');
+
+
 
 //Bootup check
 client.once('ready', () => {
@@ -44,10 +46,10 @@ client.once('ready', () => {
 				//Check for updates
 				const https = require('https');
 				const file = fs.createWriteStream("version.txt"); 
-				const request = https.get("https://raw.githubusercontent.com/hax4dazy/Komet-JS/master/version/latestversion.txt?token=AD4A7UU4PQGTAPHLXGRGAYC6TB27I", function(response) {
+				const request = https.get("https://hax4dazy.github.io/Komet-JS/version/latestversion.txt", function(response) {
 				response.pipe(file);
 				const changedfile = fs.createWriteStream("changelog.txt"); 
-				const changedrequest = https.get("https://raw.githubusercontent.com/hax4dazy/Komet-JS/master/version/changelog.txt?token=AD4A7UT4G7FIZEOEZCER5DC6TB3BC", function(changedresponse) {
+				const changedrequest = https.get("https://hax4dazy.github.io/Komet-JS/version/changelog.txt", function(changedresponse) {
 				changedresponse.pipe(changedfile);
 				fs.readFile('./changelog.txt', function(err, data){
 				const changelog = data.toString()
@@ -123,3 +125,36 @@ client.on('message', message => {
 		message.reply('there was an error trying to execute that command!');
 	}
 });
+
+client.on('message', message => {
+	if (message.content ===  prefix + 'updates') {
+				//Check for updates
+				const https = require('https');
+				const file = fs.createWriteStream("version.txt"); 
+				const request = https.get("https://hax4dazy.github.io/Komet-JS/version/latestversion.txt", function(response) {
+				response.pipe(file);
+				const changedfile = fs.createWriteStream("changelog.txt"); 
+				const changedrequest = https.get("https://hax4dazy.github.io/Komet-JS/version/changelog.txt", function(changedresponse) {
+				changedresponse.pipe(changedfile);
+				fs.readFile('./changelog.txt', function(err, data){
+				const changelog = data.toString()
+				fs.readFile('./version.txt', function(err, data){
+					const latestversion = data.toString().replace(/[\r\n]+/g, '');
+				 	if(version != latestversion){
+					const UpdateAvailableEmbed = new Discord.MessageEmbed()
+					.setTitle('Update Available')
+					.setColor('ffa500')
+					.setDescription(`An update is available.\nLatest version: ${latestversion}\nYour version: ${version}`)
+					.addField('Changelog',changelog,false)
+					.setTimestamp()
+					.setFooter('Komet-JS | Version '+version)
+					message.channel.send(UpdateAvailableEmbed);
+					}
+							try {
+								fs.unlinkSync(`./version.txt`)
+								fs.unlinkSync(`./changelog.txt`)
+					  			} catch(err) {
+								console.error(err)
+					  }
+				})})})})
+			}});
