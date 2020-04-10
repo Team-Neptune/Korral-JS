@@ -137,6 +137,29 @@ client.on('guildMemberAdd', member => {
 	}
 );
 
+//Member leave
+client.on('guildMemberRemove', member => {
+	var today = new Date();
+	var date = today.getMonth()+1+'-'+(today.getDate())+'-'+today.getFullYear();
+	var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+	global.dateTime = date+' '+time;
+	const channel = member.guild.channels.cache.find(ch => ch.id === `${ModLog}`);
+	const guild = member.guild
+	if (!channel) return;
+	const MemberLeaveEmbed = new Discord.MessageEmbed()
+	.setColor('#ff0000')
+	.setTitle('Member Leave')
+	.addFields(
+		{ name: 'Username', value: member.user.tag, inline: false },
+		{ name: 'Member ID', value: member.user.id, inline: false },
+		{ name: 'Account creation date', value: member.user.createdAt, inline: false },
+		{ name: 'Server leave date', value: dateTime, inline: false },
+		{ name: 'Server member count', value: `${guild.memberCount}`, inline: false },
+	)
+	.setTimestamp()
+	channel.send(MemberLeaveEmbed)
+});
+
 //Log deleted messages
 client.on('messageDelete', async message => {
 	const fetchedLogs = await message.guild.fetchAuditLogs({
