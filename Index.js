@@ -4,7 +4,7 @@ const client = new Discord.Client();
 client.commands = new Discord.Collection();
 const { MessageEmbed } = require('discord.js');
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
-global.version = '1.0.0'
+global.version = '2.0.0'
 
 const {	prefix, 
 	Token,
@@ -126,7 +126,7 @@ client.on('message', message => {
 	}
 });
 
-client.on('message', message => {
+/*client.on('message', message => {
 	if (message.content ===  prefix + 'updates') {
 				//Check for updates
 				const https = require('https');
@@ -157,4 +157,4 @@ client.on('message', message => {
 								console.error(err)
 					  }
 				})})})})
-			}});
+			}}); */
