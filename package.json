@@ -4,7 +4,8 @@
   "description": "Its Komet but for JS!",
   "main": "index.js",
   "dependencies": {
-    "discord.js": "^12.1.1"
+    "discord.js": "^12.1.1",
+    "moment": "^2.24.0"
   },
   "devDependencies": {},
   "scripts": {
