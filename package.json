@@ -4,8 +4,11 @@
   "description": "Its Komet but for JS!",
   "main": "index.js",
   "dependencies": {
+    "JSON": "^1.0.0",
+    "bent": "^7.3.0",
     "discord.js": "^12.1.1",
-    "moment": "^2.24.0"
+    "moment": "^2.24.0",
+    "request": "^2.88.2"
   },
   "devDependencies": {},
   "scripts": {
