@@ -7,7 +7,9 @@ const Discord = require('discord.js');
 const client = new Discord.Client();
 client.commands = new Discord.Collection();
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
-const MessageEmbed = require('discord.js');
+const {
+	MessageEmbed
+} = require('discord.js');
 
 const {
 	prefix, 
@@ -17,20 +19,16 @@ const {
 	userLog
 } = require ('./config.json');
 
-const botlogchannel = client.channels.cache.get(`${botLog}`);
-const modlogchannel = client.channels.cache.get(`${modLog}}`);
-const userlogchannel = client.channels.cache.get(`${userLog}`);
-
 //Bootup check
 client.once('ready', () => {
 	console.log('Ready!');
 	console.log('Version: '+version)
-		var StartupEmbed = new Discord.MessageEmbed()
+		const StartupEmbed = new Discord.MessageEmbed()
 			.setColor('#00FF00')
 			.setTitle('Bot Started')
 			.setTimestamp()
-		//	.setFooter('Komet-JS | Version '+version)
-		botlogchannel.send(StartupEmbed);
+			.setFooter('Komet-JS | Version '+version)
+		client.channels.cache.get(`${botLog}`).send(StartupEmbed);
 				//Check for updates
 				const https = require('https');
 				const file = fs.createWriteStream("version.txt"); 
@@ -51,7 +49,7 @@ client.once('ready', () => {
 						.addField('Changelog',changelog,false)
 						.setTimestamp()
 						.setFooter('Komet-JS | Version '+version)
-						botlogchannel.send(UpdateAvailableEmbed);
+						client.channels.cache.get(`${botLog}`).send(UpdateAvailableEmbed);
 					}
 							try {
 								fs.unlinkSync(`./version.txt`)
@@ -73,19 +71,6 @@ client.on('error', error => {
 	console.error('an error has occured', error);
 
 });
-
-//Sets bot status
-client.on('message', message => {
-	if (message.author.bot)return;
-	if (!message.content.startsWith(`${prefix}${SetStatusCommand}`))return;
-	if (message.channel.type == 'dm')return;
-	if(RequirePermissonsToUseDmCommand == true){
-	if (message.member.roles.cache.some(role => role.id === `${StaffRoleID}`)){}else{message.reply(nopermreply);return;}}
-	const args = message.content.slice((prefix+SetStatusCommand).length).split(/ +/);
-	const activity = args.join(' ')
-	client.user.setActivity(activity, { type: 'WATCHING' });
-	message.channel.send('Bot activity set to `WATCHING '+activity+'`.')
-})
 
 //Login
 client.login(token);
@@ -129,7 +114,7 @@ client.on('guildMemberAdd', member => {
 		{ name: 'Server member count', value: `${guild.memberCount}`, inline: false },
 	)
 	.setTimestamp()
-	userlogchannel.send(MemberJoinEmbed)
+	client.channels.cache.get(`${userLog}`).send(MemberJoinEmbed)
 	}
 );
 
@@ -148,7 +133,7 @@ client.on('guildMemberRemove', member => {
 		{ name: 'Server member count', value: `${guild.memberCount}`, inline: false },
 	)
 	.setTimestamp()
-	userlogchannel.send(MemberLeaveEmbed)
+	client.channels.cache.get(`${userLog}`).send(MemberLeaveEmbed)
 });
 
 //Log deleted messages
@@ -172,7 +157,7 @@ client.on('messageDelete', async message => {
 		{ name: 'Message', value: message.content, inline: false },
 	)
 	.setTimestamp()
-	modlogchannel.send(DeletionEmbed)}
+	client.channels.cache.get(`${modLog}}`).send(DeletionEmbed)}
 
 	// We now grab the user object of the person who deleted the message
 	// Let us also grab the target of this action to double check things
@@ -193,7 +178,7 @@ client.on('messageDelete', async message => {
 			{ name: 'Message', value: message.content, inline: false },
 		)
 		.setTimestamp()
-		modlogchannel.send(DeletionEmbed)
+		client.channels.cache.get(`${modLog}}`).send(DeletionEmbed)
 		return;
 	}	else {
 		if (target.id === message.author.id) return;
@@ -208,7 +193,7 @@ client.on('messageDelete', async message => {
 			{ name: 'Message', value: message.content, inline: false },
 		)
 		.setTimestamp()
-		modlogchannel.send(DeletionEmbed)
+		client.channels.cache.get(`${modLog}}`).send(DeletionEmbed)
 		return;
 	}
 });
