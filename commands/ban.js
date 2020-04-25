@@ -6,7 +6,10 @@ module.exports = {
 	cooldown: 0,
 	mod:true,
     execute(message, args) {
-        try {
+		const Discord = require('discord.js');
+		const client = new Discord.Client();
+		const fs = require('fs');
+		try {
 			if (message.author.id == message.mentions.members.first().id){message.channel.send(`You can't perform this action on yourself.`);return;}
 			const {ModeratorRoleID} = require('../info.json');
 			const checkmemberforroles = message.mentions.members.first()
@@ -20,8 +23,7 @@ module.exports = {
 			if(reason == ''){var reason = 'No reason provided.'}
 			fs.appendFileSync('./logs/' + userid + '-warnings.log', 'Ban\nReason: ' + reason +'\n\n');
    			fs.appendFileSync('./logs/' + userid + '-modwarnings.log', 'Ban issued by '+ authorusername +'\nReason: ' + reason +'\n\n');
-			respond('Ban','<@'+user+'> was banned.\nReason: '+reason, message.channel)
-			respond('Banned','You were banned from the Apple Explained server due to: '+ reason, user)
+			message.channel.send('Ban','<@'+user+'> was banned.\nReason: '+reason, message.channel)
 			guild.members.ban(user);
 			modaction(this.name, message.author.tag, message.channel.name, message.content)
     		}
