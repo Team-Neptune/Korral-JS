@@ -7,7 +7,7 @@ module.exports = {
 		if (message.author.bot) return;
 	const exampleEmbed = new Discord.MessageEmbed()
 	.setTitle('Cat')
-	.setImage('https://placekitten.com/g/200/' + Math.floor((Math.random() * 200) + 1))
+	.setImage('https://placekitten.com/200/' + Math.floor((Math.random() * 200) + 1))
 	.setTimestamp()
 	message.channel.send(exampleEmbed)
 
