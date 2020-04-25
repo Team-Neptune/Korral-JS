@@ -4,7 +4,7 @@ const client = new Discord.Client();
 client.commands = new Discord.Collection();
 const { MessageEmbed } = require('discord.js');
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
-const {prefix, Token, SetStatusCommand} = require ('./config.json');
+const {prefix, token, SetStatusCommand} = require ('./config.json');
 const {BotLog, MessageLog, RequirePermissions, ModLog} = require('./info.json');
 const {BootSuccessful} = require('./strings.json');
 global.version = '1.0.0'
@@ -86,7 +86,7 @@ client.on('message', message => {
 })
 
 //Login
-client.login(Token);
+client.login(token);
 
 for (const file of commandFiles) {
 	const command = require(`./commands/${file}`);
@@ -176,7 +176,7 @@ client.on('messageDelete', async message => {
 	.setTitle('Message Deleted')
 	.addFields(
 		{ name: 'Message sent by', value: message.author.tag, inline: false },
-		{ name: 'Deleted by', value: 'Unknown - Audit log not found.', inline: false },
+		{ name: 'Deleted by', value: 'Unknown - Audit log was not found.', inline: false },
 		{ name: 'Sent in', value: message.channel.name, inline: false },
 		{ name: 'Message', value: message.content, inline: false },
 	)
@@ -198,7 +198,7 @@ client.on('messageDelete', async message => {
 		.setTitle('Message Deleted')
 		.addFields(
 			{ name: 'Message sent by', value: message.author.tag, inline: false },
-			{ name: 'Deleted by', value: executor.tag, inline: false },
+			{ name: 'Deleted by', value: executor.tag + ` (${executor.id})`, inline: false },
 			{ name: 'Sent in', value: message.channel.name, inline: false },
 			{ name: 'Message', value: message.content, inline: false },
 		)
