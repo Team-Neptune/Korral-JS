@@ -11,9 +11,9 @@ module.exports = {
 		const fs = require('fs');
 		try {
 			if (message.author.id == message.mentions.members.first().id){message.channel.send(`You can't perform this action on yourself.`);return;}
-			const {ModeratorRoleID} = require('../info.json');
-			const checkmemberforroles = message.mentions.members.first()
-			if (checkmemberforroles.roles.cache.some(role => role.id === `${ModeratorRoleID}`)){message.channel.send(`You can't perform that action on this user.`);return;}
+			//const {ModeratorRoleID} = require('../info.json');
+			//const checkmemberforroles = message.mentions.members.first()
+			//if (checkmemberforroles.roles.cache.some(role => role.id === `${ModeratorRoleID}`)){message.channel.send(`You can't perform that action on this user.`);return;}
 			const user = message.mentions.users.first();
 			const userid = user.id
 			const guild = message.guild
@@ -23,7 +23,7 @@ module.exports = {
 			if(reason == ''){var reason = 'No reason provided.'}
 			fs.appendFileSync('./logs/' + userid + '-warnings.log', 'Ban\nReason: ' + reason +'\n\n');
    			fs.appendFileSync('./logs/' + userid + '-modwarnings.log', 'Ban issued by '+ authorusername +'\nReason: ' + reason +'\n\n');
-			message.channel.send('Ban','<@'+user+'> was banned.\nReason: '+reason, message.channel)
+			message.channel.send(message.mentions.members.first().user.tag+' is ̶n͢ow b̕&̡.̷ 👍̡!')
 			guild.members.ban(user);
 			modaction(this.name, message.author.tag, message.channel.name, message.content)
     		}
