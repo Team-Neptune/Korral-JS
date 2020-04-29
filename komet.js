@@ -19,6 +19,12 @@ const {
 	userLog
 } = require ('./config.json');
 
+
+global.respond = function (title, content, sendto, color){
+	//Since hax4dayz likes to copy my code from my other bot
+	//He doesn't check to make sure it works on this bot :shrek:
+	sendto.send(content)
+}
 //Bootup check
 client.once('ready', () => {
 	console.log('Ready!');
@@ -88,12 +94,17 @@ client.on('message', message => {
 	if (!message.content.startsWith(prefix) || message.author.bot) return;
 
 	const args = message.content.slice(prefix.length).split(/ +/);
-	const command = args.shift().toLowerCase();
+	const commandName = args.shift().toLowerCase();
+	const command = client.commands.get(commandName)
+		|| client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
 
-	if (!client.commands.has(command)) return;
+	if(command.mod == true && message.author.id != '461560462991949863'){
+		message.channel.send('<@'+message.author.id+'>: Check failed. You might not have the right permissions to run this command, or you may not be able to run this command in the current channel.');
+		return;
+	}
 
 	try {
-		client.commands.get(command).execute(message, args, client);
+		command.execute(message, args, client);
 	} catch (error) {
 		console.error(error);
 		message.reply('there was an error trying to execute that command!');
