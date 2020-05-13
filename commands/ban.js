@@ -22,7 +22,8 @@ module.exports = {
 			var reason = args.join(' ').replace(args[0], '')
 			if(reason == ''){var reason = 'No reason provided.'}
 			//fs.appendFileSync('./logs/' + userid + '-.log', 'Ban\nReason: ' + reason +'\n\n');
-   			//fs.appendFileSync('./logs/' + userid + '-mod.log', 'Ban issued by '+ authorusername +'\nReason: ' + reason +'\n\n');
+			//fs.appendFileSync('./logs/' + userid + '-mod.log', 'Ban issued by '+ authorusername +'\nReason: ' + reason +'\n\n');
+			message.mentions.members.first().send(`You were banned from ${message.guild.name}. The given reason was: "${reason}"\n\nThis ban does not expire.`)
 			message.channel.send(message.mentions.members.first().user.tag+' is ̶n͢ow b̕&̡.̷ 👍̡')
 			message.mentions.members.first().ban({reason: `${message.author.tag}, ${reason}`})
 			message.guild.channels.cache.get(modLog).send(`:no_entry: Ban: <@${message.author.id}> banned <@${userid}> | ${user.tag}
