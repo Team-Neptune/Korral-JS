@@ -1,2 +1,2 @@
 # Komet-JS
- Its the official Team AtlasNX Komet bot rewritten in JS!
+ Its the official Team Neptune bot written in Discord JS!
