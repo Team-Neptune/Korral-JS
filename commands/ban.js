@@ -4,7 +4,7 @@ module.exports = {
     aliases: ['banish'],
 	usage: '<user> <reason>',
 	cooldown: 0,
-	mod:true,
+	staff:true,
     execute(message, args) {
 		const Discord = require('discord.js');
 		const client = new Discord.Client();

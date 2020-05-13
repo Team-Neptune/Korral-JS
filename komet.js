@@ -16,7 +16,8 @@ const {
 	token, 
 	botLog, 
 	modLog, 
-	userLog
+	userLog,
+	staffRoles
 } = require ('./config.json');
 
 
@@ -101,7 +102,12 @@ client.on('message', message => {
 
 	if(!command)return;
 	
-	if(command.mod && command.mod == true && message.author.id != '461560462991949863'){
+	if(command.staff && command.staff == true && !message.member.roles.cache.some(role => staffRoles.includes(role.id))){
+		message.channel.send('<@'+message.author.id+'>: Check failed. You might not have the right permissions to run this command, or you may not be able to run this command in the current channel.');
+		return;
+	}
+	//Added so there is time to fix commands
+	if(command.mod && command.mod == true && !message.member.roles.cache.some(role => staffRoles.includes(role.id))){
 		message.channel.send('<@'+message.author.id+'>: Check failed. You might not have the right permissions to run this command, or you may not be able to run this command in the current channel.');
 		return;
 	}
@@ -200,6 +206,7 @@ from ${message.author.tag} (${message.author.id}), in <#${message.channel.id}>:
 
 //Log message edits
 client.on('messageUpdate', (oldMessage, newMessage) => {
+	if(oldMessage.author == client.author)
 	newMessage.guild.channels.cache.get(modLog).send(`:pencil: Message edit: 
 from ${newMessage.author.tag} (${newMessage.author.id}), in <#${newMessage.channel.id}>:
 \`${oldMessage.content}\` → \`${newMessage.content}\``)
