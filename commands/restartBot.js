@@ -16,7 +16,7 @@ module.exports = {
 		message.channel.send(RestartedEmbed)
 		setTimeout(function(){ 
 			process.exit()
-		}, 5000);
+		}, 3000);
 	}catch(error) {
 		respond('Error', 'Something went wrong.\n'+error+`\nMessage: ${message}\nArgs: ${args}\n`, message.channel)
 		errorlog(error)
