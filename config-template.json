@@ -1,7 +1,8 @@
 {
-	"prefix": "",
+	"prefix": ["", ""],
 	"token": "",
 	"botLog": "",
 	"modLog": "",
-	"userLog":""
+	"userLog":"",
+	"staffRoles":["", ""]
 }
