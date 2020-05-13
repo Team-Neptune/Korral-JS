@@ -12,7 +12,7 @@ const {
 } = require('discord.js');
 
 const {
-	prefix, 
+	prefix,
 	token, 
 	botLog, 
 	modLog, 
@@ -20,7 +20,7 @@ const {
 } = require ('./config.json');
 
 
-global.respond = function (title, content, sendto, color){
+respond = function (title, content, sendto, color){
 	//Since hax4dayz likes to copy my code from my other bot
 	//He doesn't check to make sure it works on this bot :shrek:
 	sendto.send(content)
@@ -91,14 +91,17 @@ for (const file of commandFiles) {
 
 //this is the code for the /commands folder
 client.on('message', message => {
-	if (!message.content.startsWith(prefix) || message.author.bot) return;
+	var firstChar = message.content.slice(0, 1)
+	if (!prefix.includes(firstChar) && !message.content.startsWith(firstChar) || message.author.bot) return;
 
-	const args = message.content.slice(prefix.length).split(/ +/);
+	const args = message.content.slice(firstChar.length).split(/ +/);
 	const commandName = args.shift().toLowerCase();
 	const command = client.commands.get(commandName)
 		|| client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
 
-	if(command.mod == true && message.author.id != '461560462991949863'){
+	if(!command)return;
+	
+	if(command.mod && command.mod == true && message.author.id != '461560462991949863'){
 		message.channel.send('<@'+message.author.id+'>: Check failed. You might not have the right permissions to run this command, or you may not be able to run this command in the current channel.');
 		return;
 	}
@@ -114,37 +117,17 @@ client.on('message', message => {
 //Member join
 client.on('guildMemberAdd', member => {
 	const guild = member.guild
-	if (!channel) return;
-	const MemberJoinEmbed = new Discord.MessageEmbed()
-	.setColor('#00FF00')
-	.setTitle('Member Join')
-	.addFields(
-		{ name: 'Username', value: member.user.tag, inline: false },
-		{ name: 'Member ID', value: member.id, inline: false },
-		{ name: 'Account creation date', value: member.user.createdAt, inline: false },
-		{ name: 'Server member count', value: `${guild.memberCount}`, inline: false },
-	)
-	.setTimestamp()
-	client.channels.cache.get(`${userLog}`).send(MemberJoinEmbed)
+	member.guild.channels.cache.get(`${userLog}`).send(`:white_check_mark: Join: <@${member.id}> | ${member.user.tag}
+:calendar_spiral: Creation: ${member.user.createdAt}
+:label: User ID: ${member.id}`)
 	}
 );
 
 //Member leave
 client.on('guildMemberRemove', member => {
 	const guild = member.guild
-	if (!channel) return;
-	const MemberLeaveEmbed = new Discord.MessageEmbed()
-	.setColor('#ff0000')
-	.setTitle('Member Leave')
-	.addFields(
-		{ name: 'Username', value: member.user.tag, inline: false },
-		{ name: 'Member ID', value: member.user.id, inline: false },
-		{ name: 'Account creation date', value: member.user.createdAt, inline: false },
-		{ name: 'Server leave date', value: dateTime, inline: false },
-		{ name: 'Server member count', value: `${guild.memberCount}`, inline: false },
-	)
-	.setTimestamp()
-	client.channels.cache.get(`${userLog}`).send(MemberLeaveEmbed)
+	client.channels.cache.get(`${userLog}`).send(`:arrow_left: Leave: <@${member.id}> | ${member.user.tag}
+:label: User ID: ${member.id}`)
 });
 
 //Log deleted messages
@@ -153,6 +136,12 @@ client.on('messageDelete', async message => {
 		limit: 1,
 		type: 'MESSAGE_DELETE',
 	});
+
+	message.guild.channels.cache.get(modLog).send(`:wastebasket: Message delete: 
+from ${message.author.tag} (${message.author.id}), in <#${message.channel.id}>:
+\`${message.content}\``)
+	//May fix it up someday TM
+	return; 
 	// Since we only have 1 audit log entry in this collection, we can simply grab the first one
 	const deletionLog = fetchedLogs.entries.first();
 
@@ -168,7 +157,7 @@ client.on('messageDelete', async message => {
 		{ name: 'Message', value: message.content, inline: false },
 	)
 	.setTimestamp()
-	client.channels.cache.get(`${modLog}}`).send(DeletionEmbed)}
+	client.channels.cache.get(`${modLog}`).send(DeletionEmbed)}
 
 	// We now grab the user object of the person who deleted the message
 	// Let us also grab the target of this action to double check things
@@ -189,7 +178,7 @@ client.on('messageDelete', async message => {
 			{ name: 'Message', value: message.content, inline: false },
 		)
 		.setTimestamp()
-		client.channels.cache.get(`${modLog}}`).send(DeletionEmbed)
+		client.channels.cache.get(`${modLog}`).send(DeletionEmbed)
 		return;
 	}	else {
 		if (target.id === message.author.id) return;
@@ -204,8 +193,14 @@ client.on('messageDelete', async message => {
 			{ name: 'Message', value: message.content, inline: false },
 		)
 		.setTimestamp()
-		client.channels.cache.get(`${modLog}}`).send(DeletionEmbed)
+		client.channels.cache.get(`${modLog}`).send(DeletionEmbed)
 		return;
 	}
 });
 
+//Log message edits
+client.on('messageUpdate', (oldMessage, newMessage) => {
+	newMessage.guild.channels.cache.get(modLog).send(`:pencil: Message edit: 
+from ${newMessage.author.tag} (${newMessage.author.id}), in <#${newMessage.channel.id}>:
+\`${oldMessage.content}\` → \`${newMessage.content}\``)
+})
