@@ -206,7 +206,6 @@ from ${message.author.tag} (${message.author.id}), in <#${message.channel.id}>:
 
 //Log message edits
 client.on('messageUpdate', (oldMessage, newMessage) => {
-	if(!oldMessage.author == client.user.id)
 	newMessage.guild.channels.cache.get(modLog).send(`:pencil: Message edit: 
 from ${newMessage.author.tag} (${newMessage.author.id}), in <#${newMessage.channel.id}>:
 \`${oldMessage.content}\` → \`${newMessage.content}\``)
