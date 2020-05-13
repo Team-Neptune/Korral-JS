@@ -1,6 +1,6 @@
 module.exports = {
   name: 'say',
-  aliases: ['speak'],
+  aliases: ['echo'],
   description: 'Has the bot speak in the channel it is ran in.',
   usage: '<text>',
   cooldown: 0,
