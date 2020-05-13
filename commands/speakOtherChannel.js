@@ -23,6 +23,5 @@ module.exports = {
     }
     var text = args.join(' ');
     var text = text.replace(argarray[1], '')
-		message.delete()
 		message.mentions.channels.first().send(text)
   }}
