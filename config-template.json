@@ -4,5 +4,7 @@
 	"botLog": "",
 	"modLog": "",
 	"userLog":"",
+	"suspiciousWordsLog":"",
+	"suspiciousWordsFilter":true,
 	"staffRoles":["", ""]
 }
