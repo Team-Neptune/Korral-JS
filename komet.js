@@ -1,5 +1,4 @@
 console.log('Loading, please wait a moment.')
-const version = '1.0.0'
 
 const fs = require('fs')
 
@@ -27,55 +26,43 @@ respond = function (title, content, sendto, color){
 	//He doesn't check to make sure it works on this bot :shrek:
 	sendto.send(content)
 }
+
+const { exec } = require("child_process");
+exec("git rev-parse HEAD", (error, stdout, stderr) => {
+	commitID = `${stdout}`
+	version = `${stdout}`
+	})
+exec("git log master --format=\"%H\" -n 1", (err, stdout, stderr) => {
+	latestCommit = stdout
+})
+exec("git log master -1 --pretty=%B", (err, stdout, stderr) => {
+	latestCommitMessage = stdout
+})
+
 //Bootup check
 client.once('ready', () => {
 	console.log('Ready!');
-	console.log('Version: '+version)
-	const { exec } = require("child_process");
+	console.log(`Local commit ID: ${commitID}`)
+	console.log(`Latest commit ID: ${latestCommit}`)
 		const StartupEmbed = new Discord.MessageEmbed()
 			.setColor('#00FF00')
 			.setTitle('Bot Started')
 			.setTimestamp()
-			exec("git rev-parse HEAD", (error, stdout, stderr) => {
-			StartupEmbed.setFooter('Komet-JS | Version '+version+`${stdout}`)
-			})
+			.setFooter(`${client.user.username} | Commit: ${commitID}`)
 		client.channels.cache.get(`${botLog}`).send(StartupEmbed);
 				//Check for updates
-				const https = require('https');
-				const file = fs.createWriteStream("version.txt"); 
-				const request = https.get("https://hax4dazy.github.io/Komet-JS/version/latestversion.txt", function(response) {
-				response.pipe(file);
-				const changedfile = fs.createWriteStream("changelog.txt"); 
-				const changedrequest = https.get("https://hax4dazy.github.io/Komet-JS/version/changelog.txt", function(changedresponse) {
-				changedresponse.pipe(changedfile);
-				fs.readFile('./changelog.txt', function(err, data){
-					const changelog = data.toString()
-					fs.readFile('./version.txt', function(err, data){
-						const latestversion = data.toString().replace(/[\r\n]+/g, '');
-				 		if(version != latestversion){
+				 		if(latestCommit != commitID){
 						const UpdateAvailableEmbed = new Discord.MessageEmbed()
 						.setTitle('Update Available')
 						.setColor('ffa500')
-						.setDescription(`An update is available.\nLatest version: ${latestversion}\nYour version: ${version}`)
-						.addField('Changelog',changelog,false)
+						.setDescription(`An update is available.\nLatest commit ID: ${latestCommit}\nLocal commit ID: ${commitID}`)
+						.addField('Commit message',latestCommitMessage,false)
 						.setTimestamp()
-						exec("git rev-parse HEAD", (error, stdout, stderr) => {
-							UpdateAvailableEmbed.setFooter('Komet-JS | Version '+version+`${stdout}`)
-							})
+						.setFooter(`${client.user.username} | Commit: ${commitID}`)
 						client.channels.cache.get(`${botLog}`).send(UpdateAvailableEmbed);
-					}
-							try {
-								fs.unlinkSync(`./version.txt`)
-								fs.unlinkSync(`./changelog.txt`)
-					  			} catch(err) {
-								console.error(err)
+					
 					  }
 				})
-			})
-		})
-	})								 
-});
-
 
 process.on('unhandledRejection', error => console.error('Uncaught Promise Rejection', error));
 
