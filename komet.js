@@ -39,6 +39,39 @@ exec("git log master -1 --pretty=%B", (err, stdout, stderr) => {
 	latestCommitMessage = stdout
 })
 
+//Check for updates automatically
+checkForUpdates = function(){
+	console.log('Checking for updates...')
+	setTimeout(function(){ 
+		exec("git rev-parse HEAD", (error, stdout, stderr) => {
+			commitID = `${stdout}`
+			version = `${stdout}`
+			})
+		exec("git log master --format=\"%H\" -n 1", (err, stdout, stderr) => {
+			latestCommit = stdout
+		})
+		exec("git log master -1 --pretty=%B", (err, stdout, stderr) => {
+			latestCommitMessage = stdout
+		})
+		if(latestCommit != commitID){
+			const UpdateAvailableEmbed = new Discord.MessageEmbed()
+			.setTitle('Update Available')
+			.setColor('ffa500')
+			.setDescription(`An update is available.\nLatest commit ID: ${latestCommit}\nLocal commit ID: ${commitID}`)
+			.addField('Commit message',latestCommitMessage,false)
+			.setTimestamp()
+			.setFooter(`${client.user.username} | Commit: ${commitID}`)
+			client.channels.cache.get(`${botLog}`).send(UpdateAvailableEmbed);
+			console.log('Checking for updates complete. Update was found.')
+		}else{
+			console.log('Checking for updates complete. No update found.')
+		}
+		checkForUpdates()
+	}, 43200000);
+}
+checkForUpdates()
+
+
 //Bootup check
 client.once('ready', () => {
 	console.log('Ready!');
