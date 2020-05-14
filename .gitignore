@@ -3,5 +3,6 @@ config.json
 info.json
 info.json
 info.json
-logs/
 roles.json
+*.log
+warnings.json
