@@ -35,7 +35,9 @@ client.once('ready', () => {
 			.setColor('#00FF00')
 			.setTitle('Bot Started')
 			.setTimestamp()
-			.setFooter('Komet-JS | Version '+version)
+			exec("git rev-parse HEAD", (error, stdout, stderr) => {
+			StartupEmbed.setFooter('Komet-JS | Version '+version+`${stdout}`)
+			})
 		client.channels.cache.get(`${botLog}`).send(StartupEmbed);
 				//Check for updates
 				const https = require('https');
@@ -56,7 +58,9 @@ client.once('ready', () => {
 						.setDescription(`An update is available.\nLatest version: ${latestversion}\nYour version: ${version}`)
 						.addField('Changelog',changelog,false)
 						.setTimestamp()
-						.setFooter('Komet-JS | Version '+version)
+						exec("git rev-parse HEAD", (error, stdout, stderr) => {
+							UpdateAvailableEmbed.setFooter('Komet-JS | Version '+version+`${stdout}`)
+							})
 						client.channels.cache.get(`${botLog}`).send(UpdateAvailableEmbed);
 					}
 							try {
