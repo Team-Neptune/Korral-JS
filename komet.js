@@ -40,7 +40,7 @@ exec("git log master -1 --pretty=%B", (err, stdout, stderr) => {
 })
 
 //Check for updates automatically
-checkForUpdates = function(){
+autoCheckForUpdates = function(){
 	console.log('Checking for updates...')
 	setTimeout(function(){ 
 		exec("git rev-parse HEAD", (error, stdout, stderr) => {
@@ -66,11 +66,37 @@ checkForUpdates = function(){
 		}else{
 			console.log('Checking for updates complete. No update found.')
 		}
-		checkForUpdates()
+		autoCheckForUpdates()
 	}, 43200000);
 }
-checkForUpdates()
+autoCheckForUpdates()
 
+//Check for updates
+checkForUpdates = function(){
+		exec("git rev-parse HEAD", (error, stdout, stderr) => {
+			commitID = `${stdout}`
+			version = `${stdout}`
+			})
+		exec("git log master --format=\"%H\" -n 1", (err, stdout, stderr) => {
+			latestCommit = stdout
+		})
+		exec("git log master -1 --pretty=%B", (err, stdout, stderr) => {
+			latestCommitMessage = stdout
+		})
+		if(latestCommit != commitID){
+			const UpdateAvailableEmbed = new Discord.MessageEmbed()
+			.setTitle('Update Available')
+			.setColor('ffa500')
+			.setDescription(`An update is available.\nLatest commit ID: ${latestCommit}\nLocal commit ID: ${commitID}`)
+			.addField('Commit message',latestCommitMessage,false)
+			.setTimestamp()
+			.setFooter(`${client.user.username} | Commit: ${commitID}`)
+			client.channels.cache.get(`${botLog}`).send(UpdateAvailableEmbed);
+			return `An update was found.\nLocal commit ID: ${commitID}\nLatest commit ID: ${latestCommit}\nUpdate information can be found in <#${config.botLog}>.`
+		}else{
+			return `No update was found.\nLocal commit ID: ${commitID}\nLatest commit ID: ${latestCommit}`
+		}
+}
 
 //Bootup check
 client.once('ready', () => {
