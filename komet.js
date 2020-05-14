@@ -31,6 +31,7 @@ respond = function (title, content, sendto, color){
 client.once('ready', () => {
 	console.log('Ready!');
 	console.log('Version: '+version)
+	const { exec } = require("child_process");
 		const StartupEmbed = new Discord.MessageEmbed()
 			.setColor('#00FF00')
 			.setTitle('Bot Started')
