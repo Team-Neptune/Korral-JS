@@ -1,11 +1,11 @@
 console.log('Loading, please wait a moment.')
 
-const fs = require('fs')
+fs = require('fs')
 
-const Discord = require('discord.js');
-const client = new Discord.Client();
+Discord = require('discord.js');
+client = new Discord.Client();
 client.commands = new Discord.Collection();
-const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
 const {
 	MessageEmbed
 } = require('discord.js');
@@ -31,12 +31,15 @@ const { exec } = require("child_process");
 exec("git rev-parse HEAD", (error, stdout, stderr) => {
 	commitID = `${stdout}`
 	version = `${stdout}`
+	if(stderr)console.log(stderr)
 	})
 exec("git log master --format=\"%H\" -n 1", (err, stdout, stderr) => {
 	latestCommit = stdout
+	if(stderr)console.log(stderr)
 })
 exec("git log master -1 --pretty=%B", (err, stdout, stderr) => {
 	latestCommitMessage = stdout
+	if(stderr)console.log(stderr)
 })
 
 //Check for updates automatically
@@ -71,32 +74,10 @@ autoCheckForUpdates = function(){
 }
 autoCheckForUpdates()
 
-//Check for updates
-checkForUpdates = function(){
-		exec("git rev-parse HEAD", (error, stdout, stderr) => {
-			commitID = `${stdout}`
-			version = `${stdout}`
-			})
-		exec("git log master --format=\"%H\" -n 1", (err, stdout, stderr) => {
-			latestCommit = stdout
-		})
-		exec("git log master -1 --pretty=%B", (err, stdout, stderr) => {
-			latestCommitMessage = stdout
-		})
-		if(latestCommit != commitID){
-			const UpdateAvailableEmbed = new Discord.MessageEmbed()
-			.setTitle('Update Available')
-			.setColor('ffa500')
-			.setDescription(`An update is available.\nLatest commit ID: ${latestCommit}\nLocal commit ID: ${commitID}`)
-			.addField('Commit message',latestCommitMessage,false)
-			.setTimestamp()
-			.setFooter(`${client.user.username} | Commit: ${commitID}`)
-			client.channels.cache.get(`${botLog}`).send(UpdateAvailableEmbed);
-			return `An update was found.\nLocal commit ID: ${commitID}\nLatest commit ID: ${latestCommit}\nUpdate information can be found in <#${config.botLog}>.`
-		}else{
-			return `No update was found.\nLocal commit ID: ${commitID}\nLatest commit ID: ${latestCommit}`
-		}
-}
+//If files are missing, they are created
+fs.readFile('./warnings.json',(err, data) => {
+	if(err)fs.writeFile('./warnings.json', JSON.stringify({}), (err) => {if(err)console.log(err)})
+})
 
 //Bootup check
 client.once('ready', () => {
@@ -270,7 +251,7 @@ client.on('message', message => {
 	if(config.suspiciousWordsFilter == true && config.suspiciousWordsLog)
 	if(message.author.bot) return;
 	var msg = message.content.toLowerCase()
-       if (msg.includes('xci') || msg.includes('nsp') || msg.includes('tinfoil') || msg.includes('blawar')) {
+       if (msg.includes('xci') || msg.includes('nsp') || msg.includes('tinfoil') || msg.includes('blawar') || msg.includes('discord.gg')) {
 		   caughtwords = []
 		   if(msg.includes('xci'))caughtwords.push('xci')
 		   if(msg.includes('nsp'))caughtwords.push('nsp')
@@ -282,7 +263,7 @@ client.on('message', message => {
 Jump:
 https://discordapp.com/channels/${message.guild.id}/${message.channel.id}/${message.id}`)
 
-const messageContent = message.content.toLocaleLowerCase().replace(/xci/g, '**xci**').replace(/nsp/g, '**nsp**').replace(/tinfoil/g, '**tinfoil**').replace(/blawar/g, '**blawar**')
+const messageContent = message.content.toLocaleLowerCase().replace(/xci/g, '**xci**').replace(/nsp/g, '**nsp**').replace(/tinfoil/g, '**tinfoil**').replace(/blawar/g, '**blawar**').replace(/discord.gg/g, '**discord.gg**')
 const messageContentEmbed = new Discord.MessageEmbed()
 .setAuthor(`${message.author.tag}`, message.author.avatarURL(), '')
 .setDescription(`${messageContent}`)
