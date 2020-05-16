@@ -6,3 +6,5 @@ info.json
 roles.json
 *.log
 warnings.json
+Korral.code-workspace
+.vscode/launch.json
