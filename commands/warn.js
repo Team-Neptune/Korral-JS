@@ -8,8 +8,8 @@ module.exports = {
 		const fs = require('fs');
 		try {
 			var userlog = require('../warnings.json')
-			if(!userlog[`${message.author.id}_warnings`]){
-				userlog[`${message.author.id}_warnings`] = 0
+			if(!userlog[`${message.mentions.members.first().id}_warnings`]){
+				userlog[`${message.mentions.members.first().id}_warnings`] = 0
 				let data = JSON.stringify(userlog);
 				fs.writeFile('./warnings.json', data, (err) => {console.log(err)})
 		}
@@ -29,8 +29,8 @@ module.exports = {
 			if(reason == ''){var reason = 'No reason provided.'}
 
 
-				userlog[`${message.author.id}_warn${userlog[`${message.author.id}_warnings`]+1}`] = reason;
-				userlog[`${message.author.id}_warnings`] = userlog[`${message.author.id}_warnings`]+1;
+				userlog[`${message.mentions.members.first().id}_warn${userlog[`${message.mentions.members.first().id}_warnings`]+1}`] = reason;
+				userlog[`${message.mentions.members.first().id}_warnings`] = userlog[`${message.mentions.members.first().id}_warnings`]+1;
 
 			let data = JSON.stringify(userlog);
 			
@@ -41,9 +41,9 @@ module.exports = {
 				userlog = require('../warnings.json')
 			delete require.cache[require.resolve(`../warnings.json`)]
 			userlog = require('../warnings.json')
-			message.mentions.members.first().send(`You were warned on ${message.guild.name}. The given reason is: ${reason}\n\nPlease read the rules. This is warn #${userlog[`${message.author.id}_warnings`]}.`)
-			message.channel.send(`<@${user.id}> warned. User has ${userlog[`${message.author.id}_warnings`]} warning(s).`)
-			message.guild.channels.cache.get(modLog).send(`:warning: Warned: <@${message.author.id}> warned <@${message.mentions.members.first().id}> (warn #${userlog[`${message.author.id}_warnings`]}) | ${message.mentions.members.first().user.tag}
+			message.mentions.members.first().send(`You were warned on ${message.guild.name}. The given reason is: ${reason}\n\nPlease read the rules. This is warn #${userlog[`${message.mentions.members.first().id}_warnings`]}.`)
+			message.channel.send(`<@${user.id}> warned. User has ${userlog[`${message.mentions.members.first().id}_warnings`]} warning(s).`)
+			message.guild.channels.cache.get(modLog).send(`:warning: Warned: <@${message.author.id}> warned <@${message.mentions.members.first().id}> (warn #${userlog[`${message.mentions.members.first().id}_warnings`]}) | ${message.mentions.members.first().user.tag}
 :pencil2: Reason: "${reason}"`)
 delete require.cache[require.resolve(`../warnings.json`)]
 });
