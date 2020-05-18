@@ -13,6 +13,19 @@ module.exports = {
 				return
 			}
 
+			fixWarnEntries = function(currentNumberToMigrate, userLog){
+				console.log(`Creating `+userLog[`${message.mentions.members.first().id}_warn${currentNumberToMigrate}`])
+				userLog[`${message.mentions.members.first().id}_warn${currentNumberToMigrate}`] = userLog[`${message.mentions.members.first().id}_warn${currentNumberToMigrate+1}`]
+				console.log(`Created` + userLog[`${message.mentions.members.first().id}_warn${currentNumberToMigrate+1}`])
+				delete userLog[`${message.mentions.members.first().id}_warn${currentNumberToMigrate+1}`]
+				let data = JSON.stringify(userLog);
+				fs.writeFile('./warnings.json', data, (err) => {console.log(err)})
+				var currentNumberToMigrate = currentNumberToMigrate+1
+				if(userLog[`${message.mentions.members.first().id}_warn${currentNumberToMigrate}`]){
+					fixWarnEntries(currentNumberToMigrate, userLog)
+				}
+			}
+
 			delete userLog[`${message.mentions.members.first().id}_warn${warnToDelete}`];
 
 			userLog[`${message.mentions.members.first().id}_warnings`] = userLog[`${message.mentions.members.first().id}_warnings`]-1;
@@ -20,8 +33,13 @@ module.exports = {
 			
 			fs.writeFile('./warnings.json', data, (err) => {if(err)console.log(err)})
 
+			console.log(userLog[`${message.mentions.members.first().id}_warn${warnToDelete+1}`])
 			if(userLog[`${message.mentions.members.first().id}_warn${warnToDelete+1}`]){
-				userLog[`${message.mentions.members.first().id}_warn${warnToDelete}`] = userLog[`${message.mentions.members.first().id}_warn${warnToDelete+1}`]
+				delete require.cache[require.resolve(`../warnings.json`)]
+				var currentNumberToMigrate = warnToDelete
+				userLog = require('../warnings.json')
+
+				fixWarnEntries(currentNumberToMigrate, userLog)
 			}
 
 			message.channel.send(`<@${message.mentions.members.first().id}> now has `+userLog[`${message.mentions.members.first().id}_warnings`]+ ` warnings.`)
