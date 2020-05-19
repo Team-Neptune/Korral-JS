@@ -39,9 +39,21 @@ module.exports = {
 				console.log('Data written to file');
 				delete require.cache[require.resolve(`../warnings.json`)]
 				userlog = require('../warnings.json')
-			delete require.cache[require.resolve(`../warnings.json`)]
-			userlog = require('../warnings.json')
-			message.mentions.members.first().send(`You were warned on ${message.guild.name}. The given reason is: ${reason}\n\nPlease read the rules. This is warn #${userlog[`${message.mentions.members.first().id}_warnings`]}.`)
+			if(Number(userlog[`${message.mentions.members.first().id}_warnings`]) == 1){
+				message.mentions.members.first().send(`You were warned on ${message.guild.name}. The given reason is: ${reason}\n\nPlease read the rules. This is warn #${userlog[`${message.mentions.members.first().id}_warnings`]}.`)
+			}else if(Number(userlog[`${message.mentions.members.first().id}_warnings`]) == 2){
+				message.mentions.members.first().send(`You were warned on ${message.guild.name}. The given reason is: ${reason}\n\nPlease read the rules. This is warn #${userlog[`${message.mentions.members.first().id}_warnings`]}. __**The next warn will result in an automatic kick.**__`)
+			}else if(Number(userlog[`${message.mentions.members.first().id}_warnings`]) == 3){
+				message.mentions.members.first().send(`You were warned on ${message.guild.name}. The given reason is: ${reason}\n\nPlease read the rules. This is warn #${userlog[`${message.mentions.members.first().id}_warnings`]}.\n\nYou were kicked because of this warning. You can rejoin right away, but two more warnings will result in an automatic ban.`)
+				message.mentions.members.first().kick({reason: `Auto kick: ${reason}`})
+			}else if(Number(userlog[`${message.mentions.members.first().id}_warnings`]) == 4){
+				message.mentions.members.first().send(`You were warned on ${message.guild.name}. The given reason is: ${reason}\n\nPlease read the rules. This is warn #${userlog[`${message.mentions.members.first().id}_warnings`]}.\n\nYou were kicked because of this warning. You can rejoin right away, but **one more warning will result in an automatic ban.**`)
+				message.mentions.members.first().kick({reason: `Auto kick: ${reason}`})
+			}else if(Number(userlog[`${message.mentions.members.first().id}_warnings`]) >= 5){
+				message.mentions.members.first().send(`You were warned on ${message.guild.name}. The given reason is: ${reason}\n\nThis is warn #${userlog[`${message.mentions.members.first().id}_warnings`]}.\n\nYou were banned because of this warning. This ban will not expire.`)
+				message.mentions.members.first().ban({reason: `Auto ban: ${reason}`})
+			}
+			
 			message.channel.send(`<@${user.id}> warned. User has ${userlog[`${message.mentions.members.first().id}_warnings`]} warning(s).`)
 			message.guild.channels.cache.get(modLog).send(`:warning: Warned: <@${message.author.id}> warned <@${message.mentions.members.first().id}> (warn #${userlog[`${message.mentions.members.first().id}_warnings`]}) | ${message.mentions.members.first().user.tag}
 :pencil2: Reason: "${reason}"`)
