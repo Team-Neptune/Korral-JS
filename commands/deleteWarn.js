@@ -6,34 +6,36 @@ module.exports = {
 	execute(message, args) {
 		var memberIdToLookup = message.mentions.members.first().id
 
+		fixWarnEntries = function(currentNumberToMigrate, userLog){
+
+			userLog[`${message.mentions.members.first().id}_warn${currentNumberToMigrate}`] = userLog[`${message.mentions.members.first().id}_warn${currentNumberToMigrate+1}`]
+			delete userLog[`${message.mentions.members.first().id}_warn${currentNumberToMigrate+1}`]
+			let data = JSON.stringify(userLog);
+			fs.writeFile('./warnings.json', data, (err) => {console.log(err)})
+			var currentNumberToMigrate = currentNumberToMigrate+1
+			if(userLog[`${message.mentions.members.first().id}_warn${currentNumberToMigrate}`]){
+				fixWarnEntries(currentNumberToMigrate, userLog)
+			}
+		}
+
 		function eraseWarn(currentNumber, userLog){
-			var warnToDelete = args[1]
+			var warnToDelete = Number(args[1])
 			if(!userLog[`${message.mentions.members.first().id}_warn${warnToDelete}`]){
 				message.channel.send('Warning doesn\'t exist.')
 				return
 			}
-
-			fixWarnEntries = function(currentNumberToMigrate, userLog){
-				console.log(`Creating `+userLog[`${message.mentions.members.first().id}_warn${currentNumberToMigrate}`])
-				userLog[`${message.mentions.members.first().id}_warn${currentNumberToMigrate}`] = userLog[`${message.mentions.members.first().id}_warn${currentNumberToMigrate+1}`]
-				console.log(`Created` + userLog[`${message.mentions.members.first().id}_warn${currentNumberToMigrate+1}`])
-				delete userLog[`${message.mentions.members.first().id}_warn${currentNumberToMigrate+1}`]
-				let data = JSON.stringify(userLog);
-				fs.writeFile('./warnings.json', data, (err) => {console.log(err)})
-				var currentNumberToMigrate = currentNumberToMigrate+1
-				if(userLog[`${message.mentions.members.first().id}_warn${currentNumberToMigrate}`]){
-					fixWarnEntries(currentNumberToMigrate, userLog)
-				}
-			}
-
 			delete userLog[`${message.mentions.members.first().id}_warn${warnToDelete}`];
 
-			userLog[`${message.mentions.members.first().id}_warnings`] = userLog[`${message.mentions.members.first().id}_warnings`]-1;
+
+
 			let data = JSON.stringify(userLog);
 			
 			fs.writeFile('./warnings.json', data, (err) => {if(err)console.log(err)})
+			
+			delete userLog[`${message.mentions.members.first().id}_warn${warnToDelete}`];
+			userLog = require('../warnings.json')
 
-			console.log(userLog[`${message.mentions.members.first().id}_warn${warnToDelete+1}`])
+			
 			if(userLog[`${message.mentions.members.first().id}_warn${warnToDelete+1}`]){
 				delete require.cache[require.resolve(`../warnings.json`)]
 				var currentNumberToMigrate = warnToDelete
@@ -54,7 +56,10 @@ module.exports = {
 				message.channel.send('No entries found.')
 				return
 			}
-			console.log(userLog[memberIdToLookup+`_warnings`])
+			userLog[`${message.mentions.members.first().id}_warnings`] = userLog[`${message.mentions.members.first().id}_warnings`]-1;
+			let data = JSON.stringify(userLog);	
+			fs.writeFile('./warnings.json', data, (err) => {if(err)console.log(err)})
+			
 			var currentNumber = 0
 			const embed = new Discord.MessageEmbed()
 			eraseWarn(currentNumber, userLog, embed)
