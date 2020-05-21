@@ -61,7 +61,7 @@ module.exports = {
 			switch (warnings[mentionedUser.id].length) {
 				case 0:
 					// only base message
-					// nothing will happen on the first warning
+					mentionedUser.send(eventMessage);
 					break;
 				case 1:
 					eventMessage = eventMessage + "\n\n __**The next warn will result in an automatic kick.**__";
