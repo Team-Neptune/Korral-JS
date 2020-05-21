@@ -56,8 +56,7 @@ module.exports = {
 				return;
 			}
 
-			var eventMessage = `You were warned on ${message.guild.name}. The given reason is: ${reason}\n\n
-			Please read the rules. This is warning #${(warnings[mentionedUser.id].length)}.`
+			var eventMessage = `You were warned on ${message.guild.name}.\nThe given reason is: ${reason}\n\nPlease read the rules. This is warning #${(warnings[mentionedUser.id].length)}.`
 			switch (warnings[mentionedUser.id].length) {
 				case 0:
 					// only base message
