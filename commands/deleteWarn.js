@@ -28,7 +28,7 @@ module.exports = {
 			return;
 		}
 
-		var warningNr = args[1];
+		var warningNr = args[1]-1;
 
 		// all requirements are met
 
