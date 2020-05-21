@@ -1,68 +1,60 @@
 module.exports = {
-	name: 'delwarn',
-	aliases: ['deletewarn'],
+	name: 'deletewarn',
+	aliases: ['delwarn'],
 	description: 'Deletes a warning',
-	staff:true,
+	staff: true,
 	execute(message, args) {
-		var memberIdToLookup = message.mentions.members.first().id
 
-		fixWarnEntries = function(currentNumberToMigrate, userLog){
-
-			userLog[`${message.mentions.members.first().id}_warn${currentNumberToMigrate}`] = userLog[`${message.mentions.members.first().id}_warn${currentNumberToMigrate+1}`]
-			delete userLog[`${message.mentions.members.first().id}_warn${currentNumberToMigrate+1}`]
-			let data = JSON.stringify(userLog);
-			fs.writeFile('./warnings.json', data, (err) => {console.log(err)})
-			var currentNumberToMigrate = currentNumberToMigrate+1
-			if(userLog[`${message.mentions.members.first().id}_warn${currentNumberToMigrate}`]){
-				fixWarnEntries(currentNumberToMigrate, userLog)
-			}
+		function returnResponse(reponse = "Something happened but no response was defined.") {
+			message.channel.send(reponse);
+			return;
 		}
 
-		function eraseWarn(currentNumber, userLog){
-			var warnToDelete = Number(args[1])
-			if(!userLog[`${message.mentions.members.first().id}_warn${warnToDelete}`]){
-				message.channel.send('Warning doesn\'t exist.')
-				return
-			}
-			delete userLog[`${message.mentions.members.first().id}_warn${warnToDelete}`];
+		if (message.mentions.members.first()) {
+			var mentionedUser = message.mentions.members.first();
+		} else {
+			returnResponse(`No user was mentioned.`);
+			return;
+		}
 
-
-
-			let data = JSON.stringify(userLog);
-			
-			fs.writeFile('./warnings.json', data, (err) => {if(err)console.log(err)})
-			
-			delete userLog[`${message.mentions.members.first().id}_warn${warnToDelete}`];
-			userLog = require('../warnings.json')
-
-			
-			if(userLog[`${message.mentions.members.first().id}_warn${warnToDelete+1}`]){
-				delete require.cache[require.resolve(`../warnings.json`)]
-				var currentNumberToMigrate = warnToDelete
-				userLog = require('../warnings.json')
-
-				fixWarnEntries(currentNumberToMigrate, userLog)
-			}
-
-			message.channel.send(`<@${message.mentions.members.first().id}> now has `+userLog[`${message.mentions.members.first().id}_warnings`]+ ` warnings.`)
+		if (!fs.existsSync(`./warnings.json`)) {
+			returnResponse(`'warnings.json' doesn't exist. Please do at least one warning to create the file.`)
+			return;
 		}
 
 
-		if (!fs.existsSync(`./warnings.json`)){
-			message.channel.send('`warnings.json` doesn\'t exist. Please do at least one warning to create the file.')
-		}else{
-			var userLog = require('../warnings.json')
-			if(!userLog[memberIdToLookup+`_warnings`]){
-				message.channel.send('No entries found.')
-				return
-			}
-			userLog[`${message.mentions.members.first().id}_warnings`] = userLog[`${message.mentions.members.first().id}_warnings`]-1;
-			let data = JSON.stringify(userLog);	
-			fs.writeFile('./warnings.json', data, (err) => {if(err)console.log(err)})
-			
-			var currentNumber = 0
-			const embed = new Discord.MessageEmbed()
-			eraseWarn(currentNumber, userLog, embed)
+		if (!args[1]) {
+			returnResponse(`Please choose a (or different) warning to delete.`);
+			return;
 		}
-	},
+
+		var warningNr = args[1];
+
+		// all requirements are met
+
+		var userLog = require('../warnings.json')
+		if (!userLog[mentionedUser.id]) {
+			returnResponse(`This user has no warnings.`);
+			return;
+		}
+
+
+		if (!userLog[mentionedUser.id][warningNr]) {
+			returnResponse(`Warning doesn't exist.`)
+			return;
+		}
+
+
+		userLog[mentionedUser.id].splice(warningNr, 1); // remove the warning
+		fs.writeFile('./warnings.json', JSON.stringify(userLog), (err) => {
+			if (err) {
+				console.log(err);
+				returnResponse(`An error occured during saving.`);
+				return;
+			}
+		})
+
+		returnResponse(`Warning removed.`);
+		delete require.cache[require.resolve(`../warnings.json`)]
+	}
 };

@@ -1,34 +1,41 @@
 module.exports = {
 	name: 'userlog',
 	description: 'Views the user warn log',
-	staff:true,
+	staff: true,
 	execute(message, args) {
-		var memberIdToLookup = message.mentions.members.first().id
 
-		function viewEntries(currentNumber, userLog, embed){
-			var currentNumber = currentNumber +1
-			embed.addField('Warn '+currentNumber, userLog[memberIdToLookup+`_warn`+currentNumber])
-			if(currentNumber == userLog[memberIdToLookup+`_warnings`]){
-				message.channel.send(embed)
-			}else{
-				viewEntries(currentNumber, userLog, embed)
-			}
+
+		function returnResponse(reponse = "Something happened but no response was defined.") {
+			message.channel.send(reponse);
 		}
 
-
-		if (!fs.existsSync(`./warnings.json`)){
-			message.channel.send('`warnings.json` doesn\'t exist. Please do at least one warning to create the file.')
-		}else{
-			var userLog = require('../warnings.json')
-			if(!userLog[memberIdToLookup+`_warnings`]){
-				message.channel.send('No entries found.')
-				return
-			}
-			console.log(userLog[memberIdToLookup+`_warnings`])
-			message.channel.send(userLog[memberIdToLookup+`_warnings`])	
-			var currentNumber = 0
-			const embed = new Discord.MessageEmbed()
-			viewEntries(currentNumber, userLog, embed)
+		if (message.mentions.members.first()) {
+			var mentionedUser = message.mentions.members.first();
+		} else {
+			returnResponse(`No user was mentioned.`);
+			return;
 		}
-	},
+
+		if (!fs.existsSync(`./warnings.json`)) {
+			returnResponse(`'warnings.json' doesn't exist. Please do at least one warning to create the file.`)
+			return;
+		}
+
+		// all requirements are met
+
+		var warnings = require('../warnings.json')
+
+		if (!warnings[mentionedUser.id]) {
+			returnResponse(`This user does not have any warnings`);
+			return;
+		}
+
+		const embed = new Discord.MessageEmbed()
+		warnings[mentionedUser.id].forEach(function (warning, index) {
+			embed.addField('Warning: ' + (parseInt(index) + 1), warning)
+		});
+		message.channel.send(embed)
+
+		delete require.cache[require.resolve(`../warnings.json`)]
+	}
 };
