@@ -1,6 +1,6 @@
 module.exports = {
-	name: 'bs',
-	description: 'Germany',
+	name: 'exfat',
+	description: 'Displays info on why not to use exfat',
 	execute(message, args) {
 		const Discord = require('discord.js');
         const client = new Discord.Client();
