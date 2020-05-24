@@ -4,9 +4,15 @@ module.exports = {
   description: 'This is for testing purposes only. Remove from release.',
   usage: '',
   cooldown: 0,
+  staff:true,
   botmanager:true,
   hidden:true,
-	execute(message, args) {
-    global.client = new Discord.Client()
-    client.emit("guildMemberRemove", message.member)
+	execute(message, args, client) {
+    if(message.mentions.members.size == 0){
+      client.emit("guildMemberRemove", message.author)
+      respond('⬅️', `<@${message.author.id}> has "left" the server.`, message.channel)
+    }else{
+      client.emit("guildMemberRemove", message.mentions.members.first())
+      respond('⬅️', `<@${message.mentions.members.first().id}> has "left" the server.`, message.channel)
+    }
   }}

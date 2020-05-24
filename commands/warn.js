@@ -1,56 +1,103 @@
 module.exports = {
-    name: 'warn',
-    description: 'Warns a user.',
+	name: 'warn',
+	description: 'Warns a user.',
 	usage: '<user> <reason>',
 	cooldown: 0,
-	staff:true,
-    execute(message, args) {
-		const fs = require('fs');
-		try {
-			var userlog = require('../warnings.json')
-			if(!userlog[`${message.mentions.members.first().id}_warnings`]){
-				userlog[`${message.mentions.members.first().id}_warnings`] = 0
-				let data = JSON.stringify(userlog);
-				fs.writeFile('./warnings.json', data, (err) => {console.log(err)})
+	staff: true,
+	execute(message, args) {
+
+		function returnResponse(reponse = "Something happened but no response was defined.") {
+			message.channel.send(reponse);
 		}
-			delete require.cache[require.resolve(`../warnings.json`)]
 
+		if (message.mentions.members.first()) {
+			var mentionedUser = message.mentions.members.first();
+		} else {
+			returnResponse(`No user was mentioned.`);
+			return;
+		}
 
-			if (message.author.id == message.mentions.members.first().id){message.channel.send(`You can't perform this action on yourself.`);return;}
-			const {staffRoles} = require('../config.json');
-			if (message.mentions.members.first().roles.cache.some(role => staffRoles.includes(role.id))){
-				respond('',`You can't perform that action on this user.`, message.channel);return;
+		if (!fs.existsSync(`./warnings.json`)) {
+			returnResponse(`'warnings.json' doesn't exist. Please do at least one warning to create the file.`)
+			return;
+		}
+
+		if (!args[1]) {
+			returnResponse(`Please set a warning.`)
+			return;
+		}
+
+		var reason = args.join(' ').replace(args[0], '')
+
+		// all requirements are met
+
+		if (message.author.id == mentionedUser.id) {
+			returnResponse(`You can't perform this action on yourself.`);
+			return;
+		}
+
+		var config = require('../config.json');
+		var warnings = require('../warnings.json')
+
+		if (mentionedUser.roles.cache.some(role => config.staffRoles.includes(role.id))) {
+			returnResponse(`You can't perform that action on this user.`);
+			return;
+		}
+
+		if (!warnings[mentionedUser.id])
+			warnings[mentionedUser.id] = [];
+
+		warnings[mentionedUser.id].push(reason);
+
+		fs.writeFile('./warnings.json', JSON.stringify(warnings), (err) => {
+			if (err) {
+				console.log(err);
+				returnResponse(`An error occured during saving.`);
+				return;
 			}
-			const {modLog} = require('../config.json');
-			const user = message.mentions.users.first();
-			const userid = user.id
-			const authorusername = message.author.username +'#' +message.author.discriminator
-			var reason = args.join(' ').replace(args[0], '')
-			if(reason == ''){var reason = 'No reason provided.'}
+
+			var eventMessage = `You were warned on ${message.guild.name}.\nThe given reason is: ${reason}\n\nPlease read the rules. This is warning #${(warnings[mentionedUser.id].length)}.`
+			switch (warnings[mentionedUser.id].length) {
+				case 0:
+					// only base message
+					mentionedUser.send(eventMessage);
+					break;
+				case 1:
+					eventMessage = eventMessage + "\n\n __**The next warn will result in an automatic kick.**__";
+					mentionedUser.send(eventMessage)
+					break;
+				case 2:
+					eventMessage = eventMessage + "\n\nYou were kicked because of this warning. You can rejoin right away, but two more warnings will result in an automatic ban.";
+					mentionedUser.send(eventMessage)
+					mentionedUser.kick({ reason: `Auto kick: ${reason}` })
+					break;
+				case 3:
+					eventMessage = eventMessage + "\n\nYou were kicked because of this warning. You can rejoin right away, but two more warnings will result in an automatic ban.";
+					mentionedUser.send(eventMessage)
+					mentionedUser.kick({ reason: `Auto kick: ${reason}` })
+					break;
+				case 4:
+					eventMessage = eventMessage + "\n\nYou were kicked because of this warning. You can rejoin right away, but **one more warning will result in an automatic ban.**";
+					mentionedUser.send(eventMessage)
+					mentionedUser.kick({ reason: `Auto kick: ${reason}` })
+					break;
+				case 5:
+					eventMessage = eventMessage + "\n\nYou were banned because of this warning. This ban will not expire.";
+					mentionedUser.send(eventMessage)
+					mentionedUser.ban({ reason: `Auto ban: ${reason}` })
+					break;
+				default:
+				// code block
+				// nothing will happen by default
+			}
 
 
-				userlog[`${message.mentions.members.first().id}_warn${userlog[`${message.mentions.members.first().id}_warnings`]+1}`] = reason;
-				userlog[`${message.mentions.members.first().id}_warnings`] = userlog[`${message.mentions.members.first().id}_warnings`]+1;
-
-			let data = JSON.stringify(userlog);
-			
-			fs.writeFile('./warnings.json', data, (err) => {
-				if (err) throw err;
-				console.log('Data written to file');
-				delete require.cache[require.resolve(`../warnings.json`)]
-				userlog = require('../warnings.json')
+			message.channel.send(`<@${mentionedUser.id}> got warned. User has ${warnings[mentionedUser.id].length} warning(s).`)
+			message.guild.channels.cache
+				.get(config.modLog)
+				.send(`<@${message.author.id}> warned <@${mentionedUser.id}> (${mentionedUser.user.tag}) - warn #${warnings[mentionedUser.id].length}\n Reason: "${reason}"`)
 			delete require.cache[require.resolve(`../warnings.json`)]
-			userlog = require('../warnings.json')
-			message.mentions.members.first().send(`You were warned on ${message.guild.name}. The given reason is: ${reason}\n\nPlease read the rules. This is warn #${userlog[`${message.mentions.members.first().id}_warnings`]}.`)
-			message.channel.send(`<@${user.id}> warned. User has ${userlog[`${message.mentions.members.first().id}_warnings`]} warning(s).`)
-			message.guild.channels.cache.get(modLog).send(`:warning: Warned: <@${message.author.id}> warned <@${message.mentions.members.first().id}> (warn #${userlog[`${message.mentions.members.first().id}_warnings`]}) | ${message.mentions.members.first().user.tag}
-:pencil2: Reason: "${reason}"`)
-delete require.cache[require.resolve(`../warnings.json`)]
-});
-    		}
-        catch(error) {
-			// Your code broke (Leave untouched in most cases)
-			console.error('an error has occured', error);
-		  }
-    },
+		})
+
+	}
 };
