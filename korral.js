@@ -47,6 +47,7 @@ autoCheckForUpdates = function(){
 	console.log('Checking for updates...')
 	setTimeout(function(){ 
 		exec("git rev-parse HEAD", (error, stdout, stderr) => {
+			if(stderr)return;
 			commitID = `${stdout}`
 			version = `${stdout}`
 			})
