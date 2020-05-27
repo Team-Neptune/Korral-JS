@@ -26,18 +26,21 @@ respond = function (title, content, sendto, color){
 	//He doesn't check to make sure it works on this bot :shrek:
 	sendto.send(content)
 }
-
+/*
 const { exec } = require("child_process");
 exec("git rev-parse HEAD", (error, stdout, stderr) => {
+	if(stderr)return;
 	commitID = `${stdout}`
 	version = `${stdout}`
 	if(stderr)console.log(stderr)
 	})
 exec("git log master --format=\"%H\" -n 1", (err, stdout, stderr) => {
+	if(stderr)return;
 	latestCommit = stdout
 	if(stderr)console.log(stderr)
 })
 exec("git log master -1 --pretty=%B", (err, stdout, stderr) => {
+	if(stderr)return;
 	latestCommitMessage = stdout
 	if(stderr)console.log(stderr)
 })
@@ -64,7 +67,7 @@ autoCheckForUpdates = function(){
 			.setDescription(`An update is available.\nLatest commit ID: ${latestCommit}\nLocal commit ID: ${commitID}`)
 			.addField('Commit message',latestCommitMessage,false)
 			.setTimestamp()
-			.setFooter(`${client.user.username} | Commit: ${commitID}`)
+			.setFooter(`${client.user.username} | Version: ${commitID}`)
 			client.channels.cache.get(`${botLog}`).send(UpdateAvailableEmbed);
 			console.log('Checking for updates complete. Update was found.')
 		}else{
@@ -75,6 +78,8 @@ autoCheckForUpdates = function(){
 }
 autoCheckForUpdates()
 
+*/
+
 //If files are missing, they are created
 fs.readFile('./warnings.json',(err, data) => {
 	if(err)fs.writeFile('./warnings.json', JSON.stringify({}), (err) => {if(err)console.log(err)})
@@ -82,16 +87,18 @@ fs.readFile('./warnings.json',(err, data) => {
 
 //Bootup check
 client.once('ready', () => {
+	commitID = "2.0.0"
 	console.log('Ready!');
-	console.log(`Local commit ID: ${commitID}`)
-	console.log(`Latest commit ID: ${latestCommit}`)
+	//console.log(`Local commit ID: ${commitID}`)
+//	console.log(`Latest commit ID: ${latestCommit}`)
 		const StartupEmbed = new Discord.MessageEmbed()
 			.setColor('#00FF00')
 			.setTitle('Bot Started')
 			.setTimestamp()
-			.setFooter(`${client.user.username} | Commit: ${commitID}`)
+			.setFooter(`${client.user.username} | Version: ${commitID}`)
 		client.channels.cache.get(`${botLog}`).send(StartupEmbed);
 				//Check for updates
+				return;
 				 		if(latestCommit != commitID){
 						const UpdateAvailableEmbed = new Discord.MessageEmbed()
 						.setTitle('Update Available')
@@ -99,7 +106,7 @@ client.once('ready', () => {
 						.setDescription(`An update is available.\nLatest commit ID: ${latestCommit}\nLocal commit ID: ${commitID}`)
 						.addField('Commit message',latestCommitMessage,false)
 						.setTimestamp()
-						.setFooter(`${client.user.username} | Commit: ${commitID}`)
+						.setFooter(`${client.user.username} | Version: ${commitID}`)
 						client.channels.cache.get(`${botLog}`).send(UpdateAvailableEmbed);
 					
 					  }

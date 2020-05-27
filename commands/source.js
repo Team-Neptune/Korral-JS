@@ -5,6 +5,6 @@ module.exports = {
         const Discord = require('discord.js');
 		const client = new Discord.Client();
 		if (message.author.bot) return;
-		message.channel.send(`You can find my source at https://github.com/hax4dazy/Komet-JS. Serious PRs and issues welcome!`);
+		message.channel.send(`You can find my source at https://github.com/Team-Neptune/Korral-JS. Serious PRs and issues welcome!`);
 	},
 };
