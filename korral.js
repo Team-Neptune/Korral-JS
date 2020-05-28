@@ -134,7 +134,8 @@ for (const file of commandFiles) {
 //this is the code for the /commands folder
 client.on('message', message => {
 	var firstChar = message.content.slice(0, 1)
-	if (!prefix.includes(firstChar) && !message.content.startsWith(firstChar) || message.author.bot) return;
+	if (!message.content.startsWith('.')) return;
+	if (message.author.bot) return;
 
 	const args = message.content.slice(firstChar.length).split(/ +/);
 	const commandName = args.shift().toLowerCase();
