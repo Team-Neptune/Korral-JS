@@ -166,7 +166,8 @@ client.on('guildMemberAdd', member => {
 	const guild = member.guild
 	member.guild.channels.cache.get(`${userLog}`).send(`:white_check_mark: Join: <@${member.id}> | ${member.user.tag}
 :calendar_spiral: Creation: ${member.user.createdAt}
-:label: User ID: ${member.id}`)
+:label: User ID: ${member.id}
+:hash: Server Member Count: ${member.guild.memberCount}`)
 	}
 );
 
@@ -174,7 +175,8 @@ client.on('guildMemberAdd', member => {
 client.on('guildMemberRemove', member => {
 	const guild = member.guild
 	client.channels.cache.get(`${userLog}`).send(`:arrow_left: Leave: <@${member.id}> | ${member.user.tag}
-:label: User ID: ${member.id}`)
+:label: User ID: ${member.id}
+:hash: Server Member Count: ${member.guild.memberCount}`)
 });
 
 //Log deleted messages
