@@ -1,25 +1,38 @@
-const { prefix } = require('../config.json');
+const config = require('../config.json')
 
 module.exports = {
 	name: 'kick',
 	description: 'Kicks a user from the server.',
 	aliases: ['boot'],
-	usage: '<user>',
+	usage: '<user> <reason>',
 	cooldown: 0,
-	mod:true,
+	staff:true,
 	execute(message, args) {
 		try {
-			if (message.author.id == message.mentions.members.first().id){message.channel.send(`You can't perform this action on yourself.`);return;}
-			const {ModeratorRoleID} = require('../info.json');
-			const checkmemberforroles = message.mentions.members.first()
-			if (checkmemberforroles.roles.cache.some(role => role.id === `${ModeratorRoleID}`)){message.channel.send(`You can't perform that action on this user.`);return;}
+			function returnResponse(respone = 'Something went wrong.'){
+				message.channel.send(respone)
+			};
+			mentionedMember = message.mentions.members.first();
+			
+			if (message.author.id == mentionedMember){
+				message.channel.send(`You can't perform this action on yourself.`);
+				return;
+			}
+			if (mentionedMember.roles.cache.some(role => role.id === `${config.staffRoles}`)){
+				message.channel.send(`You can't perform that action on this user.`);
+				return;
+			}
+
 			// Code hopefully works
-			const user = message.mentions.members.first()
-			const reason = args.join(' ')
-			respond('⬅️ Kick','<@'+user.id+'> was kicked from the server.\nReason: '+reason, message.channel)
-			respond('⬅️ Kick','You have been kicked from the server. You may rejoin at anytime.\n\nReason for kick: '+reason, user)
-			modaction(this.name, message.author.tag, message.channel.name, message.content)
-			user.kick()
+			const reason = args.join(' ').replace(args[0], '')
+
+			returnResponse('<@'+mentionedMember.id+'> was kicked from the server.')
+			message.guild.channels.cache.get(config.modLog).send(`:boot: Kick: <@${message.author.id}> kicked <@${mentionedMember.id}> | ${mentionedMember.user.tag}
+:label: User ID: ${mentionedMember.id}
+:pencil2: Reason: "${reason}"`)
+			mentionedMember.send(`You have been kicked from the server. You may rejoin at anytime.\n\nReason for kick: ${reason}`)
+			mentionedMember.kick({reason: reason})
+
 		  } catch(error) {
 			// Your code broke (Leave untouched in most cases)
 			console.error('an error has occured', error);
