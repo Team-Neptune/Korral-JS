@@ -134,7 +134,7 @@ for (const file of commandFiles) {
 //this is the code for the /commands folder
 client.on('message', message => {
 	var firstChar = message.content.slice(0, 1)
-	if (!message.content.startsWith('.')) return;
+	if (!message.content.startsWith('.') && !message.content.startsWith('!')) return;
 	if (message.author.bot) return;
 
 	const args = message.content.slice(firstChar.length).split(/ +/);
