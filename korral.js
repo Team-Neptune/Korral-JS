@@ -1,6 +1,7 @@
 console.log('Loading, please wait a moment.')
 
 fs = require('fs')
+fetch = require("node-fetch");
 
 Discord = require('discord.js');
 client = new Discord.Client();
@@ -12,16 +13,16 @@ const {
 
 const {
 	prefix,
-	token, 
-	botLog, 
-	modLog, 
+	token,
+	botLog,
+	modLog,
 	userLog,
 	staffRoles
-} = require ('./config.json');
+} = require('./config.json');
 const config = require('./config.json')
 
 
-respond = function (title, content, sendto, color){
+respond = function (title, content, sendto, color) {
 	//Since hax4dayz likes to copy my code from my other bot
 	//He doesn't check to make sure it works on this bot :shrek:
 	sendto.send(content)
@@ -81,8 +82,8 @@ autoCheckForUpdates()
 */
 
 //If files are missing, they are created
-fs.readFile('./warnings.json',(err, data) => {
-	if(err)fs.writeFile('./warnings.json', JSON.stringify({}), (err) => {if(err)console.log(err)})
+fs.readFile('./warnings.json', (err, data) => {
+	if (err) fs.writeFile('./warnings.json', JSON.stringify({}), (err) => { if (err) console.log(err) })
 })
 
 //Bootup check
@@ -90,27 +91,27 @@ client.once('ready', () => {
 	commitID = "2.0.0"
 	console.log('Ready!');
 	//console.log(`Local commit ID: ${commitID}`)
-//	console.log(`Latest commit ID: ${latestCommit}`)
-		const StartupEmbed = new Discord.MessageEmbed()
-			.setColor('#00FF00')
-			.setTitle('Bot Started')
+	//	console.log(`Latest commit ID: ${latestCommit}`)
+	const StartupEmbed = new Discord.MessageEmbed()
+		.setColor('#00FF00')
+		.setTitle('Bot Started')
+		.setTimestamp()
+		.setFooter(`${client.user.username} | Version: ${commitID}`)
+	client.channels.cache.get(`${botLog}`).send(StartupEmbed);
+	//Check for updates
+	return;
+	if (latestCommit != commitID) {
+		const UpdateAvailableEmbed = new Discord.MessageEmbed()
+			.setTitle('Update Available')
+			.setColor('ffa500')
+			.setDescription(`An update is available.\nLatest commit ID: ${latestCommit}\nLocal commit ID: ${commitID}`)
+			.addField('Commit message', latestCommitMessage, false)
 			.setTimestamp()
 			.setFooter(`${client.user.username} | Version: ${commitID}`)
-		client.channels.cache.get(`${botLog}`).send(StartupEmbed);
-				//Check for updates
-				return;
-				 		if(latestCommit != commitID){
-						const UpdateAvailableEmbed = new Discord.MessageEmbed()
-						.setTitle('Update Available')
-						.setColor('ffa500')
-						.setDescription(`An update is available.\nLatest commit ID: ${latestCommit}\nLocal commit ID: ${commitID}`)
-						.addField('Commit message',latestCommitMessage,false)
-						.setTimestamp()
-						.setFooter(`${client.user.username} | Version: ${commitID}`)
-						client.channels.cache.get(`${botLog}`).send(UpdateAvailableEmbed);
-					
-					  }
-				})
+		client.channels.cache.get(`${botLog}`).send(UpdateAvailableEmbed);
+
+	}
+})
 
 process.on('unhandledRejection', error => console.error('Uncaught Promise Rejection', error));
 
@@ -142,15 +143,15 @@ client.on('message', message => {
 	const command = client.commands.get(commandName)
 		|| client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
 
-	if(!command)return;
-	
-	if(command.staff && command.staff == true && !message.member.roles.cache.some(role => staffRoles.includes(role.id))){
-		message.channel.send('<@'+message.author.id+'>: Check failed. You might not have the right permissions to run this command, or you may not be able to run this command in the current channel.');
+	if (!command) return;
+
+	if (command.staff && command.staff == true && !message.member.roles.cache.some(role => staffRoles.includes(role.id))) {
+		message.channel.send('<@' + message.author.id + '>: Check failed. You might not have the right permissions to run this command, or you may not be able to run this command in the current channel.');
 		return;
 	}
 	//Added so there is time to fix commands
-	if(command.mod && command.mod == true && !message.member.roles.cache.some(role => staffRoles.includes(role.id))){
-		message.channel.send('<@'+message.author.id+'>: Check failed. You might not have the right permissions to run this command, or you may not be able to run this command in the current channel.');
+	if (command.mod && command.mod == true && !message.member.roles.cache.some(role => staffRoles.includes(role.id))) {
+		message.channel.send('<@' + message.author.id + '>: Check failed. You might not have the right permissions to run this command, or you may not be able to run this command in the current channel.');
 		return;
 	}
 
@@ -169,7 +170,7 @@ client.on('guildMemberAdd', member => {
 :calendar_spiral: Creation: ${member.user.createdAt}
 :label: User ID: ${member.id}
 :hash: Server Member Count: ${member.guild.memberCount}`)
-	}
+}
 );
 
 //Member leave
@@ -191,23 +192,25 @@ client.on('messageDelete', async message => {
 from ${message.author.tag} (${message.author.id}), in <#${message.channel.id}>:
 \`${message.content}\``)
 	//May fix it up someday TM
-	return; 
+	return;
 	// Since we only have 1 audit log entry in this collection, we can simply grab the first one
 	const deletionLog = fetchedLogs.entries.first();
 
 	// Let's perform a sanity check here and make sure we got *something*
-	if (!deletionLog) {  console.log(`A message by ${message.author.tag} was deleted, but no relevant audit logs were found.`);
-	const DeletionEmbed = new Discord.MessageEmbed()
-	.setColor('#ff0000')
-	.setTitle('Message Deleted')
-	.addFields(
-		{ name: 'Message sent by', value: message.author.tag, inline: false },
-		{ name: 'Deleted by', value: 'Unknown - Audit log was not found.', inline: false },
-		{ name: 'Sent in', value: message.channel.name, inline: false },
-		{ name: 'Message', value: message.content, inline: false },
-	)
-	.setTimestamp()
-	client.channels.cache.get(`${modLog}`).send(DeletionEmbed)}
+	if (!deletionLog) {
+		console.log(`A message by ${message.author.tag} was deleted, but no relevant audit logs were found.`);
+		const DeletionEmbed = new Discord.MessageEmbed()
+			.setColor('#ff0000')
+			.setTitle('Message Deleted')
+			.addFields(
+				{ name: 'Message sent by', value: message.author.tag, inline: false },
+				{ name: 'Deleted by', value: 'Unknown - Audit log was not found.', inline: false },
+				{ name: 'Sent in', value: message.channel.name, inline: false },
+				{ name: 'Message', value: message.content, inline: false },
+			)
+			.setTimestamp()
+		client.channels.cache.get(`${modLog}`).send(DeletionEmbed)
+	}
 
 	// We now grab the user object of the person who deleted the message
 	// Let us also grab the target of this action to double check things
@@ -219,30 +222,30 @@ from ${message.author.tag} (${message.author.id}), in <#${message.channel.id}>:
 	if (target.id === message.author.id) {
 		console.log(`A message by ${message.author.tag} was deleted by ${executor.tag}.`)
 		const DeletionEmbed = new Discord.MessageEmbed()
-		.setColor('#ff0000')
-		.setTitle('Message Deleted')
-		.addFields(
-			{ name: 'Message sent by', value: message.author.tag, inline: false },
-			{ name: 'Deleted by', value: executor.tag + ` (${executor.id})`, inline: false },
-			{ name: 'Sent in', value: message.channel.name, inline: false },
-			{ name: 'Message', value: message.content, inline: false },
-		)
-		.setTimestamp()
+			.setColor('#ff0000')
+			.setTitle('Message Deleted')
+			.addFields(
+				{ name: 'Message sent by', value: message.author.tag, inline: false },
+				{ name: 'Deleted by', value: executor.tag + ` (${executor.id})`, inline: false },
+				{ name: 'Sent in', value: message.channel.name, inline: false },
+				{ name: 'Message', value: message.content, inline: false },
+			)
+			.setTimestamp()
 		client.channels.cache.get(`${modLog}`).send(DeletionEmbed)
 		return;
-	}	else {
+	} else {
 		if (target.id === message.author.id) return;
 		console.log(`A message by ${message.author.tag} was deleted, but we don't know by who.`)
 		const DeletionEmbed = new Discord.MessageEmbed()
-		.setColor('#ff0000')
-		.setTitle('Message Deleted')
-		.addFields(
-			{ name: 'Message sent by', value: message.author.tag, inline: false },
-			{ name: 'Deleted by', value: 'Unable to find.', inline: false },
-			{ name: 'Sent in', value: message.channel.name, inline: false },
-			{ name: 'Message', value: message.content, inline: false },
-		)
-		.setTimestamp()
+			.setColor('#ff0000')
+			.setTitle('Message Deleted')
+			.addFields(
+				{ name: 'Message sent by', value: message.author.tag, inline: false },
+				{ name: 'Deleted by', value: 'Unable to find.', inline: false },
+				{ name: 'Sent in', value: message.channel.name, inline: false },
+				{ name: 'Message', value: message.content, inline: false },
+			)
+			.setTimestamp()
 		client.channels.cache.get(`${modLog}`).send(DeletionEmbed)
 		return;
 	}
@@ -250,34 +253,34 @@ from ${message.author.tag} (${message.author.id}), in <#${message.channel.id}>:
 
 //Log message edits
 client.on('messageUpdate', (oldMessage, newMessage) => {
-	if(newMessage.author.bot)return
-	if(newMessage.author != client.user)
-	newMessage.guild.channels.cache.get(modLog).send(`:pencil: Message edit: 
+	if (newMessage.author.bot) return
+	if (newMessage.author != client.user)
+		newMessage.guild.channels.cache.get(modLog).send(`:pencil: Message edit: 
 from ${newMessage.author.tag} (${newMessage.author.id}), in <#${newMessage.channel.id}>:
 \`${oldMessage.content}\` → \`${newMessage.content}\``)
 })
 
 //Logs bad words like XCI, NSP, Tinfoil and brawlr perhaps extend this to also look for invites?
 client.on('message', message => {
-	if(config.suspiciousWordsFilter == true && config.suspiciousWordsLog)
-	if(message.author.bot) return;
+	if (config.suspiciousWordsFilter == true && config.suspiciousWordsLog)
+		if (message.author.bot) return;
 	var msg = message.content.toLowerCase()
-       if (msg.includes('xci') || msg.includes('nsp') || msg.includes('tinfoil') || msg.includes('blawar') || msg.includes('discord.gg')) {
-		   caughtwords = []
-		   if(msg.includes('xci'))caughtwords.push('xci')
-		   if(msg.includes('nsp'))caughtwords.push('nsp')
-		   if(msg.includes('tinfoil'))caughtwords.push('tinfoil')
-		   if(msg.includes('blawar'))caughtwords.push('blawar')
-		   message.guild.channels.cache.get(config.suspiciousWordsLog).send(`:rotating_light: Suspicious message by <@${message.author.id}> (${message.author.id}):
+	if (msg.includes('xci') || msg.includes('nsp') || msg.includes('tinfoil') || msg.includes('blawar') || msg.includes('discord.gg')) {
+		caughtwords = []
+		if (msg.includes('xci')) caughtwords.push('xci')
+		if (msg.includes('nsp')) caughtwords.push('nsp')
+		if (msg.includes('tinfoil')) caughtwords.push('tinfoil')
+		if (msg.includes('blawar')) caughtwords.push('blawar')
+		message.guild.channels.cache.get(config.suspiciousWordsLog).send(`:rotating_light: Suspicious message by <@${message.author.id}> (${message.author.id}):
 - Contains suspicious word(s): \`${caughtwords}\`
 
 Jump:
 https://discordapp.com/channels/${message.guild.id}/${message.channel.id}/${message.id}`)
 
-const messageContent = message.content.toLocaleLowerCase().replace(/xci/g, '**xci**').replace(/nsp/g, '**nsp**').replace(/tinfoil/g, '**tinfoil**').replace(/blawar/g, '**blawar**').replace(/discord.gg/g, '**discord.gg**')
-const messageContentEmbed = new Discord.MessageEmbed()
-.setAuthor(`${message.author.tag}`, message.author.avatarURL(), '')
-.setDescription(`${messageContent}`)
-message.guild.channels.cache.get(config.suspiciousWordsLog).send(messageContentEmbed)
-}
+		const messageContent = message.content.toLocaleLowerCase().replace(/xci/g, '**xci**').replace(/nsp/g, '**nsp**').replace(/tinfoil/g, '**tinfoil**').replace(/blawar/g, '**blawar**').replace(/discord.gg/g, '**discord.gg**')
+		const messageContentEmbed = new Discord.MessageEmbed()
+			.setAuthor(`${message.author.tag}`, message.author.avatarURL(), '')
+			.setDescription(`${messageContent}`)
+		message.guild.channels.cache.get(config.suspiciousWordsLog).send(messageContentEmbed)
+	}
 })
