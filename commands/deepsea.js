@@ -1,6 +1,6 @@
 module.exports = {
     name: 'deepsea',
-    description: 'Grabs the current users avatar',
+    description: 'Displays deepsea statistics and infos',
     execute(message, args) {
 
         const dbFile = "./storage/deepsea_db.json";
