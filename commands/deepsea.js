@@ -44,6 +44,10 @@ module.exports = {
 
         var setup = async () => {
             try {
+                if (!fs.existsSync("./storage")) {
+                    fs.mkdirSync("./storage");
+                }
+
                 if (fs.existsSync(dbFile)) {
                     db = readFromDb();
                     var differenceInHours = Math.abs(new Date() - new Date(db.lastFetchDate)) / 36e5;
