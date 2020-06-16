@@ -5,13 +5,15 @@ module.exports = {
 
         const dbFile = "./storage/deepsea_db.json";
         const deepseaApi = "https://api.github.com/repos/Team-Neptune/DeepSea/releases";
-        const deepseaNormal = "https://raw.githack.com/Team-Neptune/DeepSea/master/builder/deepsea.json";
+        const deepseaModules = "https://raw.githack.com/Team-Neptune/DeepSea/master/builder/deepsea.json";
+        const moduleDefinitions = "https://raw.githack.com/Team-Neptune/DeepSea/master/builder/Modules/modules-definitions.json";
 
 
         var db = {
             "lastFetchDate": new Date(),
             "releaseApi": {},
-            "deepseaModules": {}
+            "deepseaModules": {},
+            "moduleDefinitions": {}
         }
 
         var getJsonFromUrl = async (url) => {
@@ -38,8 +40,26 @@ module.exports = {
             console.log("Downloading new APIs")
             db.lastFetchDate = new Date();
             db.releaseApi = await getJsonFromUrl(deepseaApi);
-            db.deepseaModules = await getJsonFromUrl(deepseaNormal);
+            db.deepseaModules = await getJsonFromUrl(deepseaModules);
+            db.moduleDefinitions = await getJsonFromUrl(moduleDefinitions);
             writeToDb(db);
+        }
+
+        var buildEmbedField = (module, embed) => {
+            var url = "";
+            var service = "";
+            if (module.git.service === 0) {
+                url = "http://github.com/" + module.git.org_name + "/" + module.git.repo_name;
+                service = "Github";
+            } else {
+                url = "https://gitlab.com/" + module.git.org_name + "/" + module.git.repo_name;
+                service = "Gitlab";
+            }
+            embed.fields.push({
+                "name": module.git.repo_name,
+                "value": `[${module.git.org_name}](${url})`,
+                "inline": true
+            })
         }
 
         var setup = async () => {
@@ -104,21 +124,13 @@ module.exports = {
             };
 
 
-            db.deepseaModules.forEach(module => {
-                var url = "";
-                var service = "";
-                if (module.git.service === 0) {
-                    url = "http://github.com/" + module.git.org_name + "/" + module.git.repo_name;
-                    service = "Github";
-                } else {
-                    url = "https://gitlab.com/" + module.git.org_name + "/" + module.git.repo_name;
-                    service = "Gitlab";
-                }
-                embed.fields.push({
-                    "name": module.git.repo_name,
-                    "value": `[${module.git.org_name}](${url})`,
-                    "inline": true
-                })
+
+            db.moduleDefinitions.forEach(definition => {
+                db.deepseaModules.modules.forEach(module => {
+                    if (definition.name == module.module_name) {
+                        buildEmbedField(definition, embed);
+                    }
+                });
             });
 
             message.channel.send({ embed });
