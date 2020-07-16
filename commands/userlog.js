@@ -16,26 +16,30 @@ module.exports = {
 			return;
 		}
 
-		if (!fs.existsSync(`./warnings.json`)) {
-			returnResponse(`'warnings.json' doesn't exist. Please do at least one warning to create the file.`)
-			return;
-		}
-
 		// all requirements are met
 
 		var warnings = require('../warnings.json')
+		var notes = require('../userNotes.json')
 
-		if (!warnings[mentionedUser.id]) {
-			returnResponse(`This user does not have any warnings`);
+		if (!warnings[mentionedUser.id] && !notes[mentionedUser.id]) {
+			returnResponse(`This user does not have any warnings or notes.`);
 			return;
 		}
 
 		const embed = new Discord.MessageEmbed()
-		warnings[mentionedUser.id].forEach(function (warning, index) {
-			embed.addField('Warning: ' + (parseInt(index) + 1), warning)
-		});
+		if(warnings[mentionedUser.id]){
+			warnings[mentionedUser.id].forEach(function (warning, index) {
+				embed.addField('Warning: ' + (parseInt(index) + 1), warning)
+			});
+		}
+		if(notes[mentionedUser.id]){
+			notes[mentionedUser.id].forEach(function (warning, index) {
+				embed.addField('Note: ' + (parseInt(index) + 1), warning)
+			});
+		}
 		message.channel.send(embed)
 
 		delete require.cache[require.resolve(`../warnings.json`)]
+		delete require.cache[require.resolve(`../userNotes.json`)]
 	}
 };
