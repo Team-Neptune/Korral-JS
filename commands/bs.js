@@ -1,6 +1,7 @@
 module.exports = {
 	name: 'bs',
 	description: 'Germany',
+	staff:true,
 	execute(message, args) {
 		const Discord = require('discord.js');
 		const client = new Discord.Client();
