@@ -81,10 +81,14 @@ autoCheckForUpdates()
 
 */
 
-//If files are missing, they are created
-fs.readFile('./warnings.json', (err, data) => {
-	if (err) fs.writeFile('./warnings.json', JSON.stringify({}), (err) => { if (err) console.log(err) })
-})
+//Required files
+let requiredFiles = ["warnings.json", "userNotes.json"]
+for (let index = 0; index < requiredFiles.length; index++) {
+	const element = requiredFiles[index];
+	if(!fs.existsSync('./'+element)){
+		fs.writeFileSync('./'+element, JSON.stringify({}))
+	}
+}
 
 //Bootup check
 client.once('ready', () => {
