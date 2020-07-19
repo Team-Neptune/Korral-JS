@@ -268,7 +268,7 @@ from ${newMessage.author.tag} (${newMessage.author.id}), in <#${newMessage.chann
 //Logs bad words like XCI, NSP, Tinfoil and brawlr perhaps extend this to also look for invites?
 client.on('message', message => {
 	if (config.suspiciousWordsFilter == true && config.suspiciousWordsLog){
-		if (message.author.bot) return;
+	if (message.author.bot) return;
 	var msg = message.content.toLowerCase()
 	if (msg.includes('xci') || msg.includes('nsp') || msg.includes('tinfoil') || msg.includes('blawar') || msg.includes('discord.gg')) {
 		caughtwords = []
