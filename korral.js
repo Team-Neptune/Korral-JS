@@ -267,7 +267,7 @@ from ${newMessage.author.tag} (${newMessage.author.id}), in <#${newMessage.chann
 
 //Logs bad words like XCI, NSP, Tinfoil and brawlr perhaps extend this to also look for invites?
 client.on('message', message => {
-	if (config.suspiciousWordsFilter == true && config.suspiciousWordsLog)
+	if (config.suspiciousWordsFilter == true && config.suspiciousWordsLog){
 		if (message.author.bot) return;
 	var msg = message.content.toLowerCase()
 	if (msg.includes('xci') || msg.includes('nsp') || msg.includes('tinfoil') || msg.includes('blawar') || msg.includes('discord.gg')) {
@@ -280,12 +280,13 @@ client.on('message', message => {
 - Contains suspicious word(s): \`${caughtwords}\`
 
 Jump:
-https://discordapp.com/channels/${message.guild.id}/${message.channel.id}/${message.id}`)
+https://discord.com/channels/${message.guild.id}/${message.channel.id}/${message.id}`)
 
 		const messageContent = message.content.toLocaleLowerCase().replace(/xci/g, '**xci**').replace(/nsp/g, '**nsp**').replace(/tinfoil/g, '**tinfoil**').replace(/blawar/g, '**blawar**').replace(/discord.gg/g, '**discord.gg**')
 		const messageContentEmbed = new Discord.MessageEmbed()
 			.setAuthor(`${message.author.tag}`, message.author.avatarURL(), '')
 			.setDescription(`${messageContent}`)
 		message.guild.channels.cache.get(config.suspiciousWordsLog).send(messageContentEmbed)
+	}
 	}
 })
