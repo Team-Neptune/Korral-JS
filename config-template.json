@@ -6,5 +6,6 @@
 	"userLog":"",
 	"suspiciousWordsLog":"",
 	"suspiciousWordsFilter":true,
+	"userLogging":true,
 	"staffRoles":["", ""]
 }
