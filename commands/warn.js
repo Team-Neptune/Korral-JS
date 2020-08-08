@@ -58,18 +58,13 @@ module.exports = {
 
 			var eventMessage = `You were warned on ${message.guild.name}.\nThe given reason is: ${reason}\n\nPlease read the rules. This is warning #${(warnings[mentionedUser.id].length)}.`
 			switch (warnings[mentionedUser.id].length) {
-				case 0:
+				case 1:
 					// only base message
 					mentionedUser.send(eventMessage);
 					break;
-				case 1:
+				case 2:
 					eventMessage = eventMessage + "\n\n __**The next warn will result in an automatic kick.**__";
 					mentionedUser.send(eventMessage)
-					break;
-				case 2:
-					eventMessage = eventMessage + "\n\nYou were kicked because of this warning. You can rejoin right away, but two more warnings will result in an automatic ban.";
-					mentionedUser.send(eventMessage)
-					mentionedUser.kick({ reason: `Auto kick: ${reason}` })
 					break;
 				case 3:
 					eventMessage = eventMessage + "\n\nYou were kicked because of this warning. You can rejoin right away, but two more warnings will result in an automatic ban.";
@@ -77,11 +72,16 @@ module.exports = {
 					mentionedUser.kick({ reason: `Auto kick: ${reason}` })
 					break;
 				case 4:
-					eventMessage = eventMessage + "\n\nYou were kicked because of this warning. You can rejoin right away, but **one more warning will result in an automatic ban.**";
+					eventMessage = eventMessage + "\n\nYou were kicked because of this warning. You can rejoin right away, but two more warnings will result in an automatic ban.";
 					mentionedUser.send(eventMessage)
 					mentionedUser.kick({ reason: `Auto kick: ${reason}` })
 					break;
 				case 5:
+					eventMessage = eventMessage + "\n\nYou were kicked because of this warning. You can rejoin right away, but **one more warning will result in an automatic ban.**";
+					mentionedUser.send(eventMessage)
+					mentionedUser.kick({ reason: `Auto kick: ${reason}` })
+					break;
+				case 6:
 					eventMessage = eventMessage + "\n\nYou were banned because of this warning. This ban will not expire.";
 					mentionedUser.send(eventMessage)
 					mentionedUser.ban({ reason: `Auto ban: ${reason}` })

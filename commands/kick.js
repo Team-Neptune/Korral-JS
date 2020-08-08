@@ -31,7 +31,7 @@ module.exports = {
 :label: User ID: ${mentionedMember.id}
 :pencil2: Reason: "${reason}"`)
 			mentionedMember.send(`You have been kicked from the server. You may rejoin at anytime.\n\nReason for kick: ${reason}`)
-			mentionedMember.kick({reason: reason})
+			mentionedMember.kick(reason)
 
 		  } catch(error) {
 			// Your code broke (Leave untouched in most cases)
