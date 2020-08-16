@@ -1,0 +1,18 @@
+{
+    "senko": {
+        "name": "Senko",
+        "desc": "Display floof",
+        "tags": [
+            "senko_(sewayaki_kitsune_no_senko-san)",
+            "rating:safe"
+        ]
+    },
+    "awoo": {
+        "name": "Awoo",
+        "desc": "AWOOOO!!!",
+        "tags": [
+            "inubashiri_momiji",
+            "rating:safe"
+        ]
+    }
+}

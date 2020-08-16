@@ -21,6 +21,15 @@ const {
 } = require('./config.json');
 const config = require('./config.json')
 
+const request = require('request');
+const parser = require('fast-xml-parser');
+
+/* All important information is in the attributes */
+const ParserOptions = {
+	attributeNamePrefix: "",
+	attrNodeName: "attr",
+	ignoreAttributes: false,
+};
 
 respond = function (title, content, sendto, color) {
 	//Since hax4dayz likes to copy my code from my other bot
@@ -85,8 +94,8 @@ autoCheckForUpdates()
 let requiredFiles = ["warnings.json", "userNotes.json"]
 for (let index = 0; index < requiredFiles.length; index++) {
 	const element = requiredFiles[index];
-	if(!fs.existsSync('./'+element)){
-		fs.writeFileSync('./'+element, JSON.stringify({}))
+	if (!fs.existsSync('./' + element)) {
+		fs.writeFileSync('./' + element, JSON.stringify({}))
 	}
 }
 
@@ -136,10 +145,53 @@ for (const file of commandFiles) {
 	client.commands.set(command.name, command);
 }
 
+const boorus = require('./booru.json');
+
+for (const key in boorus) {
+	const booru = boorus[key]
+	const title = booru['name']
+	const tags = booru['tags'].join('%20')
+
+	console.log("exported " + key)
+
+	client.commands.set(key, {
+		name: key,
+		description: booru['desc'],
+		execute(message, args) {
+			if (message.author.bot) return;
+
+			/* Get post count */
+			const page = 'https://gelbooru.com/index.php?page=dapi&s=post&q=index&limit=0&tags=' + tags
+			request({ url: page }, function (err, res, response) {
+				if (err) {
+					throw err;
+				}
+				const count = Number(parser.parse(response, ParserOptions)["posts"]["attr"]["count"])
+				const index = Math.floor(Math.random() * count)
+
+				/* Only request the one element we care about. */
+				const page = 'https://gelbooru.com/index.php?page=dapi&s=post&q=index&tags=' + tags + '&limit=1&pid=' + index
+				request({ url: page }, function (err, res, response) {
+					if (err) {
+						throw err;
+					}
+					const floof = parser.parse(response, ParserOptions)["posts"]["post"]["attr"]
+					const senko = new Discord.MessageEmbed()
+						.setTitle(title)
+						.setImage(floof["file_url"])
+						.setURL("https://gelbooru.com/index.php?page=post&s=view&id=" + floof["id"])
+					message.channel.send(senko)
+				});
+			});
+		}
+	})
+
+}
+
 //this is the code for the /commands folder
 client.on('message', message => {
 	var firstChar = message.content.slice(0, 1)
-	if (!message.content.startsWith('.') && !message.content.startsWith('!')) return;
+	if (!config.prefix.includes(message.content[0])) return;
 	if (message.author.bot) return;
 
 	const args = message.content.slice(firstChar.length).split(/ +/);
@@ -169,7 +221,7 @@ client.on('message', message => {
 
 //Member join
 client.on('guildMemberAdd', member => {
-	if(config.userLogging == false)return;
+	if (config.userLogging == false) return;
 	const guild = member.guild
 	member.guild.channels.cache.get(`${userLog}`).send(`:white_check_mark: Join: <@${member.id}> | ${member.user.tag}
 :calendar_spiral: Creation: ${member.user.createdAt}
@@ -180,7 +232,7 @@ client.on('guildMemberAdd', member => {
 
 //Member leave
 client.on('guildMemberRemove', member => {
-	if(config.userLogging == false)return;
+	if (config.userLogging == false) return;
 	const guild = member.guild
 	client.channels.cache.get(`${userLog}`).send(`:arrow_left: Leave: <@${member.id}> | ${member.user.tag}
 :label: User ID: ${member.id}
@@ -260,7 +312,7 @@ from ${message.author.tag} (${message.author.id}), in <#${message.channel.id}>:
 //Log message edits
 client.on('messageUpdate', (oldMessage, newMessage) => {
 	if (newMessage.author.bot) return
-	if(newMessage.content == oldMessage.content)return;
+	if (newMessage.content == oldMessage.content) return;
 	if (newMessage.author != client.user)
 		newMessage.guild.channels.cache.get(modLog).send(`:pencil: Message edit: 
 from ${newMessage.author.tag} (${newMessage.author.id}), in <#${newMessage.channel.id}>:
@@ -269,26 +321,26 @@ from ${newMessage.author.tag} (${newMessage.author.id}), in <#${newMessage.chann
 
 //Logs bad words like XCI, NSP, Tinfoil and brawlr perhaps extend this to also look for invites?
 client.on('message', message => {
-	if (config.suspiciousWordsFilter == true && config.suspiciousWordsLog){
-	if (message.author.bot) return;
-	var msg = message.content.toLowerCase()
-	if (msg.includes('xci') || msg.includes('nsp') || msg.includes('tinfoil') || msg.includes('blawar') || msg.includes('discord.gg')) {
-		caughtwords = []
-		if (msg.includes('xci')) caughtwords.push('xci')
-		if (msg.includes('nsp')) caughtwords.push('nsp')
-		if (msg.includes('tinfoil')) caughtwords.push('tinfoil')
-		if (msg.includes('blawar')) caughtwords.push('blawar')
-		message.guild.channels.cache.get(config.suspiciousWordsLog).send(`:rotating_light: Suspicious message by <@${message.author.id}> (${message.author.id}):
+	if (config.suspiciousWordsFilter == true && config.suspiciousWordsLog) {
+		if (message.author.bot) return;
+		var msg = message.content.toLowerCase()
+		if (msg.includes('xci') || msg.includes('nsp') || msg.includes('tinfoil') || msg.includes('blawar') || msg.includes('discord.gg')) {
+			caughtwords = []
+			if (msg.includes('xci')) caughtwords.push('xci')
+			if (msg.includes('nsp')) caughtwords.push('nsp')
+			if (msg.includes('tinfoil')) caughtwords.push('tinfoil')
+			if (msg.includes('blawar')) caughtwords.push('blawar')
+			message.guild.channels.cache.get(config.suspiciousWordsLog).send(`:rotating_light: Suspicious message by <@${message.author.id}> (${message.author.id}):
 - Contains suspicious word(s): \`${caughtwords}\`
 
 Jump:
 https://discord.com/channels/${message.guild.id}/${message.channel.id}/${message.id}`)
 
-		const messageContent = message.content.toLocaleLowerCase().replace(/xci/g, '**xci**').replace(/nsp/g, '**nsp**').replace(/tinfoil/g, '**tinfoil**').replace(/blawar/g, '**blawar**').replace(/discord.gg/g, '**discord.gg**')
-		const messageContentEmbed = new Discord.MessageEmbed()
-			.setAuthor(`${message.author.tag}`, message.author.avatarURL(), '')
-			.setDescription(`${messageContent}`)
-		message.guild.channels.cache.get(config.suspiciousWordsLog).send(messageContentEmbed)
-	}
+			const messageContent = message.content.toLocaleLowerCase().replace(/xci/g, '**xci**').replace(/nsp/g, '**nsp**').replace(/tinfoil/g, '**tinfoil**').replace(/blawar/g, '**blawar**').replace(/discord.gg/g, '**discord.gg**')
+			const messageContentEmbed = new Discord.MessageEmbed()
+				.setAuthor(`${message.author.tag}`, message.author.avatarURL(), '')
+				.setDescription(`${messageContent}`)
+			message.guild.channels.cache.get(config.suspiciousWordsLog).send(messageContentEmbed)
+		}
 	}
 })
