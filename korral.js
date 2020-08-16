@@ -26,8 +26,8 @@ const parser = require('fast-xml-parser');
 
 /* All important information is in the attributes */
 const ParserOptions = {
-	attributeNamePrefix: "",
-	attrNodeName: "attr",
+	attributeNamePrefix: '',
+	attrNodeName: 'attr',
 	ignoreAttributes: false,
 };
 
@@ -152,7 +152,7 @@ for (const key in boorus) {
 	const title = booru['name']
 	const tags = booru['tags'].join('%20')
 
-	console.log("exported " + key)
+	console.log(`exported ${key}`)
 
 	client.commands.set(key, {
 		name: key,
@@ -161,25 +161,25 @@ for (const key in boorus) {
 			if (message.author.bot) return;
 
 			/* Get post count */
-			const page = 'https://gelbooru.com/index.php?page=dapi&s=post&q=index&limit=0&tags=' + tags
+			const page = `https://gelbooru.com/index.php?page=dapi&s=post&q=index&limit=0&tags=${tags}`
 			request({ url: page }, function (err, res, response) {
 				if (err) {
 					throw err;
 				}
-				const count = Number(parser.parse(response, ParserOptions)["posts"]["attr"]["count"])
+				const count = Number(parser.parse(response, ParserOptions)['posts']['attr']['count'])
 				const index = Math.floor(Math.random() * count)
 
 				/* Only request the one element we care about. */
-				const page = 'https://gelbooru.com/index.php?page=dapi&s=post&q=index&tags=' + tags + '&limit=1&pid=' + index
+				const page = `https://gelbooru.com/index.php?page=dapi&s=post&q=index&tags=${tags}&limit=1&pid=${index}`
 				request({ url: page }, function (err, res, response) {
 					if (err) {
 						throw err;
 					}
-					const floof = parser.parse(response, ParserOptions)["posts"]["post"]["attr"]
+					const floof = parser.parse(response, ParserOptions)['posts']['post']['attr']
 					const senko = new Discord.MessageEmbed()
 						.setTitle(title)
-						.setImage(floof["file_url"])
-						.setURL("https://gelbooru.com/index.php?page=post&s=view&id=" + floof["id"])
+						.setImage(floof['file_url'])
+						.setURL(`https://gelbooru.com/index.php?page=post&s=view&id=${floof['id']}`)
 					message.channel.send(senko)
 				});
 			});
