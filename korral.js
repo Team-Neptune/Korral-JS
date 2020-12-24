@@ -138,11 +138,11 @@ for (const file of commandFiles) {
 
 //this is the code for the /commands folder
 client.on('message', message => {
-	var firstChar = message.content.slice(0, 1)
-	if (!message.content.startsWith('.') && !message.content.startsWith('!')) return;
+	if(!config.prefix.includes(message.content.charAt(0)))return;
 	if (message.author.bot) return;
 
-	const args = message.content.slice(firstChar.length).split(/ +/);
+	const args = message.content.slice(config.prefix[config.prefix.findIndex(p => message.content.charAt(0) == p)].length).split(/ +/);
+	console.log(args)
 	const commandName = args.shift().toLowerCase();
 	const command = client.commands.get(commandName)
 		|| client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
