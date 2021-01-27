@@ -7,10 +7,19 @@ const Discord = require('discord.js');
 const client = new Discord.Client({ws:{intents:["GUILDS", "GUILD_MEMBERS", "GUILD_MESSAGES"]}});
 client.commands = new Discord.Collection();
 
-const commands = require(`./commands/${file}`)
-commands.forEach(command => {
-	client.commands.set(command.name, command);
-	console.log(`exported ${command.name}`)
+let commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+commandFiles.forEach((file) => {
+	const commands = require(`./commands/${file}`)
+	if(Array.isArray(commands)){
+		commands.forEach(command => {
+			client.commands.set(command.name, command);
+			console.log(`Exported ${command.name}`)
+		})
+	}else{
+		const command = require(`./commands/${file}`)
+		client.commands.set(command.name, command)
+		console.log(`Loaded ${command.name}`)
+	}
 })
 
 const config = require('./config.json')
@@ -39,7 +48,7 @@ client.once('ready', () => {
 		.setTitle('Bot Started')
 		.setTimestamp()
 		.setFooter(`${client.user.username}`)
-	client.channels.cache.get(`${botLog}`).send(StartupEmbed);
+	client.channels.cache.get(config.botLog).send(StartupEmbed);
 })
 
 process.on('unhandledRejection', error => {
@@ -48,15 +57,7 @@ process.on('unhandledRejection', error => {
 });
 
 //Login
-client.login(token);
-
-for (const file of commandFiles) {
-	const command = require(`./commands/${file}`);
-
-	// set a new item in the Collection
-	// with the key as the command name and the value as the exported module
-	client.commands.set(command.name, command);
-}
+client.login(config.token);
 
 //this is the code for the /commands folder
 client.on('message', message => {
