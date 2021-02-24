@@ -9,3 +9,5 @@ warnings.json
 Korral.code-workspace
 .vscode/launch.json
 memeValues.json
+storage/titledb/
+storage/master.zip
