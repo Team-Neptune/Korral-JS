@@ -9,38 +9,45 @@ module.exports = {
         let deepseaApi = "https://api.github.com/repos/Team-Neptune/DeepSea/releases";
 
         function update(){
+            client.tempStorage["deepsea"] = {};
             request({url: deepseaApi, headers: { 'User-Agent': 'request'}, json: true}, function(err, res, releasejson) {
-                console.log(releasejson[0])
-                client.tempStorage["lastUpdate"] = new Date();
-                client.tempStorage["lastTag"] = releasejson[0].tag_name;
-                client.tempStorage["pubDate"] = releasejson[0].published_at;
-                client.tempStorage["totalDownloads"] = 0
+                client.tempStorage["deepsea"]["lastUpdate"] = new Date();
+                client.tempStorage["deepsea"]["lastTag"] = releasejson[0].tag_name;
+                client.tempStorage["deepsea"]["pubDate"] = releasejson[0].published_at;
+                client.tempStorage["deepsea"]["body"] = releasejson[0].body;
+                client.tempStorage["deepsea"]["totalDownloads"] = 0
                 releasejson.forEach((release) => {
                     release.assets.forEach(asset => {
-                        client.tempStorage["totalDownloads"] += asset.download_count;
+                        client.tempStorage["deepsea"]["totalDownloads"] += asset.download_count;
                     });
                 })
-             }).then(function(){
                 sendMessage();
-            });
+             })
         }
 
 
         if (!client.tempStorage["deepsea"]){
+            console.log("tempstorage does not exit")
             update();
         } else{
             let lastDate = client.tempStorage["deepsea"]["lastUpdate"];
             let currDate = new Date()
-            let diffTime = Math.abs(lastDate - currDate); //milliseconds
-            diffTime = (diffTime * 1000) * 60 //minutes
+            let diffTime = Math.abs(currDate.getTime() - lastDate.getTime()); //milliseconds
+            diffTime = (diffTime / 1000) / 60 //minutes
             if (diffTime > 30){
                 update();
+            } else {
+                sendMessage();
             }
+
         };
 
         function sendMessage(){
-            console.log(client.tempStorage["lastUpdate"], client.tempStorage["lastTag"],
-            client.tempStorage["pubDate"], client.tempStorage["totalDownloads"])
+            message.channel.send("Cached from: " + client.tempStorage["deepsea"]["lastUpdate"]+ "\n\n" +
+            "- Current version: " + client.tempStorage["deepsea"]["lastTag"] + "\n" +
+            "- Released at: " + client.tempStorage["deepsea"]["pubDate"] + "\n" +
+            "- Total Downloads: " + client.tempStorage["deepsea"]["totalDownloads"] + "\n" +
+            "```" + client.tempStorage["deepsea"]["body"] + "```")
         }
     }
 };
