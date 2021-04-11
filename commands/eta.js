@@ -18,4 +18,4 @@ module.exports = [
 			const msg = messages[index]
 			message.channel.send(msg)
 	}
-}
+};
