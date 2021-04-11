@@ -1,5 +1,4 @@
-module.exports = [
-	{
+module.exports = {
 		name: 'eta',
 		description: '@tomger eta wen',
 		usage: '<text>',
