@@ -42,7 +42,7 @@ for (let index = 0; index < requiredFiles.length; index++) {
 
 //Bootup check
 client.once('ready', () => {
-	console.log('Ready!');
+	console.log(`Ready as ${client.user.tag} (${client.user.id})`);
 	const StartupEmbed = new Discord.MessageEmbed()
 		.setColor('#00FF00')
 		.setTitle('Bot Started')
@@ -72,12 +72,12 @@ client.on('message', message => {
 
 	if (!command) return;
 
-	if (command.staff && command.staff == true && !message.member.roles.cache.some(role => staffRoles.includes(role.id))) {
+	if (command.staff && command.staff == true && !message.member.roles.cache.some(role => config.staffRoles.includes(role.id))) {
 		message.channel.send('<@' + message.author.id + '>: Check failed. You might not have the right permissions to run this command, or you may not be able to run this command in the current channel.');
 		return;
 	}
 	//Added so there is time to fix commands
-	if (command.mod && command.mod == true && !message.member.roles.cache.some(role => staffRoles.includes(role.id))) {
+	if (command.mod && command.mod == true && !message.member.roles.cache.some(role => config.staffRoles.includes(role.id))) {
 		message.channel.send('<@' + message.author.id + '>: Check failed. You might not have the right permissions to run this command, or you may not be able to run this command in the current channel.');
 		return;
 	}
@@ -93,25 +93,25 @@ client.on('message', message => {
 //Member join
 client.on('guildMemberAdd', member => {
 	if(config.userLogging == false)return;
-	member.guild.channels.cache.get(`${userLog}`).send(`:white_check_mark: Join: <@${member.id}> | ${member.user.tag}\n:calendar_spiral: Creation: ${member.user.createdAt}\n:label: User ID: ${member.id}\n:hash: Server Member Count: ${member.guild.memberCount}`)
+	member.guild.channels.cache.get(config.userLog).send(`:white_check_mark: Join: <@${member.id}> | ${member.user.tag}\n:calendar_spiral: Creation: ${member.user.createdAt}\n:label: User ID: ${member.id}\n:hash: Server Member Count: ${member.guild.memberCount}`)
 }
 );
 
 //Member leave
 client.on('guildMemberRemove', member => {
 	if(config.userLogging == false)return;
-	client.channels.cache.get(`${userLog}`).send(`:arrow_left: Leave: <@${member.id}> | ${member.user.tag}\n:label: User ID: ${member.id}\n:hash: Server Member Count: ${member.guild.memberCount}`)
+	client.channels.cache.get(config.userLog).send(`:arrow_left: Leave: <@${member.id}> | ${member.user.tag}\n:label: User ID: ${member.id}\n:hash: Server Member Count: ${member.guild.memberCount}`)
 });
 
 //Log deleted messages
 client.on('messageDelete', async message => {
-	message.guild.channels.cache.get(modLog).send(`:wastebasket: Message delete: \nfrom ${message.author.tag} (${message.author.id}), in <#${message.channel.id}>:\n\`${message.content}\``)
+	message.guild.channels.cache.get(config.modLog).send(`:wastebasket: Message delete: \nfrom ${message.author.tag} (${message.author.id}), in <#${message.channel.id}>:\n\`${message.content}\``)
 });
 
 //Log message edits
 client.on('messageUpdate', (oldMessage, newMessage) => {
 	if(oldMessage.aut)
-		newMessage.guild.channels.cache.get(modLog).send(`:pencil: Message edit: 
+		newMessage.guild.channels.cache.get(config.modLog).send(`:pencil: Message edit: 
 from ${newMessage.author.tag} (${newMessage.author.id}), in <#${newMessage.channel.id}>:
 \`${oldMessage.content}\` → \`${newMessage.content}\``)
 })
