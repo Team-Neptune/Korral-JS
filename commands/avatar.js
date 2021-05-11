@@ -12,9 +12,7 @@ module.exports = {
         const avatarEmbed = new Discord.MessageEmbed()
         .setColor(member.roles.highest?member.roles.highest.color:"")
         .setAuthor(member.user.tag)
-        .setImage(member.user.displayAvatarURL({"size":"512", "dynamic":true}));
-        message.channel.send(avatarEmbed).catch(e => {
-            message.client.channels.cache.get(require("../config.json").botLog).send(`\`\`\`console\n${e}\`\`\``, {allowedMentions:{parse:[]}})
-        })
+        .setImage(member.user.displayAvatarURL({"size":512, "dynamic":true}));
+        message.channel.send(avatarEmbed)
     },
 };
