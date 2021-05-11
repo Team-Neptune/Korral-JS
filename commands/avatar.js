@@ -8,12 +8,13 @@ module.exports = {
      * @param {Array<String>} args 
      */
 	execute(message, args) {
-        const fs = require('fs');
-        const user = message.mentions.users.first() || message.author;
+        const member = message.mentions.members.first() || message.member
         const avatarEmbed = new Discord.MessageEmbed()
-        .setColor(0x333333)
-        .setAuthor(user.username)
-        .setImage(user.displayAvatarURL({"size":"512", "dynamic":true}));
-        message.channel.send(avatarEmbed);
+        .setColor(member.roles.highest?member.roles.highest.color:"")
+        .setAuthor(member.user.tag)
+        .setImage(member.user.displayAvatarURL({"size":"512", "dynamic":true}));
+        message.channel.send(avatarEmbed).catch(e => {
+            message.client.channels.cache.get(require("../config.json").botLog).send(`\`\`\`console\n${e}\`\`\``, {allowedMentions:{parse:[]}})
+        })
     },
 };
