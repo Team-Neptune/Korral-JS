@@ -1,15 +1,18 @@
+const Discord = require('discord.js');
 module.exports = {
 	name: 'avatar',
 	description: 'Grabs the current users avatar',
+    /**
+     * 
+     * @param {Discord.Message} message 
+     * @param {Array<String>} args 
+     */
 	execute(message, args) {
-        const fs = require('fs');
-        const Discord = require('discord.js');
-        const client = new Discord.Client();
-        const user = message.mentions.users.first() || message.author;
+        const member = message.mentions.members.first() || message.member
         const avatarEmbed = new Discord.MessageEmbed()
-        .setColor(0x333333)
-        .setAuthor(user.username)
-        .setImage(user.avatarURL);
-        message.channel.send(avatarEmbed);
+        .setColor(member.roles.highest?member.roles.highest.color:"")
+        .setAuthor(member.user.tag)
+        .setImage(member.user.displayAvatarURL({"size":4096, "dynamic":true}));
+        message.channel.send(avatarEmbed)
     },
 };
