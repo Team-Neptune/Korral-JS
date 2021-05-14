@@ -13,10 +13,14 @@ client.commands = new Collection()
 import {moderationCommands} from './commands/moderation'
 import {userCommands} from './commands/user'
 import {supportCommands} from './commands/support'
+import {memeCommands} from './commands/meme'
+import {customCommands} from './commands/custom'
 
 moderationCommands.forEach(c => client.commands.set(c.name, c))
 userCommands.forEach(c => client.commands.set(c.name, c))
 supportCommands.forEach(c => client.commands.set(c.name, c))
+memeCommands.forEach(c => client.commands.set(c.name, c))
+customCommands.forEach(c => client.commands.set(c.name, c))
 
 
 let requiredFiles = ["warnings.json", "userNotes.json"]
@@ -55,7 +59,7 @@ client.on('message', message => {
 
 	if (!command) return;
 
-	if (command.staffOnly == true && !message.member.roles.cache.some(role => config.staffRoles.includes(role.id)) || (command.allowedChannels && !command.allowedChannels.includes(message.channel.id)))
+	if ((command.disallowedChannels && command.disallowedChannels.includes(message.channel.id)) || (command.allowedChannels && !command.allowedChannels.includes(message.channel.id)) || command.staffOnly == true && !message.member.roles.cache.some(role => config.staffRoles.includes(role.id)))
 		return message.channel.send(`**Invalid permissions**: You don't appear to have the correct permissions to run this commands, or it may be disabled in this channel.`);
 
 	try {
