@@ -34,5 +34,21 @@ export const userCommands:Array<Command> = [
             message.channel.send(`${message.guild.name} has ${message.guild.memberCount} members!`);
         },
         staffOnly:false
+    },
+    {
+        name: 'source',
+        description: 'Displays the source of the bot',
+        staffOnly:false,
+        execute(message, args) {
+            message.channel.send(`You can find my source at https://github.com/Team-Neptune/Korral-JS. Serious PRs and issues welcome!`);
+        },
+    },
+    {
+        name: 'ping',
+        description: 'Ping!',
+        staffOnly:false,
+        execute(message, args) {
+            message.channel.send("Your ping is `" + `${Date.now() - message.createdTimestamp}` + " ms`");
+        },
     }
 ]
