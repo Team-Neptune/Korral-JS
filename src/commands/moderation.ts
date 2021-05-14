@@ -40,7 +40,7 @@ export const moderationCommands:Array<Command> = [
             if(!message.mentions.members.first())
                 return message.channel.send(`You need to mention at least **one** member.`)
             // all requirements are met
-            var warnings = require('../warnings.json')
+            var warnings = require('.../warnings.json')
             var notes = require('../userNotes.json')
     
             message.mentions.members.forEach(mentionedUser => {
@@ -62,7 +62,7 @@ export const moderationCommands:Array<Command> = [
                 message.channel.send(embed)
             });
     
-            delete require.cache[require.resolve(`../warnings.json`)]
+            delete require.cache[require.resolve(`.../warnings.json`)]
             delete require.cache[require.resolve(`../userNotes.json`)]
         }
     },
@@ -104,7 +104,7 @@ export const moderationCommands:Array<Command> = [
             if(!mentionedUser)
                 return message.channel.send(`No user was mentioned.`);
     
-            if (!existsSync(`./warnings.json`)) {
+            if (!existsSync(`../warnings.json`)) {
                 return message.channel.send(`'warnings.json' doesn't exist. Please do at least one warning to create the file.`)
             }
     
@@ -116,7 +116,7 @@ export const moderationCommands:Array<Command> = [
     
             // all requirements are met
     
-            var userLog = require('../warnings.json')
+            var userLog = require('.../warnings.json')
             if (!userLog[mentionedUser.id]) {
                 message.channel.send(`This user has no warnings.`);
                 return;
@@ -128,10 +128,10 @@ export const moderationCommands:Array<Command> = [
     
     
             userLog[mentionedUser.id].splice(warningNr, 1); // remove the warning
-            writeFileSync('./warnings.json', JSON.stringify(userLog))
+            writeFileSync('../warnings.json', JSON.stringify(userLog))
     
             message.channel.send(`Warning removed.`);
-            delete require.cache[require.resolve(`../warnings.json`)]
+            delete require.cache[require.resolve(`.../warnings.json`)]
         }
     },
     {
@@ -159,7 +159,7 @@ export const moderationCommands:Array<Command> = [
     
             writeFileSync('./userNotes.json', JSON.stringify(notes))
             message.channel.send(`<@${mentionedUser.id}> had a note added. User has ${notes[mentionedUser.id].length} note(s).`)
-            delete require.cache[require.resolve(`../warnings.json`)]
+            delete require.cache[require.resolve(`.../warnings.json`)]
         }
     },
     {
@@ -196,7 +196,7 @@ export const moderationCommands:Array<Command> = [
             if(!mentionedUser)
                 return message.channel.send(`Please mention a member.`)
     
-            if (!existsSync(`./warnings.json`))
+            if (!existsSync(`../warnings.json`))
                 return message.channel.send(`'warnings.json' doesn't exist. Please do at least one warning to create the file.`)
     
             if (!args[1])
@@ -209,8 +209,7 @@ export const moderationCommands:Array<Command> = [
             if (message.author.id == mentionedUser.id)
                 return message.channel.send(`You can't perform this action on yourself.`);
     
-            var config = require('../config.json');
-            var warnings = require('../warnings.json')
+            var warnings = require('.../warnings.json')
     
             if (mentionedUser.roles.cache.some(role => config.staffRoles.includes(role.id)))
                 return message.channel.send(`You can't perform that action on this user.`);
@@ -220,7 +219,7 @@ export const moderationCommands:Array<Command> = [
     
             warnings[mentionedUser.id].push(reason);
     
-            writeFileSync('./warnings.json', JSON.stringify(warnings))
+            writeFileSync('../warnings.json', JSON.stringify(warnings))
             var eventMessage = `You were warned on ${message.guild.name}.\nThe given reason is: ${reason}\n\nPlease read the rules. This is warning #${(warnings[mentionedUser.id].length)}.`
             switch (warnings[mentionedUser.id].length) {
                 case 1:
@@ -259,7 +258,7 @@ export const moderationCommands:Array<Command> = [
 
             message.channel.send(`<@${mentionedUser.id}> got warned. User has ${warnings[mentionedUser.id].length} warning(s).`);
             (message.guild.channels.cache.get(config.modLog) as TextChannel).send(`<@${message.author.id}> warned <@${mentionedUser.id}> (${mentionedUser.user.tag}) - warn #${warnings[mentionedUser.id].length}\n Reason: "${reason}"`)
-            delete require.cache[require.resolve(`../warnings.json`)]
+            delete require.cache[require.resolve(`.../warnings.json`)]
     
         }
     },
@@ -310,11 +309,11 @@ export const moderationCommands:Array<Command> = [
             if (message.mentions.members.first())
                 return message.channel.send(`Please use userlog command instead.`);
     
-            if (!existsSync(`./warnings.json`))
+            if (!existsSync(`../warnings.json`))
                 return message.channel.send(`'warnings.json' doesn't exist. Please do at least one warning to create the file.`)
     
             // all requirements are met
-            var warnings = require('../warnings.json')
+            var warnings = require('.../warnings.json')
     
             if (!warnings[(args[0] as unknown as number)])
                 return message.channel.send(`This user does not have any userlog entries`);
@@ -325,7 +324,7 @@ export const moderationCommands:Array<Command> = [
             });
             message.channel.send(embed)
     
-            delete require.cache[require.resolve(`../warnings.json`)]
+            delete require.cache[require.resolve(`.../warnings.json`)]
         }
     }
 ]
