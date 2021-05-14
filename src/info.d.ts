@@ -8,6 +8,7 @@ export interface Command {
   cooldown?:number,
   staffOnly:boolean,
   allowedChannels?:Array<string>,
+  disallowedChannels?:Array<string>,
   execute(message:Message, args:Array<String>)
 }
 
