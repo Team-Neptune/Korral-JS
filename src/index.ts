@@ -10,12 +10,14 @@ const client = new Client({ws:{intents:["GUILDS", "GUILD_MEMBERS", "GUILD_MESSAG
 client.commands = new Collection()
 
 //Commands
+import {botCommands} from './commands/bot'
 import {moderationCommands} from './commands/moderation'
 import {userCommands} from './commands/user'
 import {supportCommands} from './commands/support'
 import {memeCommands} from './commands/meme'
 import {customCommands} from './commands/custom'
 
+botCommands.forEach(c => client.commands.set(c.name, c))
 moderationCommands.forEach(c => client.commands.set(c.name, c))
 userCommands.forEach(c => client.commands.set(c.name, c))
 supportCommands.forEach(c => client.commands.set(c.name, c))
