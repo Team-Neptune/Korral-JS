@@ -104,7 +104,7 @@ export const moderationCommands:Array<Command> = [
             if(!mentionedUser)
                 return message.channel.send(`No user was mentioned.`);
     
-            if (!existsSync(`../warnings.json`)) {
+            if (!existsSync(`./warnings.json`)) {
                 return message.channel.send(`'warnings.json' doesn't exist. Please do at least one warning to create the file.`)
             }
     
@@ -128,7 +128,7 @@ export const moderationCommands:Array<Command> = [
     
     
             userLog[mentionedUser.id].splice(warningNr, 1); // remove the warning
-            writeFileSync('../warnings.json', JSON.stringify(userLog))
+            writeFileSync('./warnings.json', JSON.stringify(userLog))
     
             message.channel.send(`Warning removed.`);
             delete require.cache[require.resolve(`../../warnings.json`)]
@@ -196,7 +196,7 @@ export const moderationCommands:Array<Command> = [
             if(!mentionedUser)
                 return message.channel.send(`Please mention a member.`)
     
-            if (!existsSync(`../warnings.json`))
+            if (!existsSync(`./warnings.json`))
                 return message.channel.send(`'warnings.json' doesn't exist. Please do at least one warning to create the file.`)
     
             if (!args[1])
@@ -219,7 +219,7 @@ export const moderationCommands:Array<Command> = [
     
             warnings[mentionedUser.id].push(reason);
     
-            writeFileSync('../warnings.json', JSON.stringify(warnings))
+            writeFileSync('./warnings.json', JSON.stringify(warnings))
             var eventMessage = `You were warned on ${message.guild.name}.\nThe given reason is: ${reason}\n\nPlease read the rules. This is warning #${(warnings[mentionedUser.id].length)}.`
             switch (warnings[mentionedUser.id].length) {
                 case 1:
@@ -309,7 +309,7 @@ export const moderationCommands:Array<Command> = [
             if (message.mentions.members.first())
                 return message.channel.send(`Please use userlog command instead.`);
     
-            if (!existsSync(`../warnings.json`))
+            if (!existsSync(`./warnings.json`))
                 return message.channel.send(`'warnings.json' doesn't exist. Please do at least one warning to create the file.`)
     
             // all requirements are met
