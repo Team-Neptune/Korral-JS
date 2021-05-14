@@ -16,3 +16,5 @@ src/index.js
 src/commands/user.js
 src/commands/support.js
 src/commands/moderation.js
+src/commands/custom.js
+src/commands/meme.js
