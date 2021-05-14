@@ -12,3 +12,6 @@ memeValues.json
 userNotes.json
 config.js
 config.ts
+src/index.js
+src/commands/user.js
+src/commands/support.js
