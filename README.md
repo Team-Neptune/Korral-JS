@@ -1,7 +1,7 @@
 # Korral
-Korral is the official main bot of the Team Neptune [Discord server](https://discord.gg/VkaRjYN).
+Korral is the official Discord bot of the Team Neptune [Discord server](https://discord.gg/VkaRjYN).
  
-Some responses and commands are based off [Komet](https://github.com/AtlasNX/Komet-CL) by [AtlasNX](https://github.com/AtlasNX/).
+Some responses and commands were based off [Komet](https://github.com/AtlasNX/Komet-CL), which was created by the team [AtlasNX](https://github.com/AtlasNX/).
 
 ## Developed By:
 * [TechGeekGamer](https://github.com/TechGeekGamer)
