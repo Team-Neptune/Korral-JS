@@ -150,7 +150,7 @@ export const moderationCommands:Array<Command> = [
             let reason = args.join(' ')
     
             // all requirements are met
-            var notes = require('.././/userNotes.json')
+            var notes = require('../../userNotes.json')
     
             if (!notes[mentionedUser.id])
                 notes[mentionedUser.id] = [];
