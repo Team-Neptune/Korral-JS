@@ -63,7 +63,7 @@ export const moderationCommands:Array<Command> = [
             });
     
             delete require.cache[require.resolve(`../../warnings.json`)]
-            delete require.cache[require.resolve(`../userNotes.json`)]
+            delete require.cache[require.resolve(`../../userNotes.json`)]
         }
     },
     {
