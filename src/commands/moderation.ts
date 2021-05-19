@@ -41,7 +41,7 @@ export const moderationCommands:Array<Command> = [
                 return message.channel.send(`You need to mention at least **one** member.`)
             // all requirements are met
             var warnings = require('../../warnings.json')
-            var notes = require('../userNotes.json')
+            var notes = require('../../userNotes.json')
     
             message.mentions.members.forEach(mentionedUser => {
                 if (!warnings[mentionedUser.id] && !notes[mentionedUser.id])
@@ -150,7 +150,7 @@ export const moderationCommands:Array<Command> = [
             let reason = args.join(' ')
     
             // all requirements are met
-            var notes = require('../userNotes.json')
+            var notes = require('.././/userNotes.json')
     
             if (!notes[mentionedUser.id])
                 notes[mentionedUser.id] = [];
