@@ -203,6 +203,8 @@ export const moderationCommands:Array<Command> = [
                 return message.channel.send(`Please set a warning.`)
             var removed = args.splice(0, 1)
             let reason = args.join(' ')
+
+            const reasonRegex = new RegExp(/\!{(REASON)\}!/, "g");
     
             // all requirements are met
     
@@ -221,7 +223,7 @@ export const moderationCommands:Array<Command> = [
     
             writeFileSync('./warnings.json', JSON.stringify(warnings))
             const warnAction = config.warnBehavior[warnings[mentionedUser.id].length-1].action
-            const warnMessage = config.warnBehavior[warnings[mentionedUser.id].length-1].message
+            const warnMessage = config.warnBehavior[warnings[mentionedUser.id].length-1].message.replace(reasonRegex, reason)
             switch (warnAction) {
                 case "NONE":
                     mentionedUser.send(warnMessage);
