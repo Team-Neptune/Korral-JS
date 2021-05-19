@@ -19,3 +19,4 @@ src/commands/moderation.js
 src/commands/custom.js
 src/commands/meme.js
 src/commands/bot.js
+.DS_Store
