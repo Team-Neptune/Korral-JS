@@ -71,7 +71,7 @@ export const supportCommands:Array<Command> = [
         staffOnly:false,
         execute(message, args){
             if(!args[0]){
-                message.channel.send(`For pirated eshop-games you need ES signature patches. As their only purpose is to allow piracy we're not providing any help with installation of said patches or pirated games afterwards`)
+                message.channel.send(`For pirated eshop-games, forwarders and other unofficial stuff you need signature patches. You can download them seperatly via the included "Switch AIO updater" homebrew. As their general purpose is to allow piracy we're not providing any help with installation or problems of said patches or pirated games afterwards.`)
             }else if(args[0] == '--yes' && message.member.roles.cache.some(role => config.staffRoles.includes(role.id))){
                 message.channel.send(`Patches? You want 🩹?  Ohhhhhh you mean you want like the patches patches that patch stuff for switch.. hmmmmmmmm 🤔 why do u need these patches.. idc, or do i.... 🤷‍♂️ ok kbye i guess`)
             }else if(args[0] == '--hax' && message.member.roles.cache.some(role => config.staffRoles.includes(role.id)))[
