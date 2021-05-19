@@ -1,5 +1,5 @@
 {
-    "include": ["src/*", "typings/info.d.ts"],
+    "include": ["src/*", "typings/index.d.ts"],
     "compilerOptions": {
       "allowJs": true,
       "declaration": true,
