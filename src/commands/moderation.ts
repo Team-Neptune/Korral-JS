@@ -220,8 +220,8 @@ export const moderationCommands:Array<Command> = [
             warnings[mentionedUser.id].push(reason);
     
             writeFileSync('./warnings.json', JSON.stringify(warnings))
-            const warnAction = config.warnBehavior[warnings[mentionedUser.id].length].action
-            const warnMessage = config.warnBehavior[warnings[mentionedUser.id].length].message
+            const warnAction = config.warnBehavior[warnings[mentionedUser.id].length-1].action
+            const warnMessage = config.warnBehavior[warnings[mentionedUser.id].length-1].message
             switch (warnAction) {
                 case "NONE":
                     mentionedUser.send(warnMessage);
