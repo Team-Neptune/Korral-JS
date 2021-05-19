@@ -27,8 +27,8 @@ customCommands.forEach(c => client.commands.set(c.name, c))
 let requiredFiles = ["warnings.json", "userNotes.json"]
 for (let index = 0; index < requiredFiles.length; index++) {
 	const element = requiredFiles[index];
-	if(!fs.existsSync(`../${element}`)){
-		fs.writeFileSync(`../${element}`, JSON.stringify({}))
+	if(!fs.existsSync(`./${element}`)){
+		fs.writeFileSync(`./${element}`, JSON.stringify({}))
 	}
 }
 
