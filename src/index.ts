@@ -1,9 +1,8 @@
-///<reference path="info.d.ts" />
 console.log('Loading, please wait a moment.')
 import * as fs from 'fs'
 import fetch from 'node-fetch'
 import { TextChannel, Client, Collection, MessageEmbed } from 'discord.js'
-import { Command } from './info';
+import { Command } from '../typings';
 import {config} from '../config'
 
 const client = new Client({ws:{intents:["GUILDS", "GUILD_MEMBERS", "GUILD_MESSAGES"]}});

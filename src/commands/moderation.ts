@@ -1,4 +1,4 @@
-import {Command} from '../info'
+import {Command} from '../../typings'
 import {config} from '../../config'
 import { TextChannel, MessageEmbed } from 'discord.js'
 import {writeFileSync, existsSync} from 'fs'

@@ -1,5 +1,5 @@
 import {MessageEmbed} from 'discord.js'
-import {Command} from '../info'
+import {Command} from '../../typings'
 import {writeFileSync, existsSync} from 'fs'
 import {exec} from 'child_process'
 export const botCommands:Array<Command> = [

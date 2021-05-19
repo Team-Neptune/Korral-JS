@@ -1,4 +1,4 @@
-import {Command} from '../info'
+import {Command} from '../../typings'
 import { MessageEmbed } from 'discord.js'
 import {config} from '../../config'
 export const supportCommands:Array<Command> = [
