@@ -1,4 +1,4 @@
-import { Config } from "./src/info";
+import { Config } from "./typings";
 
 export const config:Config = {
 	"prefix": ["", ""],
