@@ -10,7 +10,7 @@ export const supportCommands:Array<Command> = [
             .setTitle("Guiformat")
             .setURL('http://ridgecrop.co.uk/guiformat.exe')
             .setDescription('A useful tool for formatting SD cards over 32GB as FAT32 on Windows.')
-            message.channel.send("The exFAT drivers built into the Switch has been known to corrupt SD cards and homebrew only makes this worse. Backup everything on your SD card as soon as possible and format it to FAT32. On Windows, if your SD card is over 32GB then it will not let you select FAT32 from the built-in format tool, however you can use a tool like GUIFormat to format it.", {embed:exampleEmbed})
+            message.channel.send("The exFAT standard is bad and shouldn't be used. Especially badly written homebrew triggers the corruption.\nIf your PC doesn't allow you to format your card to FAT32 you can do that in hekate\nTools -> Arch bit · RCM · Touch · Partition -> Partition", {embed:exampleEmbed})
         },
         staffOnly:false
     },
@@ -81,6 +81,14 @@ export const supportCommands:Array<Command> = [
             }else if(args[0] == '--hax' && message.member.roles.cache.some(role => config.staffRoles.includes(role.id)))[
                 message.channel.send(`:canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: :canned_food: `)
             ]
+        }
+    },
+    {
+        "name":"manual",
+        "staffOnly":false,
+        "description":"Update guide",
+        execute(message, args){
+            message.channel.send("1. Put sd in computer\n2. Delete the `atmosphere`, `bootloader` & `sept` folder\n3: Download our latest release from <https://github.com/Team-Neptune/DeepSea/releases/latest> and try again.")
         }
     }
 ]
