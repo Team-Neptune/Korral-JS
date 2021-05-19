@@ -6,11 +6,7 @@ export const supportCommands:Array<Command> = [
         name: 'exfat',
         description: 'Displays info on why not to use exfat',
         execute(message, args) {
-            const exampleEmbed = new MessageEmbed()
-            .setTitle("Guiformat")
-            .setURL('http://ridgecrop.co.uk/guiformat.exe')
-            .setDescription('A useful tool for formatting SD cards over 32GB as FAT32 on Windows.')
-            message.channel.send("The standard exFAT driver is bad and shouldn't be used.\n\nIf your PC doesn't allow you to format your card to FAT32 you can do that in hekate:\nTools -> Arch bit · RCM · Touch · Partition -> Partition", {embed:exampleEmbed})
+            message.channel.send("The standard exFAT driver is bad and shouldn't be used.\n\nIf your PC doesn't allow you to format your card to FAT32 you can do that in hekate:\nTools -> Arch bit · RCM · Touch · Partition -> Partition")
         },
         staffOnly:false
     },
