@@ -12,16 +12,23 @@ export interface Command {
   execute(message:Message, args:Array<String>)
 }
 
+type WarnAction = "NONE" | "KICK" | "BAN"
+
+interface WarnBehavior {
+  message:string,
+  action:WarnAction
+}
+
 export interface Config {
   "prefix": Array<string>,
   "token": string,
   "botLog": string,
   "modLog": string,
   "userLog":string,
-  "suspiciousWordsLog":string,
-  "suspiciousWordsFilter":boolean,
   "userLogging":boolean,
-  "staffRoles":Array<string>
+  "staffRoles":Array<string>,
+  /** The behavior of warnings (first item in array is action for the first warning) */
+  warnBehavior:Array<WarnBehavior>
 }
 
 declare module 'discord.js' {

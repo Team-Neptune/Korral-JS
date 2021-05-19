@@ -220,39 +220,34 @@ export const moderationCommands:Array<Command> = [
             warnings[mentionedUser.id].push(reason);
     
             writeFileSync('./warnings.json', JSON.stringify(warnings))
-            var eventMessage = `You were warned on ${message.guild.name}.\nThe given reason is: ${reason}\n\nPlease read the rules. This is warning #${(warnings[mentionedUser.id].length)}.`
-            switch (warnings[mentionedUser.id].length) {
-                case 1:
-                    // only base message
-                    mentionedUser.send(eventMessage);
+            const warnAction = config.warnBehavior[warnings[mentionedUser.id].length].action
+            const warnMessage = config.warnBehavior[warnings[mentionedUser.id].length].message
+            switch (warnAction) {
+                case "NONE":
+                    mentionedUser.send(warnMessage);
                     break;
-                case 2:
-                    eventMessage = eventMessage + "\n\n __**The next warn will result in an automatic kick.**__";
-                    mentionedUser.send(eventMessage)
+                case "KICK":
+                    mentionedUser.send(warnMessage)
+                    .then(() => {
+                        mentionedUser.kick(`Auto kick: ${reason}`)
+                    })
+                    .catch((e) => {
+                        console.error(e)
+                        mentionedUser.kick(`Auto kick: ${reason}`)
+                    })
                     break;
-                case 3:
-                    eventMessage = eventMessage + "\n\nYou were kicked because of this warning. You can rejoin right away, but two more warnings will result in an automatic ban.";
-                    mentionedUser.send(eventMessage)
-                    mentionedUser.kick(`Auto kick: ${reason}`)
-                    break;
-                case 4:
-                    eventMessage = eventMessage + "\n\nYou were kicked because of this warning. You can rejoin right away, but two more warnings will result in an automatic ban.";
-                    mentionedUser.send(eventMessage)
-                    mentionedUser.kick(`Auto kick: ${reason}`)
-                    break;
-                case 5:
-                    eventMessage = eventMessage + "\n\nYou were kicked because of this warning. You can rejoin right away, but **one more warning will result in an automatic ban.**";
-                    mentionedUser.send(eventMessage)
-                    mentionedUser.kick(`Auto kick: ${reason}`)
-                    break;
-                case 6:
-                    eventMessage = eventMessage + "\n\nYou were banned because of this warning. This ban will not expire.";
-                    mentionedUser.send(eventMessage)
-                    mentionedUser.ban({ reason: `Auto ban: ${reason}` })
+                case "BAN":
+                    mentionedUser.send(warnMessage)
+                    .then(() => {
+                        mentionedUser.ban({reason:`Auto ban: ${reason}`})
+                    })
+                    .catch((e) => {
+                        console.error(e)
+                        mentionedUser.ban({reason:`Auto ban: ${reason}`})
+                    })
                     break;
                 default:
-                // code block
-                // nothing will happen by default
+                    break;
             }
 
 

@@ -6,8 +6,7 @@ export const config:Config = {
 	"botLog": "",
 	"modLog": "",
 	"userLog":"",
-	"suspiciousWordsLog":"",
-	"suspiciousWordsFilter":true,
 	"userLogging":true,
-	"staffRoles":["", ""]
+	"staffRoles":["", ""],
+	"warnBehavior":[]
 }
