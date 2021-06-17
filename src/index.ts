@@ -5,7 +5,7 @@ import { TextChannel, Client, Collection, MessageEmbed } from 'discord.js'
 import { Command } from '../typings';
 import {config} from '../config'
 
-const client = new Client({ws:{intents:["GUILDS", "GUILD_MEMBERS", "GUILD_MESSAGES"]}});
+const client = new Client({ws:{intents:["GUILDS", "GUILD_MEMBERS", "GUILD_MESSAGES"]}, allowedMentions:{"parse":[]}});
 client.commands = new Collection()
 
 //Commands
