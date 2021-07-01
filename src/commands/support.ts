@@ -6,7 +6,7 @@ export const supportCommands:Array<Command> = [
         name: 'exfat',
         description: 'Displays info on why not to use exfat',
         execute(message, args) {
-            message.channel.send("The standard exFAT driver is bad and shouldn't be used.\n\nIf your PC doesn't allow you to format your card to FAT32 you can do that in hekate:\nTools -> Arch bit · RCM · Touch · Partition -> Partition")
+            message.channel.send("The standard exFAT driver is bad and shouldn't be used.\n\nIf your PC doesn't allow you to format your card to FAT32 you can do that in hekate:\nTools -> Arch bit · RCM · Touch · Partition -> Partition"+`${message.guild.id == "703301751171973190"?`\n*Note: ${message.guild.name} has a slash command version of this command available. Eventually, support for the non-slash command version may be removed.*`:""}`)
         },
         staffOnly:false
     },
@@ -17,7 +17,7 @@ export const supportCommands:Array<Command> = [
         execute(message, args) {
             const DNS = new MessageEmbed()
             .setTitle('90DNS IP adresses')
-            .setDescription("These are the 90DNS IP adresses: \n `207.246.121.77` (USA) \n `163.172.141.219` (France) \n \n You will have to set up the DNS for every wifi network you connect to.")
+            .setDescription("These are the 90DNS IP adresses: \n `207.246.121.77` (USA) \n `163.172.141.219` (France) \n \n You will have to set up the DNS for every wifi network you connect to."+`${message.guild.id == "703301751171973190"?`\n*Note: ${message.guild.name} has a slash command version of this command available. Eventually, support for the non-slash command version may be removed.*`:""}`)
             message.channel.send(DNS)
         },
     },
@@ -28,7 +28,7 @@ export const supportCommands:Array<Command> = [
         execute(message, args) {
             const embed = new MessageEmbed()
             embed.setTitle("SD Folder")
-            embed.setDescription('If you are getting an error in hekate such as: Missing lp0 lib,  Missing or old minerva lib or Update bootloader \n Please check and make sure that you **extracted the contents of the SD folder onto your SD card**')
+            embed.setDescription('If you are getting an error in hekate such as: Missing lp0 lib,  Missing or old minerva lib or Update bootloader \n Please check and make sure that you **extracted the contents of the SD folder onto your SD card**'+`${message.guild.id == "703301751171973190"?`\n*Note: ${message.guild.name} has a slash command version of this command available. Eventually, support for the non-slash command version may be removed.*`:""}`)
             message.channel.send(embed)
         }
     },
@@ -36,7 +36,7 @@ export const supportCommands:Array<Command> = [
         name: 'guide',
         description: 'Sends links to useful guides.',
         execute(message, args) {
-            message.channel.send(`**Generic starter guides:**\nBeginners Guide: https://switch.homebrew.guide/\n\n**Specific guides:**\nManually Updating/Downgrading (with HOS): https://switch.homebrew.guide/usingcfw/manualupgrade\nManually Repairing/Downgrading (without HOS): https://switch.homebrew.guide/usingcfw/manualchoiupgrade\n\n**These guides are not by us**`);
+            message.channel.send(`**Generic starter guides:**\nBeginners Guide: https://switch.homebrew.guide/\n\n**Specific guides:**\nManually Updating/Downgrading (with HOS): https://switch.homebrew.guide/usingcfw/manualupgrade\nManually Repairing/Downgrading (without HOS): https://switch.homebrew.guide/usingcfw/manualchoiupgrade\n\n**These guides are not by us**${message.guild.id == "703301751171973190"?`\n*Note: ${message.guild.name} has a slash command version of this command available. Eventually, support for the non-slash command version may be removed.*`:""}`);
         },
         staffOnly:false
     },
@@ -50,7 +50,7 @@ export const supportCommands:Array<Command> = [
             function sendEmbed(type = "Error: `type` wasn't provided.", content = "Error: `content` wasn't provided.", methodChosen = true){
                 const embed = new MessageEmbed()
                 .setTitle(methodChosen?"Removing update with " + type:"Please choose a method")
-                .setDescription(content)
+                .setDescription(content+`${message.guild.id == "703301751171973190"?`\n*Note: ${message.guild.name} has a slash command version of this command available. Eventually, support for the non-slash command version may be removed.*`:""}`)
                 return message.channel.send(embed)
             }
             switch(args.join(" ").toLowerCase()){
@@ -71,7 +71,7 @@ export const supportCommands:Array<Command> = [
         staffOnly:false,
         execute(message, args){
             if(!args[0]){
-                message.channel.send(`For pirated eshop-games, forwarders and other unofficial stuff you need signature patches. You can download them seperatly via the included "Switch AIO updater" homebrew. As their general purpose is to allow piracy we're not providing any help with installation or problems of said patches or pirated games afterwards.`)
+                message.channel.send(`For pirated eshop-games, forwarders and other unofficial stuff you need signature patches. You can download them seperatly via the included "Switch AIO updater" homebrew. As their general purpose is to allow piracy we're not providing any help with installation or problems of said patches or pirated games afterwards. ${message.guild.id == "703301751171973190"?`\n*Note: ${message.guild.name} has a slash command version of this command available. Eventually, support for the non-slash command version may be removed.*`:""}`)
             }else if(args[0] == '--yes' && message.member.roles.cache.some(role => config.staffRoles.includes(role.id))){
                 message.channel.send(`Patches? You want 🩹?  Ohhhhhh you mean you want like the patches patches that patch stuff for switch.. hmmmmmmmm 🤔 why do u need these patches.. idc, or do i.... 🤷‍♂️ ok kbye i guess`)
             }else if(args[0] == '--hax' && message.member.roles.cache.some(role => config.staffRoles.includes(role.id)))[
@@ -84,7 +84,7 @@ export const supportCommands:Array<Command> = [
         "staffOnly":false,
         "description":"Update guide",
         execute(message, args){
-            message.channel.send("1. Put sd in computer\n2. Delete the `atmosphere`, `bootloader` & `sept` folder\n3: Download our latest release from <https://github.com/Team-Neptune/DeepSea/releases/latest> and try again.")
+            message.channel.send(`1. Put sd in computer\n2. Delete the \`atmosphere\`, \`bootloader\` & \`sept\` folder\n3: Download our latest release from <https://github.com/Team-Neptune/DeepSea/releases/latest> and try again. ${message.guild.id == "703301751171973190"?`\n*Note: ${message.guild.name} has a slash command version of this command available. Eventually, support for the non-slash command version may be removed.*`:""}`)
         }
     }
 ]
