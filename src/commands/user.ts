@@ -12,7 +12,7 @@ export const userCommands:Array<Command> = [
             .setColor(member.roles.highest?member.roles.highest.color:"")
             .setAuthor(member.user.tag)
             .setImage(member.user.displayAvatarURL({"size":4096, "dynamic":true}));
-            message.channel.send(avatarEmbed)
+            message.channel.send(`${message.guild.id == "703301751171973190"?`\n*Note: ${message.guild.name} has a slash command version of this command available. Eventually, support for the non-slash command version may be removed.*`:""}`, {embed:avatarEmbed})
         }
     },
     {

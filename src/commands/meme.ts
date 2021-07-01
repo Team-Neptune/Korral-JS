@@ -29,7 +29,7 @@ export const memeCommands:Array<Command> = [
 			]
 			const index = Math.floor(Math.random() * messages.length)
 			const msg = messages[index]
-			message.channel.send(msg)
+			message.channel.send(msg+`${message.guild.id == "703301751171973190"?`\n*Note: ${message.guild.name} has a slash command version of this command available. Eventually, support for the non-slash command version may be removed.*`:""}`)
 	    }
     },
     {
