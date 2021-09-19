@@ -12,7 +12,7 @@ export const memeCommands:Array<Command> = [
             .setThumbnail('https://cdn.vox-cdn.com/thumbor/TGJMIRrhzSrTu1oEHUCVrizhYn0=/1400x1400/filters:format(jpeg)/cdn.vox-cdn.com/uploads/chorus_asset/file/13689000/instagram_egg.jpg')
             .setTitle('🥚')
             .setDescription('🥚 🥚🥚🥚🥚🥚🥚 🥚🥚🥚🥚 🥚🥚🥚 🥚🥚🥚🥚🥚🥚🥚🥚🥚🥚 🥚🥚 🥚🥚🥚🥚🥚 🥚🥚🥚🥚 🥚🥚🥚🥚 🥚🥚 🥚🥚🥚🥚🥚 🥚🥚 🥚🥚🥚🥚🥚🥚🥚🥚')
-            message.channel.send('🥚🥚🥚 🥚🥚🥚🥚🥚 🥚🥚🥚🥚🥚🥚🥚 🥚🥚🥚🥚🥚 🥚🥚🥚🥚 🥚🥚🥚 🥚🥚🥚🥚🥚🥚 🥚🥚🥚 🥚🥚🥚🥚 🥚🥚🥚🥚🥚 \n 🥚🥚 🥚🥚🥚🥚🥚🥚🥚 🥚🥚 🥚🥚🥚🥚🥚 🥚🥚🥚 🥚🥚🥚🥚🥚🥚🥚🥚 🥚🥚🥚🥚 🥚🥚🥚🥚🥚 🥚🥚🥚🥚 🥚🥚🥚🥚🥚🥚 \n 🥚🥚🥚🥚🥚🥚 🥚🥚🥚🥚🥚🥚🥚🥚🥚🥚 🥚🥚 🥚🥚🥚🥚 🥚🥚 🥚🥚🥚🥚 🥚🥚 🥚🥚🥚🥚 🥚🥚 🥚🥚🥚🥚🥚🥚🥚🥚 \n 🥚🥚🥚 🥚🥚🥚🥚🥚🥚 🥚🥚 🥚🥚 🥚🥚🥚🥚🥚🥚 🥚🥚 🥚🥚🥚🥚🥚🥚🥚🥚 🥚🥚 🥚🥚🥚🥚 🥚🥚 🥚🥚🥚🥚 🥚🥚 \n 🥚🥚🥚🥚 🥚🥚🥚🥚 🥚🥚🥚🥚 🥚🥚 🥚🥚🥚🥚 🥚🥚🥚 🥚🥚🥚 🥚🥚🥚 🥚🥚🥚🥚🥚🥚 🥚🥚🥚🥚🥚 🥚🥚🥚🥚 \n 🥚🥚🥚 🥚🥚🥚🥚🥚🥚🥚🥚 🥚🥚🥚🥚🥚🥚 🥚🥚🥚🥚🥚 🥚🥚🥚🥚🥚🥚🥚 🥚🥚🥚 🥚🥚🥚 🥚🥚🥚 🥚 🥚🥚🥚🥚 \n 🥚🥚🥚🥚 🥚🥚🥚🥚🥚🥚🥚🥚🥚 🥚🥚 🥚🥚🥚🥚🥚🥚 🥚🥚🥚', {embed:embed})
+            message.channel.send({content:'🥚🥚🥚 🥚🥚🥚🥚🥚 🥚🥚🥚🥚🥚🥚🥚 🥚🥚🥚🥚🥚 🥚🥚🥚🥚 🥚🥚🥚 🥚🥚🥚🥚🥚🥚 🥚🥚🥚 🥚🥚🥚🥚 🥚🥚🥚🥚🥚 \n 🥚🥚 🥚🥚🥚🥚🥚🥚🥚 🥚🥚 🥚🥚🥚🥚🥚 🥚🥚🥚 🥚🥚🥚🥚🥚🥚🥚🥚 🥚🥚🥚🥚 🥚🥚🥚🥚🥚 🥚🥚🥚🥚 🥚🥚🥚🥚🥚🥚 \n 🥚🥚🥚🥚🥚🥚 🥚🥚🥚🥚🥚🥚🥚🥚🥚🥚 🥚🥚 🥚🥚🥚🥚 🥚🥚 🥚🥚🥚🥚 🥚🥚 🥚🥚🥚🥚 🥚🥚 🥚🥚🥚🥚🥚🥚🥚🥚 \n 🥚🥚🥚 🥚🥚🥚🥚🥚🥚 🥚🥚 🥚🥚 🥚🥚🥚🥚🥚🥚 🥚🥚 🥚🥚🥚🥚🥚🥚🥚🥚 🥚🥚 🥚🥚🥚🥚 🥚🥚 🥚🥚🥚🥚 🥚🥚 \n 🥚🥚🥚🥚 🥚🥚🥚🥚 🥚🥚🥚🥚 🥚🥚 🥚🥚🥚🥚 🥚🥚🥚 🥚🥚🥚 🥚🥚🥚 🥚🥚🥚🥚🥚🥚 🥚🥚🥚🥚🥚 🥚🥚🥚🥚 \n 🥚🥚🥚 🥚🥚🥚🥚🥚🥚🥚🥚 🥚🥚🥚🥚🥚🥚 🥚🥚🥚🥚🥚 🥚🥚🥚🥚🥚🥚🥚 🥚🥚🥚 🥚🥚🥚 🥚🥚🥚 🥚 🥚🥚🥚🥚 \n 🥚🥚🥚🥚 🥚🥚🥚🥚🥚🥚🥚🥚🥚 🥚🥚 🥚🥚🥚🥚🥚🥚 🥚🥚🥚', embeds:[embed]})
         },
     },
     {
