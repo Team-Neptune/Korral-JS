@@ -1,5 +1,5 @@
 {
-    "include": ["src/*", "typings/index.d.ts"],
+  "include": ["src/**/*", "typings/"],
     "compilerOptions": {
       "outDir": "dist",
       "target": "ES5",
