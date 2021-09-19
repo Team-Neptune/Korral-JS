@@ -9,10 +9,10 @@ export const userCommands:Array<Command> = [
         execute(message, args){
             const member = message.mentions.members.first() || message.member
             const avatarEmbed = new MessageEmbed()
-            .setColor(member.roles.highest?member.roles.highest.color:"")
+            .setColor(member.roles.highest?member.roles.highest.color:undefined)
             .setAuthor(member.user.tag)
             .setImage(member.user.displayAvatarURL({"size":4096, "dynamic":true}));
-            message.channel.send(`${message.guild.id == "703301751171973190"?`\n*Note: ${message.guild.name} has a slash command version of this command available. Eventually, support for the non-slash command version may be removed.*`:""}`, {embed:avatarEmbed})
+            message.channel.send({content:`${message.guild.id == "703301751171973190"?`\n*Note: ${message.guild.name} has a slash command version of this command available. Eventually, support for the non-slash command version may be removed.*`:""}`, embeds:[avatarEmbed]})
         }
     },
     {
