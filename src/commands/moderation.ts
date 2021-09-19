@@ -184,6 +184,7 @@ export const moderationCommands:Array<Command> = [
                     message.channel.send(`Failed to delete messages. They may be older than 20 days.`)
                 })
             })
+            .catch(console.error)
         },
     },
     {

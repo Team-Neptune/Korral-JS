@@ -41,6 +41,7 @@ client.once('ready', () => {
 	client.channels.fetch(config.botLog).then(c => {
 		(c as TextChannel).send(StartupEmbed);
 	})
+	.catch(console.error)
 })
 
 process.on('unhandledRejection', error => {
