@@ -59,7 +59,7 @@ export const moderationCommands:Array<Command> = [
                         embed.addField('Note: ' + (parseInt(index) + 1), warning)
                     });
                 }
-                message.channel.send(embed)
+                message.channel.send({embeds:[embed]})
             });
     
             delete require.cache[require.resolve(`../../warnings.json`)]
@@ -169,21 +169,29 @@ export const moderationCommands:Array<Command> = [
         cooldown: 0,
         staffOnly:true,
         execute(message, args) {
+            let deleteNum = Number(args[0]);
             if(!args[0])
-                return message.channel.send(`Please provide the amount of messages to delete`)
-            if((args[0] as unknown as number) >= 99)
-                return message.channel.send(`You can only delete up to 99 messages.`)
-            message.channel.bulkDelete((args[0] as unknown as number))
+                return message.channel.send(`Please provide the amount of messages to delete`);
+            if(deleteNum > 99)
+                return message.channel.send(`You can only delete up to 99 messages.`);
+            message.delete()
             .then(() => {
-                message.channel.send(`Deleted ${args[0]} messages.`).then(m => {
-                    setTimeout(() => {
-                        m.delete()
-                    }, 5000);
+                (message.channel as TextChannel)
+                .bulkDelete(deleteNum)
+                .then(() => {
+                    message.channel.send(`Deleted ${deleteNum.toString()} messages.`)
+                    .then(m => {
+                        setTimeout(() => {
+                            m.delete();
+                        }, 5000);
+                    })
+                    .catch(console.error)
                 })
                 .catch(() => {
                     message.channel.send(`Failed to delete messages. They may be older than 20 days.`)
                 })
             })
+            .catch(console.error)
         },
     },
     {
@@ -281,7 +289,7 @@ export const moderationCommands:Array<Command> = [
                 return message.channel.send('Please mention a channel.')
             var removed = args.splice(0, 1)
             let text = args.join(' ');
-            message.mentions.channels.first().send(text)
+            (message.mentions.channels.first() as TextChannel).send(text)
         }
     },
     {
@@ -294,7 +302,7 @@ export const moderationCommands:Array<Command> = [
             message.mentions.members.forEach(mentionedMember => {
                 const embed = new MessageEmbed()
                 embed.setDescription(`Username: ${mentionedMember.user.tag}\nID: ${mentionedMember.user.id}\nAvatar: [here](${mentionedMember.user.displayAvatarURL({dynamic:true})})\nBot: ${mentionedMember.user.bot}\nCreation: ${mentionedMember.user.createdAt}\nDisplay Name: ${mentionedMember.nickname || "None."}\nJoined: ${mentionedMember.joinedAt}\nHighest Role: ${mentionedMember.roles.highest || "None."}`)
-                message.channel.send(embed)
+                message.channel.send({embeds:[embed]})
             });
         }
     },
@@ -319,7 +327,7 @@ export const moderationCommands:Array<Command> = [
             warnings[(args[0] as unknown as number)].forEach(function (warning, index) {
                 embed.addField('Warning: ' + (parseInt(index) + 1), warning)
             });
-            message.channel.send(embed)
+            message.channel.send({embeds:[embed]})
     
             delete require.cache[require.resolve(`../../warnings.json`)]
         }

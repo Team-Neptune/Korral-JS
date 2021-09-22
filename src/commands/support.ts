@@ -18,7 +18,7 @@ export const supportCommands:Array<Command> = [
             const DNS = new MessageEmbed()
             .setTitle('90DNS IP adresses')
             .setDescription("These are the 90DNS IP adresses: \n `207.246.121.77` (USA) \n `163.172.141.219` (France) \n \n You will have to set up the DNS for every wifi network you connect to."+`${message.guild.id == "703301751171973190"?`\n*Note: ${message.guild.name} has a slash command version of this command available. Eventually, support for the non-slash command version may be removed.*`:""}`)
-            message.channel.send(DNS)
+            message.channel.send({embeds:[DNS]})
         },
     },
     {
@@ -29,7 +29,7 @@ export const supportCommands:Array<Command> = [
             const embed = new MessageEmbed()
             embed.setTitle("SD Folder")
             embed.setDescription('If you are getting an error in hekate such as: Missing lp0 lib,  Missing or old minerva lib or Update bootloader \n Please check and make sure that you **extracted the contents of the SD folder onto your SD card**'+`${message.guild.id == "703301751171973190"?`\n*Note: ${message.guild.name} has a slash command version of this command available. Eventually, support for the non-slash command version may be removed.*`:""}`)
-            message.channel.send(embed)
+            message.channel.send({embeds:[embed]})
         }
     },
     {
@@ -51,7 +51,7 @@ export const supportCommands:Array<Command> = [
                 const embed = new MessageEmbed()
                 .setTitle(methodChosen?"Removing update with " + type:"Please choose a method")
                 .setDescription(content+`${message.guild.id == "703301751171973190"?`\n*Note: ${message.guild.name} has a slash command version of this command available. Eventually, support for the non-slash command version may be removed.*`:""}`)
-                return message.channel.send(embed)
+                return message.channel.send({embeds:[embed]})
             }
             switch(args.join(" ").toLowerCase()){
                 case "goldleaf":return sendEmbed("Goldleaf", goldleafContent)

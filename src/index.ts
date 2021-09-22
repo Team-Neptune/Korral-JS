@@ -5,7 +5,7 @@ import { TextChannel, Client, Collection, MessageEmbed } from 'discord.js'
 import { Command } from '../typings';
 import {config} from '../config'
 
-const client = new Client({ws:{intents:["GUILDS", "GUILD_MEMBERS", "GUILD_MESSAGES"]}, allowedMentions:{"parse":[]}});
+const client = new Client({intents:["GUILDS", "GUILD_MEMBERS", "GUILD_MESSAGES"], allowedMentions:{"parse":[]}});
 client.commands = new Collection()
 
 //Commands
@@ -39,8 +39,9 @@ client.once('ready', () => {
 		.setDescription(`**${client.user.tag}** is ready. Currently in ${client.guilds.cache.size} ${client.guilds.cache.size==1?"guild":"guilds"}.`)
 		.setTimestamp()
 	client.channels.fetch(config.botLog).then(c => {
-		(c as TextChannel).send(StartupEmbed);
+		(c as TextChannel).send({embeds:[StartupEmbed]});
 	})
+	.catch(console.error)
 })
 
 process.on('unhandledRejection', error => {
@@ -49,25 +50,25 @@ process.on('unhandledRejection', error => {
 });
 
 //this is the code for the /commands folder
-client.on('message', message => {
-	if(message.channel.type == "dm" || message.author.bot || config.prefix.filter(p => message.content.startsWith(p)).length == 0)
-		return;
-
-	const usedPrefix = config.prefix.find(p => message.content.startsWith(p))
-	const args = message.content.slice(usedPrefix.length).split(/ +/);
-	const commandName = args.shift().toLowerCase();
-	const command = client.commands.get(commandName) || client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
-
-	if (!command) return;
-
-	if ((command.disallowedChannels && command.disallowedChannels.includes(message.channel.id)) || (command.allowedChannels && !command.allowedChannels.includes(message.channel.id)) || command.staffOnly == true && !message.member.roles.cache.some(role => config.staffRoles.includes(role.id)))
-		return message.channel.send(`**Invalid permissions**: You don't appear to have the correct permissions to run this commands, or it may be disabled in this channel.`);
-
-	try {
-		command.execute(message, args);
-	} catch (error) {
-		console.error(error);
-		message.channel.send('Uh oh, something went wrong while running that command. Contact TechGeekGamer#7205 if the issue persists.');
+client.on("messageCreate", message => {
+	if(message.channel.type != "DM" && !message.author.bot && config.prefix.find(p => message.content.startsWith(p))){
+		const usedPrefix = config.prefix.find(p => message.content.startsWith(p))
+		const args = message.content.slice(usedPrefix.length).split(/ +/);
+		const commandName = args.shift().toLowerCase();
+		const command = client.commands.get(commandName) || client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
+	
+		if (command) {
+			if ((command.disallowedChannels && command.disallowedChannels.includes(message.channel.id)) || (command.allowedChannels && !command.allowedChannels.includes(message.channel.id)) || command.staffOnly == true && !message.member.roles.cache.some(role => config.staffRoles.includes(role.id))){
+				message.channel.send({content:`**Invalid permissions**: You don't appear to have the correct permissions to run this commands, or it may be disabled in this channel.`});
+			}
+		
+			try {
+				command.execute(message, args);
+			} catch (error) {
+				console.error(error);
+				message.channel.send({content:'Uh oh, something went wrong while running that command. Contact TechGeekGamer#7205 if the issue persists.'});
+			}
+		}
 	}
 });
 

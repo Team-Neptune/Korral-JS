@@ -1,4 +1,4 @@
-import {Message} from 'discord.js'
+import {Message, Collection} from 'discord.js'
 export interface Command {
   /** Command name */
   name:string,
