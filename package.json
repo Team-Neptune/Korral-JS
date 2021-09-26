@@ -4,7 +4,7 @@
   "description": "Its Komet but for JS!",
   "main": "index.js",
   "dependencies": {
-    "bent": "^7.3.0",
+    "bent": "^7.3.12",
     "discord.js": "^13.1.0",
     "JSON": "^1.0.0",
     "moment": "^2.29.1",
