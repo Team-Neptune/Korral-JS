@@ -72,6 +72,14 @@ client.on("messageCreate", message => {
 	}
 });
 
+// Support channel (Remove thread creation messages)
+client.on("messageCreate", (message) => {
+	// Fix channel ID later
+	if(message.channelId == "893958390894694440" && message.type == "THREAD_CREATED" && message.channel.type == "GUILD_TEXT")
+		if(message.deletable)
+			message.delete()
+})
+
 //Member join
 client.on('guildMemberAdd', member => {
 	if(config.userLogging == false)return;
