@@ -29,7 +29,8 @@ export interface Config {
   "staffRoles":Array<string>,
   /** The behavior of warnings (first item in array is action for the first warning) */
   warnBehavior:Array<WarnBehavior>,
-  supportChannelId:string
+  supportChannelId:string,
+  supportRoleId:string
 }
 
 declare module 'discord.js' {

@@ -79,6 +79,62 @@ client.on("messageCreate", (message) => {
 			message.delete()
 })
 
+interface PrivateThreadSettings {
+	authorizedUsers:string[],
+	authorizedRoles:string[]
+}
+
+interface PrivateThread {
+	[threadId:string]:PrivateThreadSettings
+}
+
+let privateThreads:PrivateThread = {}
+
+// Support threads ("Private" threads - support role only)
+client.on("messageCreate", (message) => {
+	if(message.channel.isThread() == false) return;
+
+	// Setting thread to "private"
+	if(message.channel.type == "GUILD_PUBLIC_THREAD" && message.channel.parentId == config.supportChannelId && message.author.id == client.user.id && message.type == "DEFAULT" && message.content.includes("MARK_PRIVATE_TICKET")){
+		let authorizedUsers = message.mentions.users.map(u => u.id);
+		let authorizedRoles = config.staffRoles;
+		authorizedUsers.push(client.user.id);
+		authorizedRoles.push(config.supportRoleId)
+
+		privateThreads[message.channel.id] = {
+			authorizedRoles,
+			authorizedUsers
+		}
+	}
+
+	//Not found - May be due bot restart
+	if(!privateThreads[message.channel.id]) return;
+
+	//Unauthorized message in "private" thread
+	if(message.channel.type == "GUILD_PUBLIC_THREAD" && message.channel.parentId == config.supportChannelId && message.type == "DEFAULT" && !message.author.bot && !message.author.system){
+		let thisTicketAllowed:PrivateThreadSettings = {
+			authorizedRoles:privateThreads[message.channel.id].authorizedRoles,
+			authorizedUsers:privateThreads[message.channel.id].authorizedUsers,
+		}
+		if(!thisTicketAllowed.authorizedUsers.includes(message.author.id) && !message.member.roles.cache.find(r => thisTicketAllowed.authorizedRoles.includes(r.id))){
+			message.delete();
+			message.author.send({
+				embeds:[
+					{
+						description:`Hey there <@${message.author.id}>, <#${message.channel.id}> is a private ticket. It's viewable to all, but only staff and ticket starter can speak. Please note: Repeatedly attempting to talk in a thread you aren't authorized to be in can result is being muted and/or restricted from using threads.`,
+						color:"RED",
+						footer:{
+							text:`${message.guild.name} (${message.guildId})`,
+							iconURL:message.guild.iconURL({dynamic:true})
+						}
+					}
+				]
+			}).catch(console.error)
+			message.channel.members.remove(message.author.id, `Not authorized for this ticket`)
+		}
+	}
+})
+
 //Member join
 client.on('guildMemberAdd', member => {
 	if(config.userLogging == false)return;
