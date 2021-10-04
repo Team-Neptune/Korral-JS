@@ -95,7 +95,7 @@ client.on("messageCreate", (message) => {
 	if(message.channel.isThread() == false) return;
 
 	// Setting thread to "private"
-	if(message.channel.type == "GUILD_PUBLIC_THREAD" && message.channel.parentId == config.supportChannelId && message.author.id == client.user.id && message.type == "DEFAULT" && message.content.includes("MARK_PRIVATE_TICKET")){
+	if(message.channel.type == "GUILD_PUBLIC_THREAD" && message.channel.parentId == config.supportChannelId && message.author.id == client.user.id && message.type == "DEFAULT" && message.content.includes("private ticket")){
 		let authorizedUsers = message.mentions.users.map(u => u.id);
 		let authorizedRoles = config.staffRoles;
 		authorizedUsers.push(client.user.id);
