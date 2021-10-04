@@ -74,7 +74,6 @@ client.on("messageCreate", message => {
 
 // Support channel (Remove thread creation messages)
 client.on("messageCreate", (message) => {
-	// Fix channel ID later
 	if(message.channelId == config.supportChannelId && message.type == "THREAD_CREATED" && message.channel.type == "GUILD_TEXT")
 		if(message.deletable)
 			message.delete()
