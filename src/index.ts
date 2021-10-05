@@ -1,7 +1,7 @@
 console.log('Loading, please wait a moment.')
 import * as fs from 'fs'
 import fetch from 'node-fetch'
-import { TextChannel, Client, Collection, MessageEmbed } from 'discord.js'
+import { TextChannel, Client, Collection, MessageEmbed, MessageButton } from 'discord.js'
 import { Command } from '../typings';
 import {config} from '../config'
 
@@ -80,6 +80,7 @@ client.on("messageCreate", (message) => {
 })
 
 interface PrivateThreadSettings {
+	ownerId:string,
 	authorizedUsers:string[],
 	authorizedRoles:string[]
 }
@@ -89,8 +90,47 @@ interface PrivateThread {
 }
 
 let privateThreads:PrivateThread = {}
+if(fs.existsSync("./privateThreads.json"))
+	privateThreads = JSON.parse(fs.readFileSync("./privateThreads.json").toString());
+function savePrivateThreads(){
+	fs.writeFileSync("./privateThreads.json", JSON.stringify(privateThreads))
+}
 
-// Support threads ("Private" threads - support role only)
+function keepThreadsOpen(){
+	(client.channels.cache.get(config.supportChannelId) as TextChannel).threads.fetchActive(true).then(threads => {
+		console.log(threads)
+		threads.threads.each(channel => {
+			if(privateThreads[channel.id]){
+				let threadStarter = privateThreads[channel.id].ownerId;
+				let closeTicketButton = new MessageButton()
+				.setStyle("SECONDARY")
+				.setCustomId(`close_ticket_${threadStarter}`)
+				.setLabel("Close Ticket")
+				.setEmoji("🔒");
+				channel.send({
+					embeds:[
+						{
+							description:`This message has been sent to keep this ticket open. If you no longer need this ticket, you can close it with the button below.`
+						}
+					],
+					components:[
+						{
+							"type":1,
+							"components":[
+								closeTicketButton
+							]
+						}
+					]
+				});
+			}
+		})
+	})
+}
+
+setInterval(keepThreadsOpen, 22 * 60 * 60 * 1000)
+// 22 Hours
+
+// Support threads ("Private" tickets - support role only)
 client.on("messageCreate", (message) => {
 	if(message.channel.isThread() == false) return;
 
@@ -103,8 +143,10 @@ client.on("messageCreate", (message) => {
 
 		privateThreads[message.channel.id] = {
 			authorizedRoles,
-			authorizedUsers
+			authorizedUsers,
+			ownerId:authorizedUsers[0]
 		}
+		return savePrivateThreads();
 	}
 
 	//Not found - May be due bot restart
@@ -115,6 +157,7 @@ client.on("messageCreate", (message) => {
 		let thisTicketAllowed:PrivateThreadSettings = {
 			authorizedRoles:privateThreads[message.channel.id].authorizedRoles,
 			authorizedUsers:privateThreads[message.channel.id].authorizedUsers,
+			ownerId:privateThreads[message.channel.id].ownerId
 		}
 		if(!thisTicketAllowed.authorizedUsers.includes(message.author.id) && !message.member.roles.cache.find(r => thisTicketAllowed.authorizedRoles.includes(r.id))){
 			message.delete();
@@ -131,6 +174,33 @@ client.on("messageCreate", (message) => {
 				]
 			}).catch(console.error)
 			message.channel.members.remove(message.author.id, `Not authorized for this ticket`)
+			return;
+		}
+	}
+
+	// Add member to authorized
+	if(message.channel.type == "GUILD_PUBLIC_THREAD" && message.channel.parentId == config.supportChannelId && message.type == "DEFAULT" && !message.author.bot && !message.author.system){
+		let thisTicketAllowed:PrivateThreadSettings = {
+			authorizedRoles:privateThreads[message.channel.id].authorizedRoles,
+			authorizedUsers:privateThreads[message.channel.id].authorizedUsers,
+			ownerId:privateThreads[message.channel.id].ownerId
+		}
+		if(thisTicketAllowed.authorizedUsers.includes(message.author.id) || message.member.roles.cache.find(r => thisTicketAllowed.authorizedRoles.includes(r.id)) && message.mentions.users.size > 0){
+			message.mentions.users = message.mentions.users.filter(u => !privateThreads[message.channel.id].authorizedUsers.includes(u.id));
+			if(message.mentions.users.size == 0) return;
+			message.mentions.users.each(u => {
+				if(!privateThreads[message.channel.id].authorizedUsers.includes(u.id)){
+					privateThreads[message.channel.id].authorizedUsers.push(u.id);
+				}
+			})
+			message.reply({
+				embeds:[
+					{
+						description:`✅ Added ${message.mentions.users.map(u => `<@${u.id}>`).join(", ")} to this ticket.`,
+						color:"GREEN"
+					}
+				]
+			})
 		}
 	}
 })
