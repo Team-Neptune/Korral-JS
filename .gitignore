@@ -8,3 +8,4 @@ memeValues.json
 userNotes.json
 .DS_Store
 dist/
+privateThreads.json
