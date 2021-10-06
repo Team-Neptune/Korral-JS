@@ -9,3 +9,4 @@ userNotes.json
 .DS_Store
 dist/
 privateThreads.json
+publicThreads.json
