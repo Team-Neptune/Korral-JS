@@ -1,7 +1,7 @@
 console.log('Loading, please wait a moment.')
 import * as fs from 'fs'
 import fetch from 'node-fetch'
-import { TextChannel, Client, Collection, MessageEmbed } from 'discord.js'
+import { TextChannel, Client, Collection, MessageEmbed, MessageButton } from 'discord.js'
 import { Command } from '../typings';
 import {config} from '../config'
 
@@ -71,6 +71,162 @@ client.on("messageCreate", message => {
 		}
 	}
 });
+
+// Support channel (Remove thread creation messages)
+client.on("messageCreate", (message) => {
+	if(message.channelId == config.supportChannelId && message.type == "THREAD_CREATED" && message.channel.type == "GUILD_TEXT")
+		if(message.deletable)
+			message.delete()
+})
+
+interface ThreadSettings {
+	ownerId:string
+}
+
+interface PrivateThreadSettings extends ThreadSettings {
+	authorizedUsers:string[],
+	authorizedRoles:string[]
+}
+
+interface PublicThread {
+	[threadId:string]:ThreadSettings
+}
+
+interface PrivateThread {
+	[threadId:string]:PrivateThreadSettings
+}
+
+let privateThreads:PrivateThread = {}
+let publicThreads:PublicThread = {}
+if(fs.existsSync("./privateThreads.json"))
+	privateThreads = JSON.parse(fs.readFileSync("./privateThreads.json").toString());
+if(fs.existsSync("./publicThreads.json"))
+	publicThreads = JSON.parse(fs.readFileSync("./publicThreads.json").toString());
+function saveThreadsData(){
+	fs.writeFileSync("./publicThreads.json", JSON.stringify(publicThreads))
+	fs.writeFileSync("./privateThreads.json", JSON.stringify(privateThreads))
+}
+
+function keepThreadsOpen(){
+	(client.channels.cache.get(config.supportChannelId) as TextChannel).threads.fetchActive(true).then(threads => {
+		threads.threads.each(channel => {
+			if(publicThreads[channel.id] || privateThreads[channel.id]){
+				let threadStarter = (publicThreads[channel.id] || privateThreads[channel.id]).ownerId;
+				let closeTicketButton = new MessageButton()
+				.setStyle("SECONDARY")
+				.setCustomId(`close_ticket_${threadStarter}`)
+				.setLabel("Close Ticket")
+				.setEmoji("🔒");
+				channel.send({
+					embeds:[
+						{
+							description:`This message has been sent to keep this ticket open. If you no longer need this ticket, you can close it with the button below.`
+						}
+					],
+					components:[
+						{
+							"type":1,
+							"components":[
+								closeTicketButton
+							]
+						}
+					]
+				});
+			}
+		})
+	})
+}
+
+setInterval(keepThreadsOpen, 22 * 60 * 60 * 1000)
+// 22 Hours
+
+// Support threads
+client.on("messageCreate", (message) => {
+	if(message.channel.isThread() == false) return;
+
+	// Setting thread/ticket to "public"
+	if(message.channel.type == "GUILD_PUBLIC_THREAD" && message.channel.parentId == config.supportChannelId && message.author.id == client.user.id && message.type == "DEFAULT" && message.content.includes("public ticket")){
+		let authorizedUsers = message.mentions.users.map(u => u.id);
+		let authorizedRoles = config.staffRoles;
+		authorizedUsers.push(client.user.id);
+		authorizedRoles.push(config.supportRoleId)
+
+		publicThreads[message.channel.id] = {
+			ownerId:authorizedUsers[0]
+		}
+		return saveThreadsData();
+	}
+
+	// Setting thread/ticket to "private"
+	if(message.channel.type == "GUILD_PUBLIC_THREAD" && message.channel.parentId == config.supportChannelId && message.author.id == client.user.id && message.type == "DEFAULT" && message.content.includes("private ticket")){
+		let authorizedUsers = message.mentions.users.map(u => u.id);
+		let authorizedRoles = config.staffRoles;
+		authorizedUsers.push(client.user.id);
+		authorizedRoles.push(config.supportRoleId)
+
+		privateThreads[message.channel.id] = {
+			authorizedRoles,
+			authorizedUsers,
+			ownerId:authorizedUsers[0]
+		}
+		return saveThreadsData();
+	}
+
+	//Not found in private threads
+	if(!privateThreads[message.channel.id]) return;
+
+	//Unauthorized message in "private" thread
+	if(message.channel.type == "GUILD_PUBLIC_THREAD" && message.channel.parentId == config.supportChannelId && message.type == "DEFAULT" && !message.author.bot && !message.author.system){
+		let thisTicketAllowed:PrivateThreadSettings = {
+			authorizedRoles:privateThreads[message.channel.id].authorizedRoles,
+			authorizedUsers:privateThreads[message.channel.id].authorizedUsers,
+			ownerId:privateThreads[message.channel.id].ownerId
+		}
+		if(!thisTicketAllowed.authorizedUsers.includes(message.author.id) && !message.member.roles.cache.find(r => thisTicketAllowed.authorizedRoles.includes(r.id))){
+			message.delete();
+			message.author.send({
+				embeds:[
+					{
+						description:`Hey there <@${message.author.id}>, <#${message.channel.id}> is a private ticket. It's viewable to all, but only staff and ticket starter can speak. Please note: Repeatedly attempting to talk in a thread you aren't authorized to be in can result is being muted and/or restricted from using threads.`,
+						color:"RED",
+						footer:{
+							text:`${message.guild.name} (${message.guildId})`,
+							iconURL:message.guild.iconURL({dynamic:true})
+						}
+					}
+				]
+			}).catch(console.error)
+			message.channel.members.remove(message.author.id, `Not authorized for this ticket`)
+			return;
+		}
+	}
+
+	// Add member to authorized
+	if(message.channel.type == "GUILD_PUBLIC_THREAD" && message.channel.parentId == config.supportChannelId && message.type == "DEFAULT" && !message.author.bot && !message.author.system){
+		let thisTicketAllowed:PrivateThreadSettings = {
+			authorizedRoles:privateThreads[message.channel.id].authorizedRoles,
+			authorizedUsers:privateThreads[message.channel.id].authorizedUsers,
+			ownerId:privateThreads[message.channel.id].ownerId
+		}
+		if(thisTicketAllowed.authorizedUsers.includes(message.author.id) || message.member.roles.cache.find(r => thisTicketAllowed.authorizedRoles.includes(r.id)) && message.mentions.users.size > 0){
+			message.mentions.users = message.mentions.users.filter(u => !privateThreads[message.channel.id].authorizedUsers.includes(u.id));
+			if(message.mentions.users.size == 0) return;
+			message.mentions.users.each(u => {
+				if(!privateThreads[message.channel.id].authorizedUsers.includes(u.id)){
+					privateThreads[message.channel.id].authorizedUsers.push(u.id);
+				}
+			})
+			message.reply({
+				embeds:[
+					{
+						description:`✅ Added ${message.mentions.users.map(u => `<@${u.id}>`).join(", ")} to this ticket.`,
+						color:"GREEN"
+					}
+				]
+			})
+		}
+	}
+})
 
 //Member join
 client.on('guildMemberAdd', member => {

@@ -28,7 +28,9 @@ export interface Config {
   "userLogging":boolean,
   "staffRoles":Array<string>,
   /** The behavior of warnings (first item in array is action for the first warning) */
-  warnBehavior:Array<WarnBehavior>
+  warnBehavior:Array<WarnBehavior>,
+  supportChannelId:string,
+  supportRoleId:string
 }
 
 declare module 'discord.js' {
