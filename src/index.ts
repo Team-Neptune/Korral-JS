@@ -79,10 +79,17 @@ client.on("messageCreate", (message) => {
 			message.delete()
 })
 
-interface PrivateThreadSettings {
-	ownerId:string,
+interface ThreadSettings {
+	ownerId:string
+}
+
+interface PrivateThreadSettings extends ThreadSettings {
 	authorizedUsers:string[],
 	authorizedRoles:string[]
+}
+
+interface PublicThread {
+	[threadId:string]:ThreadSettings
 }
 
 interface PrivateThread {
@@ -90,18 +97,21 @@ interface PrivateThread {
 }
 
 let privateThreads:PrivateThread = {}
+let publicThreads:PublicThread = {}
 if(fs.existsSync("./privateThreads.json"))
 	privateThreads = JSON.parse(fs.readFileSync("./privateThreads.json").toString());
-function savePrivateThreads(){
+if(fs.existsSync("./publicThreads.json"))
+	publicThreads = JSON.parse(fs.readFileSync("./publicThreads.json").toString());
+function saveThreadsData(){
+	fs.writeFileSync("./publicThreads.json", JSON.stringify(publicThreads))
 	fs.writeFileSync("./privateThreads.json", JSON.stringify(privateThreads))
 }
 
 function keepThreadsOpen(){
 	(client.channels.cache.get(config.supportChannelId) as TextChannel).threads.fetchActive(true).then(threads => {
-		console.log(threads)
 		threads.threads.each(channel => {
-			if(privateThreads[channel.id]){
-				let threadStarter = privateThreads[channel.id].ownerId;
+			if(publicThreads[channel.id] || privateThreads[channel.id]){
+				let threadStarter = (publicThreads[channel.id] || privateThreads[channel.id]).ownerId;
 				let closeTicketButton = new MessageButton()
 				.setStyle("SECONDARY")
 				.setCustomId(`close_ticket_${threadStarter}`)
@@ -130,11 +140,24 @@ function keepThreadsOpen(){
 setInterval(keepThreadsOpen, 22 * 60 * 60 * 1000)
 // 22 Hours
 
-// Support threads ("Private" tickets - support role only)
+// Support threads
 client.on("messageCreate", (message) => {
 	if(message.channel.isThread() == false) return;
 
-	// Setting thread to "private"
+	// Setting thread/ticket to "public"
+	if(message.channel.type == "GUILD_PUBLIC_THREAD" && message.channel.parentId == config.supportChannelId && message.author.id == client.user.id && message.type == "DEFAULT" && message.content.includes("public ticket")){
+		let authorizedUsers = message.mentions.users.map(u => u.id);
+		let authorizedRoles = config.staffRoles;
+		authorizedUsers.push(client.user.id);
+		authorizedRoles.push(config.supportRoleId)
+
+		publicThreads[message.channel.id] = {
+			ownerId:authorizedUsers[0]
+		}
+		return saveThreadsData();
+	}
+
+	// Setting thread/ticket to "private"
 	if(message.channel.type == "GUILD_PUBLIC_THREAD" && message.channel.parentId == config.supportChannelId && message.author.id == client.user.id && message.type == "DEFAULT" && message.content.includes("private ticket")){
 		let authorizedUsers = message.mentions.users.map(u => u.id);
 		let authorizedRoles = config.staffRoles;
@@ -146,10 +169,10 @@ client.on("messageCreate", (message) => {
 			authorizedUsers,
 			ownerId:authorizedUsers[0]
 		}
-		return savePrivateThreads();
+		return saveThreadsData();
 	}
 
-	//Not found - May be due bot restart
+	//Not found in private threads
 	if(!privateThreads[message.channel.id]) return;
 
 	//Unauthorized message in "private" thread
