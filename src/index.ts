@@ -1,45 +1,67 @@
-console.log('Loading, please wait a moment.')
-import * as fs from 'fs'
 import fetch from 'node-fetch'
-import { TextChannel, Client, Collection, MessageEmbed, MessageButton } from 'discord.js'
-import { Command } from '../typings';
+import { TextChannel, Client, Collection, MessageEmbed, MessageButton, ThreadChannel } from 'discord.js'
+import Command from './classes/Command';
 import {config} from '../config'
+import { existsSync, readFileSync, writeFileSync } from 'fs';
 
 const client = new Client({intents:["GUILDS", "GUILD_MEMBERS", "GUILD_MESSAGES"], allowedMentions:{"parse":[]}});
 client.commands = new Collection()
+client.messageCommands = new Collection()
+client.messageCommands = new Collection()
 
-//Commands
-import {botCommands} from './commands/bot'
-import {moderationCommands} from './commands/moderation'
-import {userCommands} from './commands/user'
-import {supportCommands} from './commands/support'
-import {memeCommands} from './commands/meme'
-import {customCommands} from './commands/custom'
+let hasActiveTickets = {}
 
-botCommands.forEach(c => client.commands.set(c.name, c))
-moderationCommands.forEach(c => client.commands.set(c.name, c))
-userCommands.forEach(c => client.commands.set(c.name, c))
-supportCommands.forEach(c => client.commands.set(c.name, c))
-memeCommands.forEach(c => client.commands.set(c.name, c))
-customCommands.forEach(c => client.commands.set(c.name, c))
+client.createSupportThread = async (shortDesc:string, userId:string, privateTicket:boolean) => {
+	hasActiveTickets[userId] = true;
+	const channel = client.channels.cache.get(config.supportChannelId) as TextChannel;
+	const createdChannel = await channel.threads.create({
+		name:`${privateTicket?"🔒":"🔓"} - ${shortDesc}`,
+		autoArchiveDuration:1440,
+		type:"GUILD_PUBLIC_THREAD"
+	})
+	return createdChannel;
+}
+client.closeSupportThread = async (channelId:string, userId:string) => {
+    hasActiveTickets[userId] = false;
+	var channel = (client.channels.cache.get(channelId) as ThreadChannel)
+	await channel.setLocked(true, "Ticket has ended")
+	return channel
+}
 
+//Message Commands
+import {botCommands} from './msg_commands/bot'
+import {moderationCommands} from './msg_commands/moderation'
+import {userCommands} from './msg_commands/user'
+import {supportCommands} from './msg_commands/support'
+import {memeCommands} from './msg_commands/meme'
+import {customCommands} from './msg_commands/custom'
+import { PrivateThread, PrivateThreadSettings, PublicThread } from '../typings';
 
+botCommands.forEach(c => client.messageCommands.set(c.name, c))
+moderationCommands.forEach(c => client.messageCommands.set(c.name, c))
+userCommands.forEach(c => client.messageCommands.set(c.name, c))
+supportCommands.forEach(c => client.messageCommands.set(c.name, c))
+memeCommands.forEach(c => client.messageCommands.set(c.name, c))
+customCommands.forEach(c => client.messageCommands.set(c.name, c))
+
+// Required files
 let requiredFiles = ["warnings.json", "userNotes.json"]
 for (let index = 0; index < requiredFiles.length; index++) {
 	const element = requiredFiles[index];
-	if(!fs.existsSync(`./${element}`)){
-		fs.writeFileSync(`./${element}`, JSON.stringify({}))
+	if(!existsSync(`./${element}`)){
+		writeFileSync(`./${element}`, JSON.stringify({}))
 	}
 }
 
 client.once('ready', () => {
 	console.log(`Ready as ${client.user.tag} (${client.user.id}) | ${client.guilds.cache.size} ${client.guilds.cache.size==1?"guild":"guilds"}`);
+	console.log(`Supports: Interactions & Message Commands (Deprecated)`)
 	const StartupEmbed = new MessageEmbed()
 		.setColor('#00FF00')
 		.setDescription(`**${client.user.tag}** is ready. Currently in ${client.guilds.cache.size} ${client.guilds.cache.size==1?"guild":"guilds"}.`)
 		.setTimestamp()
-	client.channels.fetch(config.botLog).then(c => {
-		(c as TextChannel).send({embeds:[StartupEmbed]});
+	client.channels.fetch(config.botLog).then((channel:TextChannel) => {
+		channel.send({embeds:[StartupEmbed]});
 	})
 	.catch(console.error)
 })
@@ -49,13 +71,34 @@ process.on('unhandledRejection', error => {
 	(client.channels.cache.get(config.botLog) as TextChannel).send(`**Uncaught Promise Rejection**\n\`\`\`console\n${error}\`\`\``)
 });
 
-//this is the code for the /commands folder
-client.on("messageCreate", message => {
+//Code for the /commands folder (Slash Commands)
+client.on("interactionCreate", interaction => {
+	if(interaction.isCommand()){
+		const command = client.commands.get(interaction.commandName);
+	
+		if (command) {
+		
+			try {
+				command.execute(interaction);
+			} catch (error) {
+				console.error(error);
+				interaction.reply({content:'Uh oh, something went wrong while running that command. Please open an issue on [GitHub](https://github.com/Team-Neptune/Korral-JS) if the issue persists.'});
+			}
+		} else {
+			interaction.reply({
+				content:`That command was not found.`
+			})
+		}
+	}
+});
+
+//Code for the /msg_commands folder (Message Commands - deprecated)
+client.on('messageCreate', message => {
 	if(message.channel.type != "DM" && !message.author.bot && config.prefix.find(p => message.content.startsWith(p))){
 		const usedPrefix = config.prefix.find(p => message.content.startsWith(p))
 		const args = message.content.slice(usedPrefix.length).split(/ +/);
 		const commandName = args.shift().toLowerCase();
-		const command = client.commands.get(commandName) || client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
+		const command = client.messageCommands.get(commandName) || client.messageCommands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
 	
 		if (command) {
 			if ((command.disallowedChannels && command.disallowedChannels.includes(message.channel.id)) || (command.allowedChannels && !command.allowedChannels.includes(message.channel.id)) || command.staffOnly == true && !message.member.roles.cache.some(role => config.staffRoles.includes(role.id))){
@@ -66,7 +109,7 @@ client.on("messageCreate", message => {
 				command.execute(message, args);
 			} catch (error) {
 				console.error(error);
-				message.channel.send({content:'Uh oh, something went wrong while running that command. Contact TechGeekGamer#7205 if the issue persists.'});
+				message.channel.send({content:'Uh oh, something went wrong while running that command. Please open an issue on [GitHub](https://github.com/Team-Neptune/Korral-JS) if the issue persists.'});
 			}
 		}
 	}
@@ -81,13 +124,13 @@ client.on("messageCreate", message => {
 
 let privateThreads:PrivateThread = {}
 let publicThreads:PublicThread = {}
-if(fs.existsSync("./privateThreads.json"))
-	privateThreads = JSON.parse(fs.readFileSync("./privateThreads.json").toString());
-if(fs.existsSync("./publicThreads.json"))
-	publicThreads = JSON.parse(fs.readFileSync("./publicThreads.json").toString());
+if(existsSync("./privateThreads.json"))
+	privateThreads = JSON.parse(readFileSync("./privateThreads.json").toString());
+if(existsSync("./publicThreads.json"))
+	publicThreads = JSON.parse(readFileSync("./publicThreads.json").toString());
 function saveThreadsData(){
-	fs.writeFileSync("./publicThreads.json", JSON.stringify(publicThreads))
-	fs.writeFileSync("./privateThreads.json", JSON.stringify(privateThreads))
+	writeFileSync("./publicThreads.json", JSON.stringify(publicThreads))
+	writeFileSync("./privateThreads.json", JSON.stringify(privateThreads))
 }
 
 function keepThreadsOpen(){
