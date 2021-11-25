@@ -1,5 +1,6 @@
 import {Message, Collection} from 'discord.js'
-export interface Command {
+import Command from '../src/classes/Command'
+export interface MessageCommand {
   /** Command name */
   name:string,
   description:string,
@@ -20,21 +21,57 @@ interface WarnBehavior {
 }
 
 export interface Config {
-  "prefix": Array<string>,
-  "token": string,
-  "botLog": string,
-  "modLog": string,
-  "userLog":string,
-  "userLogging":boolean,
-  "staffRoles":Array<string>,
+  prefix: Array<string>,
+  token: string,
+  botLog: string,
+  modLog: string,
+  userLog:string,
+  userLogging:boolean,
+  staffRoles:Array<string>,
   /** The behavior of warnings (first item in array is action for the first warning) */
   warnBehavior:Array<WarnBehavior>,
   supportChannelId:string,
-  supportRoleId:string
+  supportRoleId:string,
+  bitly_token?:string
+}
+
+export interface GitHubRelease {
+  tag_name:string,
+  published_at:Date,
+  assets:any
+}
+
+
+export interface DeepseaDb {
+  lastFetchDate:number,
+  releaseApi:GitHubRelease[]
 }
 
 declare module 'discord.js' {
     interface Client {
       commands: Collection<string, Command>
+      messageCommands: Collection<string, MessageCommand>
+      createSupportThread(shortDesc:string, userId:string, privateTicket:boolean):Promise<ThreadChannel>,
+      closeSupportThread(channelId:string, userId:string):Promise<ThreadChannel>
     }
+}
+
+
+type SDLayoutOS = "win10" | "winxp" | "macos" | "mint20"
+
+interface ThreadSettings {
+	ownerId:string
+}
+
+interface PrivateThreadSettings extends ThreadSettings {
+	authorizedUsers:string[],
+	authorizedRoles:string[]
+}
+
+interface PublicThread {
+	[threadId:string]:ThreadSettings
+}
+
+interface PrivateThread {
+	[threadId:string]:PrivateThreadSettings
 }
