@@ -72,29 +72,6 @@ client.on("messageCreate", message => {
 	}
 });
 
-// Support channel (Remove thread creation messages)
-client.on("messageCreate", (message) => {
-	if(message.channelId == config.supportChannelId && message.type == "THREAD_CREATED" && message.channel.type == "GUILD_TEXT")
-		if(message.deletable)
-			message.delete()
-})
-
-interface ThreadSettings {
-	ownerId:string
-}
-
-interface PrivateThreadSettings extends ThreadSettings {
-	authorizedUsers:string[],
-	authorizedRoles:string[]
-}
-
-interface PublicThread {
-	[threadId:string]:ThreadSettings
-}
-
-interface PrivateThread {
-	[threadId:string]:PrivateThreadSettings
-}
 // // Support channel (Remove thread creation messages)
 // client.on("messageCreate", (message) => {
 // 	if(message.channelId == config.supportChannelId && message.type == "THREAD_CREATED" && message.channel.type == "GUILD_TEXT")
