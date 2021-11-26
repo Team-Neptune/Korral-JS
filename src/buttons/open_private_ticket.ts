@@ -3,6 +3,7 @@ import { config } from "../../config";
 import ButtonCommand from "../classes/ButtonCommand";
 
 export default new ButtonCommand({
+    customId:"open_private_ticket",
     checkType:"EQUALS",
     execute(interaction){
       let threadStarter = interaction.member.user.id

@@ -2,6 +2,7 @@ import { config } from "../../config";
 import ButtonCommand from "../classes/ButtonCommand";
 
 export default new ButtonCommand({
+    customId:"view_open_tickets",
     checkType:"EQUALS",
     execute(interaction){
         interaction.guild.channels.fetchActiveThreads()

@@ -2,6 +2,7 @@
 import ButtonCommand from "../classes/ButtonCommand";
 
 export default new ButtonCommand({
+  customId:"hekatesdmount_page",
     checkType:"STARTS_WITH",
     execute(interaction){
         let pages = {

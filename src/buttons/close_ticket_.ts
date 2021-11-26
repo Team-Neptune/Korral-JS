@@ -3,6 +3,7 @@ import { config } from "../../config";
 import ButtonCommand from "../classes/ButtonCommand";
 
 export default new ButtonCommand({
+    customId:"close_ticket",
     checkType:"STARTS_WITH",
     execute(interaction){
         let ticketUserId = interaction.customId.split("close_ticket_")[1];
