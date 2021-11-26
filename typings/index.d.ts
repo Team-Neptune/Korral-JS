@@ -1,4 +1,5 @@
 import {Message, Collection} from 'discord.js'
+import ButtonCommand from '../src/classes/ButtonCommand'
 import Command from '../src/classes/Command'
 export interface MessageCommand {
   /** Command name */
@@ -51,6 +52,7 @@ declare module 'discord.js' {
     interface Client {
       commands: Collection<string, Command>
       messageCommands: Collection<string, MessageCommand>
+      buttonCommands: Collection<string, ButtonCommand>
       createSupportThread(shortDesc:string, userId:string, privateTicket:boolean):Promise<ThreadChannel>,
       closeSupportThread(channelId:string, userId:string):Promise<ThreadChannel>
     }
