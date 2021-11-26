@@ -2,14 +2,16 @@ import fetch from 'node-fetch'
 import { TextChannel, Client, Collection, MessageEmbed, MessageButton, ThreadChannel } from 'discord.js'
 import Command from './classes/Command';
 import {config} from '../config'
-import { existsSync, readFileSync, writeFileSync } from 'fs';
+import { existsSync, readdirSync, readFileSync, writeFileSync } from 'fs';
+import { PrivateThread, PrivateThreadSettings, PublicThread } from '../typings';
+import ButtonCommand from './classes/ButtonCommand';
 
 const client = new Client({intents:["GUILDS", "GUILD_MEMBERS", "GUILD_MESSAGES"], allowedMentions:{"parse":[]}});
-client.commands = new Collection()
-client.messageCommands = new Collection()
-client.messageCommands = new Collection()
+client.commands = new Collection();
+client.messageCommands = new Collection();
+client.buttonCommands = new Collection();
 
-let hasActiveTickets = {}
+let hasActiveTickets = {};
 
 client.createSupportThread = async (shortDesc:string, userId:string, privateTicket:boolean) => {
 	hasActiveTickets[userId] = true;
@@ -35,7 +37,6 @@ import {userCommands} from './msg_commands/user'
 import {supportCommands} from './msg_commands/support'
 import {memeCommands} from './msg_commands/meme'
 import {customCommands} from './msg_commands/custom'
-import { PrivateThread, PrivateThreadSettings, PublicThread } from '../typings';
 
 botCommands.forEach(c => client.messageCommands.set(c.name, c))
 moderationCommands.forEach(c => client.messageCommands.set(c.name, c))
@@ -43,6 +44,35 @@ userCommands.forEach(c => client.messageCommands.set(c.name, c))
 supportCommands.forEach(c => client.messageCommands.set(c.name, c))
 memeCommands.forEach(c => client.messageCommands.set(c.name, c))
 customCommands.forEach(c => client.messageCommands.set(c.name, c))
+
+// Load commands/buttons
+let buttonCommandFiles = readdirSync(`./src/buttons`)
+.filter(file => file.endsWith('.ts'));
+
+for (let commandFileName of buttonCommandFiles) {
+    try {
+        import(`./buttons/${commandFileName.split(".")[0].toString()}`).then(commandImport => {
+            let command:ButtonCommand = commandImport.default;
+			client.buttonCommands.set(commandFileName.split(".")[0].toString(), command)
+        });
+    } catch (err) {
+        console.error(err)
+    }
+}
+
+let commandFiles = readdirSync(`./src/commands`)
+.filter(file => file.endsWith('.ts'));
+
+for (let commandFileName of commandFiles) {
+    try {
+        import(`./commands/${commandFileName.split(".")[0].toString()}`).then(commandImport => {
+            let command:Command = commandImport.default;
+			client.commands.set(commandFileName.split(".")[0].toString(), command)
+        });
+    } catch (err) {
+        console.error(err)
+    }
+}
 
 // Required files
 let requiredFiles = ["warnings.json", "userNotes.json"]
@@ -86,7 +116,27 @@ client.on("interactionCreate", interaction => {
 			}
 		} else {
 			interaction.reply({
-				content:`That command was not found.`
+				content:`That command was not found.`,
+				ephemeral:true
+			})
+		}
+	}
+
+	if(interaction.isButton()){
+		const command = client.buttonCommands.find(bc => bc.checkType == "EQUALS" && interaction.customId == bc.customId) || client.buttonCommands.find(bc => bc.checkType == "STARTS_WITH" && interaction.customId.startsWith(bc.customId));
+	
+		if (command) {
+		
+			try {
+				command.execute(interaction);
+			} catch (error) {
+				console.error(error);
+				interaction.reply({content:'Uh oh, something went wrong while running that command. Please open an issue on [GitHub](https://github.com/Team-Neptune/Korral-JS) if the issue persists.'});
+			}
+		} else {
+			interaction.reply({
+				content:`That button was not found.`,
+				ephemeral:true
 			})
 		}
 	}
