@@ -10,3 +10,4 @@ userNotes.json
 dist/
 privateThreads.json
 publicThreads.json
+storage/deepsea_db.json
