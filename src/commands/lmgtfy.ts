@@ -5,7 +5,7 @@ export default new Command({
     execute(interaction){
         if(!config.bitly_token)
           return interaction.reply({
-              content:"`config#bitly_token` is not provided in the config."
+              content:"`config.bitly_token` is not provided in the config."
           })
         const searchTerm:string = interaction.options.data[0].value.toString()
         const target = interaction.options.data[1]?.value.toString() || false
