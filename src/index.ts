@@ -19,7 +19,6 @@ function saveActiveTicketsData(){
 	writeFileSync("./activeTickets.json", JSON.stringify(activeTickets))
 }
 
-
 client.createSupportThread = async (shortDesc:string, userId:string, privateTicket:boolean) => {
 	const channel = client.channels.cache.get(config.supportChannelId) as TextChannel;
 	const createdChannel = await channel.threads.create({
@@ -48,6 +47,10 @@ client.closeSupportThread = async (channelId:string, userId:string) => {
 	};
 	saveActiveTicketsData();
 	return channel
+}
+
+client.supportThreadExists = (userId:string) => {
+	return activeTickets[userId]?.active || false;
 }
 
 //Message Commands

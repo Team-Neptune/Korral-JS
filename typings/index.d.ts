@@ -53,7 +53,8 @@ declare module 'discord.js' {
       commands: Collection<string, Command>
       messageCommands: Collection<string, MessageCommand>
       buttonCommands: Collection<string, ButtonCommand>
-      createSupportThread(shortDesc:string, userId:string, privateTicket:boolean):Promise<ThreadChannel>,
+      createSupportThread(shortDesc:string, userId:string, privateTicket:boolean):Promise<ThreadChannel>
+      supportThreadExists(userId:string):boolean
       closeSupportThread(channelId:string, userId:string):Promise<ThreadChannel>
     }
 }
