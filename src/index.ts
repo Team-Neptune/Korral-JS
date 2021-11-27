@@ -50,11 +50,11 @@ customCommands.forEach(c => client.messageCommands.set(c.name, c))
 let buttonCommandFiles = readdirSync(`./src/buttons`)
 .filter(file => file.endsWith('.ts'));
 
-for (let commandFileName of buttonCommandFiles) {
+for (let buttonFileName of buttonCommandFiles) {
     try {
-        import(`./buttons/${commandFileName.split(".")[0].toString()}`).then(commandImport => {
+        import(`./buttons/${buttonFileName.split(".")[0].toString()}`).then(commandImport => {
             let command:ButtonCommand = commandImport.default;
-			client.buttonCommands.set(commandFileName.split(".")[0].toString(), command)
+			client.buttonCommands.set(command.customId, command)
         });
     } catch (err) {
         console.error(err)
@@ -102,7 +102,7 @@ process.on('unhandledRejection', error => {
 	(client.channels.cache.get(config.botLog) as TextChannel).send(`**Uncaught Promise Rejection**\n\`\`\`console\n${error}\`\`\``)
 });
 
-//Code for the /commands folder (Slash Commands)
+//Code for interactions (Slash Commands, Buttons)
 client.on("interactionCreate", interaction => {
 	if(interaction.isCommand()){
 		const command = client.commands.get(interaction.commandName);
@@ -124,8 +124,10 @@ client.on("interactionCreate", interaction => {
 	}
 
 	if(interaction.isButton()){
-		const command = client.buttonCommands.find(bc => bc.checkType == "EQUALS" && interaction.customId == bc.customId) || client.buttonCommands.find(bc => bc.checkType == "STARTS_WITH" && interaction.customId.startsWith(bc.customId));
-	
+		const command = 
+			client.buttonCommands.find(bc => bc.checkType == "EQUALS" && interaction.customId == bc.customId) 
+			|| client.buttonCommands.find(bc => bc.checkType == "STARTS_WITH" && interaction.customId.startsWith(bc.customId));
+
 		if (command) {
 		
 			try {
