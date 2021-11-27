@@ -47,10 +47,11 @@ var setup = async () => {
         if (existsSync(dbFile)) {
             db = readFromDb();
             var differenceInHours = Math.abs(Date.now() - db.lastFetchDate) / 36e5;
-            if (differenceInHours > 1) updateDatabase();
+            if (differenceInHours > 1) updateDatabase(), console.log(`Updating database...`);
+            if (differenceInHours < 1) console.log(`Cached data new enough...`);
         } else {
-            createFile(dbFile);
-            updateDatabase()
+            console.log(`Creating db file...`)
+            createFile(dbFile), updateDatabase();
         }
     } catch (err) {
         console.error(err)
@@ -117,8 +118,9 @@ export default class {
     /**
      * Update cached data
      */
-    update(){
-        return new Promise((resolve) => setup().then(resolve));
+    async update(){
+        let res = await setup()
+        return res
     }
     updateDatabase(){
         updateDatabase();
