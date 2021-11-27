@@ -34,15 +34,15 @@ client.createSupportThread = async (shortDesc:string, userId:string, privateTick
 	saveActiveTicketsData();
 	return createdChannel;
 }
-client.closeSupportThread = async (channelId:string, userId:string) => {
-	var channel = (client.channels.cache.get(channelId) as ThreadChannel)
+client.closeSupportThread = async (userId:string, channelId?:string) => {
+	var channel = (client.channels.cache.get(channelId || activeTickets[userId]?.threadChannelId) as ThreadChannel)
 	await channel.setLocked(true, "Ticket has been closed")
 	await channel.setArchived(true, "Ticket has been closed")
 	await (client.channels.cache.get(config.supportChannelId) as TextChannel)
 	.messages.cache.find(message => message.thread?.id == activeTickets[userId].threadChannelId)?.delete()
 	activeTickets[userId] = {
 		active:false,
-		threadChannelId:channelId,
+		threadChannelId:channelId || activeTickets[userId]?.threadChannelId,
 		userId
 	};
 	saveActiveTicketsData();
