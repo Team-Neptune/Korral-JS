@@ -360,5 +360,12 @@ setInterval(() => {
 	setupDeepsea()
 }, 60 * 60 * 1000)
 
-//Login
-client.login(config.token).then(() => setupDeepsea());
+async function startBot(){
+	await loadButtonCommands();
+	await loadSlashCommands();
+	await setupDeepsea();
+	await client.login(config.token);
+	console.log(`Statup functions have been executed!`)
+}
+
+startBot()
