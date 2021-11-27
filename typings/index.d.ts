@@ -54,8 +54,8 @@ declare module 'discord.js' {
       messageCommands: Collection<string, MessageCommand>
       buttonCommands: Collection<string, ButtonCommand>
       createSupportThread(shortDesc:string, userId:string, privateTicket:boolean):Promise<ThreadChannel>
-      supportThreadExists(userId:string):boolean
-      closeSupportThread(channelId:string, userId:string):Promise<ThreadChannel>
+      getSupportThreadData(userId:string):ActiveTicketsData
+      closeSupportThread(userId:string, channelId?:string):Promise<ThreadChannel>
     }
 }
 
@@ -79,10 +79,12 @@ interface PrivateThread {
 	[threadId:string]:PrivateThreadSettings
 }
 
+interface ActiveTicketsData {
+  threadChannelId:string,
+  userId:string,
+  active:boolean
+}
+
 interface ActiveTickets {
-	[userId:string]:{
-		threadChannelId:string,
-		userId:string,
-		active:boolean
-	}
+	[userId:string]:ActiveTicketsData
 }

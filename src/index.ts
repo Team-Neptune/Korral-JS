@@ -49,8 +49,8 @@ client.closeSupportThread = async (channelId:string, userId:string) => {
 	return channel
 }
 
-client.supportThreadExists = (userId:string) => {
-	return activeTickets[userId]?.active || false;
+client.getSupportThreadData = (userId:string) => {
+	return activeTickets[userId];
 }
 
 //Message Commands
