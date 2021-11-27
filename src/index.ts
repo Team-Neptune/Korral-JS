@@ -7,7 +7,7 @@ import { PrivateThread, PrivateThreadSettings, PublicThread } from '../typings';
 import ButtonCommand from './classes/ButtonCommand';
 import DeepSea from './deepsea'
 
-const client = new Client({intents:["GUILDS", "GUILD_MEMBERS", "GUILD_MESSAGES"], allowedMentions:{"parse":[]}});
+const client = new Client({intents:["GUILDS", "GUILD_MEMBERS", "GUILD_MESSAGES"]});
 client.commands = new Collection();
 client.messageCommands = new Collection();
 client.buttonCommands = new Collection();
