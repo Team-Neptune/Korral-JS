@@ -77,3 +77,11 @@ interface PublicThread {
 interface PrivateThread {
 	[threadId:string]:PrivateThreadSettings
 }
+
+interface ActiveTickets {
+	[userId:string]:{
+		threadChannelId:string,
+		userId:string,
+		active:boolean
+	}
+}

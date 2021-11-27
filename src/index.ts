@@ -12,12 +12,6 @@ client.commands = new Collection();
 client.messageCommands = new Collection();
 client.buttonCommands = new Collection();
 
-interface ActiveTickets {
-	[userId:string]:{
-		threadChannelId:string,
-		userId:string,
-		active:boolean
-	}
 }
 let hasActiveTickets:ActiveTickets = {};
 
