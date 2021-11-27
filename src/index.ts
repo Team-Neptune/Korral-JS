@@ -12,23 +12,40 @@ client.commands = new Collection();
 client.messageCommands = new Collection();
 client.buttonCommands = new Collection();
 
-let hasActiveTickets = {};
+interface ActiveTickets {
+	[userId:string]:{
+		threadChannelId:string,
+		userId:string,
+		active:boolean
+	}
+}
+let hasActiveTickets:ActiveTickets = {};
 
 client.createSupportThread = async (shortDesc:string, userId:string, privateTicket:boolean) => {
-	hasActiveTickets[userId] = true;
 	const channel = client.channels.cache.get(config.supportChannelId) as TextChannel;
 	const createdChannel = await channel.threads.create({
 		name:`${privateTicket?"🔒":"🔓"} - ${shortDesc}`,
 		autoArchiveDuration:1440,
 		type:"GUILD_PUBLIC_THREAD"
 	})
+	hasActiveTickets[userId] = {
+		active:true,
+		threadChannelId:createdChannel.id,
+		userId
+	};
 	return createdChannel;
 }
 client.closeSupportThread = async (channelId:string, userId:string) => {
-    hasActiveTickets[userId] = false;
 	var channel = (client.channels.cache.get(channelId) as ThreadChannel)
-	await channel.setArchived(true, "Ticket has ended")
-	await channel.setLocked(true, "Ticket has ended")
+	await channel.setLocked(true, "Ticket has been closed")
+	await channel.setArchived(true, "Ticket has been closed")
+	await (client.channels.cache.get(config.supportChannelId) as TextChannel)
+	.messages.cache.find(message => message.thread?.id == hasActiveTickets[userId].threadChannelId)?.delete()
+	hasActiveTickets[userId] = {
+		active:false,
+		threadChannelId:channelId,
+		userId
+	};
 	return channel
 }
 
