@@ -5,7 +5,7 @@ class ButtonCommand {
     customId:string
     checkType:CustomIdCheckType
     constructor(options:ButtonCommand){
-        this.customId = options.checkType;
+        this.customId = options.customId;
         this.checkType = options.checkType;
         this.execute = options.execute;
     };
