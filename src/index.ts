@@ -142,10 +142,7 @@ client.on("interactionCreate", interaction => {
 	}
 
 	if(interaction.isButton()){
-		const command = 
-			client.buttonCommands.find(bc => bc.checkType == "EQUALS" && interaction.customId == bc.customId) 
-			|| client.buttonCommands.find(bc => bc.checkType == "STARTS_WITH" && interaction.customId.startsWith(bc.customId));
-
+		const command = client.buttonCommands.find(bc => bc.checkType == "STARTS_WITH" && interaction.customId.startsWith(bc.customId)) || client.buttonCommands.find(bc => bc.checkType == "EQUALS" && interaction.customId == bc.customId);
 		if (command) {
 		
 			try {
