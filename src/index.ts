@@ -27,6 +27,7 @@ client.createSupportThread = async (shortDesc:string, userId:string, privateTick
 client.closeSupportThread = async (channelId:string, userId:string) => {
     hasActiveTickets[userId] = false;
 	var channel = (client.channels.cache.get(channelId) as ThreadChannel)
+	await channel.setArchived(true, "Ticket has ended")
 	await channel.setLocked(true, "Ticket has ended")
 	return channel
 }
