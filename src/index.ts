@@ -5,6 +5,7 @@ import {config} from '../config'
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'fs';
 import { PrivateThread, PrivateThreadSettings, PublicThread } from '../typings';
 import ButtonCommand from './classes/ButtonCommand';
+import DeepSea from './deepsea'
 
 const client = new Client({intents:["GUILDS", "GUILD_MEMBERS", "GUILD_MESSAGES"], allowedMentions:{"parse":[]}});
 client.commands = new Collection();
@@ -328,5 +329,17 @@ client.on('messageUpdate', (oldMessage, newMessage) => {
 		(newMessage.guild.channels.cache.get(config.modLog) as TextChannel).send(`:pencil: **Message Edit**:\nfrom ${newMessage.author.tag} (${newMessage.author.id}) | in <#${newMessage.channel.id}>:\n\`${oldMessage.content}\`\n → \n\`${newMessage.content}\``)
 })
 
+// Update the cached DeepSea release data
+async function setupDeepsea() {
+	var deepsea = new DeepSea()
+	var res = await deepsea.update()
+	console.log(`Cached DeepSea has been updated`)
+}
+
+// Update cached data every 60 minutes (1 Hour)
+setInterval(() => {
+	setupDeepsea()
+}, 60 * 60 * 1000)
+
 //Login
-client.login(config.token);
+client.login(config.token).then(() => setupDeepsea());
