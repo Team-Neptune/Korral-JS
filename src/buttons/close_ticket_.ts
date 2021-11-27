@@ -7,9 +7,10 @@ export default new ButtonCommand({
     checkType:"STARTS_WITH",
     execute(interaction){
         let ticketUserId = interaction.customId.split("close_ticket_")[1];
+        let supportThread = interaction.client.getSupportThreadData(ticketUserId)
         let currentUserId = interaction.member.user.id;
-        let threadChannelId = interaction.channelId;
-        if(currentUserId != ticketUserId && (interaction.member.roles as string[]).find(roleId => config.staffRoles.includes(roleId) || config.supportRoleId == roleId))
+        let threadChannelId = supportThread.threadChannelId;
+        if(currentUserId != ticketUserId && (interaction.member.roles as string[])?.find(roleId => config.staffRoles.includes(roleId) || config.supportRoleId == roleId))
             return interaction.reply({
                 content:`You can't close a ticket that isn't yours.`,
                 ephemeral:true
@@ -28,7 +29,7 @@ export default new ButtonCommand({
                 ]
             })
             .then(() => {
-                return interaction.client.closeSupportThread(threadChannelId, ticketUserId)
+                return interaction.client.closeSupportThread(ticketUserId)
             })
         })
     }
