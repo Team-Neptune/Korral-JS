@@ -17,6 +17,23 @@ export default new ButtonCommand({
         ephemeral:true
       })
     interaction.deferReply({ephemeral:true}).then(() => {
+      if(interaction.client.getSupportThreadData(threadStarter)?.active || false)
+        return interaction.followUp({
+          content:`You already have a ticket opened. Please close your current ticket to open a new one.`,
+          components:[
+            {
+              type:"ACTION_ROW",
+              components:[
+                {
+                  type:"BUTTON",
+                  label:"Close Current Ticket",
+                  style:"DANGER",
+                  customId:`close_ticket_${threadStarter}`
+                }
+              ]
+            }
+          ]
+        })
       interaction.client.createSupportThread(topic.value.toString(), threadStarter, supportRoleOnly)
       .then(channel => {                
         const questions = [
