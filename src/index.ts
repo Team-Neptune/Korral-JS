@@ -3,7 +3,7 @@ import { TextChannel, Client, Collection, MessageEmbed, MessageButton, ThreadCha
 import Command from './classes/Command';
 import {config} from '../config'
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'fs';
-import { PrivateThread, PrivateThreadSettings, PublicThread } from '../typings';
+import { ActiveTickets, PrivateThread, PrivateThreadSettings, PublicThread } from '../typings';
 import ButtonCommand from './classes/ButtonCommand';
 import DeepSea from './deepsea'
 
@@ -12,8 +12,13 @@ client.commands = new Collection();
 client.messageCommands = new Collection();
 client.buttonCommands = new Collection();
 
+let activeTickets:ActiveTickets = {};
+if(existsSync("./activeTickets.json"))
+	activeTickets = JSON.parse(readFileSync("./activeTickets.json").toString());
+function saveActiveTicketsData(){
+	writeFileSync("./activeTickets.json", JSON.stringify(activeTickets))
 }
-let hasActiveTickets:ActiveTickets = {};
+
 
 client.createSupportThread = async (shortDesc:string, userId:string, privateTicket:boolean) => {
 	const channel = client.channels.cache.get(config.supportChannelId) as TextChannel;
@@ -22,11 +27,12 @@ client.createSupportThread = async (shortDesc:string, userId:string, privateTick
 		autoArchiveDuration:1440,
 		type:"GUILD_PUBLIC_THREAD"
 	})
-	hasActiveTickets[userId] = {
+	activeTickets[userId] = {
 		active:true,
 		threadChannelId:createdChannel.id,
 		userId
 	};
+	saveActiveTicketsData();
 	return createdChannel;
 }
 client.closeSupportThread = async (channelId:string, userId:string) => {
@@ -34,12 +40,13 @@ client.closeSupportThread = async (channelId:string, userId:string) => {
 	await channel.setLocked(true, "Ticket has been closed")
 	await channel.setArchived(true, "Ticket has been closed")
 	await (client.channels.cache.get(config.supportChannelId) as TextChannel)
-	.messages.cache.find(message => message.thread?.id == hasActiveTickets[userId].threadChannelId)?.delete()
-	hasActiveTickets[userId] = {
+	.messages.cache.find(message => message.thread?.id == activeTickets[userId].threadChannelId)?.delete()
+	activeTickets[userId] = {
 		active:false,
 		threadChannelId:channelId,
 		userId
 	};
+	saveActiveTicketsData();
 	return channel
 }
 
