@@ -80,18 +80,19 @@ async function loadButtonCommands(){
 	}
 }
 
-let commandFiles = readdirSync(`./src/commands`)
-.filter(file => file.endsWith('.ts'));
-
-for (let commandFileName of commandFiles) {
-    try {
-        import(`./commands/${commandFileName.split(".")[0].toString()}`).then(commandImport => {
-            let command:Command = commandImport.default;
-			client.commands.set(commandFileName.split(".")[0].toString(), command)
-        });
-    } catch (err) {
-        console.error(err)
-    }
+async function loadSlashCommands(){
+	let commandFiles = readdirSync(`./src/commands`)
+	.filter(file => file.endsWith('.ts'));
+	
+	for (var commandFileName of commandFiles) {
+		try {
+			var commandImport = await import(`./commands/${commandFileName.split(".")[0].toString()}`);
+			var command:Command = commandImport.default;
+			await client.commands.set(commandFileName.split(".")[0].toString(), command)
+		} catch (err) {
+			console.error(err)
+		}
+	}
 }
 
 // Required files
