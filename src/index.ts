@@ -65,19 +65,19 @@ supportCommands.forEach(c => client.messageCommands.set(c.name, c))
 memeCommands.forEach(c => client.messageCommands.set(c.name, c))
 customCommands.forEach(c => client.messageCommands.set(c.name, c))
 
-// Load commands/buttons
-let buttonCommandFiles = readdirSync(`./src/buttons`)
-.filter(file => file.endsWith('.ts'));
-
-for (let buttonFileName of buttonCommandFiles) {
-    try {
-        import(`./buttons/${buttonFileName.split(".")[0].toString()}`).then(commandImport => {
-            let command:ButtonCommand = commandImport.default;
-			client.buttonCommands.set(command.customId, command)
-        });
-    } catch (err) {
-        console.error(err)
-    }
+async function loadButtonCommands(){
+	let buttonCommandFiles = readdirSync(`./src/buttons`)
+	.filter(file => file.endsWith('.ts'));
+	
+	for (var buttonFileName of buttonCommandFiles) {
+		try {
+			var commandImport = await import(`./buttons/${buttonFileName.split(".")[0].toString()}`);
+			var command:ButtonCommand = commandImport.default;
+			await client.buttonCommands.set(command.customId, command)
+		} catch (err) {
+			console.error(err)
+		}
+	}
 }
 
 let commandFiles = readdirSync(`./src/commands`)
