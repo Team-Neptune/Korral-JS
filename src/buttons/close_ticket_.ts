@@ -29,7 +29,10 @@ export default new ButtonCommand({
                 ]
             })
             .then(() => {
-                return interaction.client.closeSupportThread(ticketUserId)
+                return interaction.client.closeSupportThread({
+                    userId:ticketUserId,
+                    channelId:threadChannelId
+                })
             })
         })
     }

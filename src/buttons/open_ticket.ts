@@ -34,7 +34,11 @@ export default new ButtonCommand({
             }
           ]
         })
-      interaction.client.createSupportThread(topic.value.toString(), threadStarter, supportRoleOnly)
+      interaction.client.createSupportThread({
+        shortDesc:topic.value.toString(), 
+        userId:threadStarter, 
+        privateTicket: supportRoleOnly
+      })
       .then(channel => {                
         const questions = [
           `- Firmware and CFW / Atmosphere / DeepSea version`,

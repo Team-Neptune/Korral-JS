@@ -19,31 +19,33 @@ function saveActiveTicketsData(){
 	writeFileSync("./activeTickets.json", JSON.stringify(activeTickets))
 }
 
-client.createSupportThread = async (shortDesc:string, userId:string, privateTicket:boolean) => {
+client.createSupportThread = async (options:{shortDesc:string, userId:string, privateTicket:boolean}) => {
 	const channel = client.channels.cache.get(config.supportChannelId) as TextChannel;
 	const createdChannel = await channel.threads.create({
-		name:`${privateTicket?"🔒":"🔓"} - ${shortDesc}`,
+		name:`${options.privateTicket?"🔒":"🔓"} - ${options.shortDesc}`,
 		autoArchiveDuration:1440,
 		type:"GUILD_PUBLIC_THREAD"
 	})
-	activeTickets[userId] = {
+	activeTickets[options.userId] = {
 		active:true,
 		threadChannelId:createdChannel.id,
-		userId
+		userId:options.userId
 	};
 	saveActiveTicketsData();
 	return createdChannel;
 }
-client.closeSupportThread = async (userId:string, channelId?:string) => {
-	var channel = (client.channels.cache.get(channelId || activeTickets[userId]?.threadChannelId) as ThreadChannel)
-	await channel.setLocked(true, "Ticket has been closed")
-	await channel.setArchived(true, "Ticket has been closed")
-	await (client.channels.cache.get(config.supportChannelId) as TextChannel)
-	.messages.cache.find(message => message.thread?.id == activeTickets[userId].threadChannelId)?.delete()
-	activeTickets[userId] = {
+client.closeSupportThread = async (options:{userId:string, channelId?:string, noApi?:boolean}) => {
+	var channel = (client.channels.cache.get(options.channelId || activeTickets[options.userId]?.threadChannelId) as ThreadChannel)
+	if(!options.noApi){
+		await channel.setLocked(true, "Ticket has been closed")
+		await channel.setArchived(true, "Ticket has been closed")
+		let supportChannelMessages = await (client.channels.cache.get(config.supportChannelId) as TextChannel).messages.fetch();
+		supportChannelMessages.find(message => message.thread?.id == activeTickets[options.userId].threadChannelId)?.delete()
+	}
+	activeTickets[options.userId] = {
 		active:false,
-		threadChannelId:channelId || activeTickets[userId]?.threadChannelId,
-		userId
+		threadChannelId:options.channelId || activeTickets[options.userId]?.threadChannelId,
+		userId:options.userId
 	};
 	saveActiveTicketsData();
 	return channel
