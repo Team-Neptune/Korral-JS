@@ -7,13 +7,20 @@ export default new ButtonCommand({
     checkType:"EQUALS",
     execute(interaction){
       let threadStarter = interaction.member.user.id
-      if(interaction.client.getSupportThreadData(threadStarter)?.active || false)
+      let currentThread = interaction.client.getSupportThreadData(threadStarter);
+      if(currentThread?.active || false)
         return interaction.followUp({
-          content:`You already have a ticket opened. Please close your current ticket to open a new one.`,
+          content:`You already have a ticket opened. Please use your current ticket or close your current ticket to open a new one.`,
           components:[
             {
               type:"ACTION_ROW",
               components:[
+                {
+                  type:"BUTTON",
+                  label:"View Current Ticket",
+                  style:"LINK",
+                  url:`https://discord.com/channels/${interaction.guildId}/${currentThread?.threadChannelId}`
+                },
                 {
                   type:"BUTTON",
                   label:"Close Current Ticket",
