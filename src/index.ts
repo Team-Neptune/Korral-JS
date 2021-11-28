@@ -190,12 +190,18 @@ client.on('messageCreate', message => {
 	}
 });
 
-// // Support channel (Remove thread creation messages)
-// client.on("messageCreate", (message) => {
-// 	if(message.channelId == config.supportChannelId && message.type == "THREAD_CREATED" && message.channel.type == "GUILD_TEXT")
-// 		if(message.deletable)
-// 			message.delete()
-// })
+// // Support channel (Remove thread creation messages when thread is manually deleted)
+client.on("threadDelete", async (thread) => {
+	let supportThreadUserId = Object.keys(activeTickets).find(userId => activeTickets[userId].active == true && activeTickets[userId].threadChannelId == thread.id);
+	if(!supportThreadUserId) return;
+	client.closeSupportThread({
+		userId:supportThreadUserId,
+		noApi:true
+	});
+	let supportChannelMessages = await (client.channels.cache.get(config.supportChannelId) as TextChannel).messages.fetch();
+	supportChannelMessages.find(message => message.thread?.id == activeTickets[supportThreadUserId].threadChannelId)?.delete();
+
+})
 
 let privateThreads:PrivateThread = {}
 let publicThreads:PublicThread = {}
