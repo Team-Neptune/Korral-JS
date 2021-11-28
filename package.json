@@ -28,8 +28,5 @@
   "bugs": {
     "url": "https://github.com/hax4dazy/Komet-JS/issues"
   },
-  "homepage": "https://github.com/hax4dazy/Komet-JS#readme",
-  "devDependencies": {
-    "@types/node": "^15.14.9"
-  }
+  "homepage": "https://github.com/hax4dazy/Komet-JS#readme"
 }
