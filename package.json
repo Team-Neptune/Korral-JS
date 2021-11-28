@@ -30,6 +30,6 @@
   },
   "homepage": "https://github.com/hax4dazy/Komet-JS#readme",
   "devDependencies": {
-    "@types/node": "^15.0.3"
+    "@types/node": "^15.14.9"
   }
 }
