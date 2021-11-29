@@ -71,6 +71,7 @@ export default new ButtonCommand({
                     }
                 ]
             }).then(r => {
+                r.pin()
                 interaction.followUp({
                     content:`Ticket is ready in <#${channel.id}>`,
                     ephemeral:true
