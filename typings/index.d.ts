@@ -24,17 +24,28 @@ interface WarnBehavior {
 export interface Config {
   /** (Message Commands: Deprecated) Prefix for using text-based commands */
   prefix: string[],
+  /** Discord bot token */
   token: string,
+  /** Bot errors/startup logs */
   botLog: string,
+  /** Logs of Message Edits/Deletes */
   modLog: string,
+  /** Logs of Member Join/Leave  */
   userLog:string,
+  /** Member Join/Leave enabled? */
   userLogging:boolean,
-  staffRoles:Array<string>,
+  /** Role IDs that can use staff only commands */
+  staffRoles:string[],
   /** The behavior of warnings (first item in array is action for the first warning) */
   warnBehavior:WarnBehavior[],
+  /** Tickets: Channel where to start tickets */
   supportChannelId:string,
+  /** Tickets: Role to be pinged when new ticket is open*/
   supportRoleId:string,
-  bitly_token?:string
+  /** bit.ly token for /lmgtfy command */
+  bitly_token?:string,
+  /** Message to be sent when ticket is closed */
+  ticketCloseMessage?:string
 }
 
 export interface GitHubRelease {
