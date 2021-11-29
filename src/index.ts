@@ -155,7 +155,7 @@ client.on("interactionCreate", interaction => {
 			try {
 				command.execute(interaction);
 			} catch (error) {
-				console.error(error);
+				console.error(command.customId, error);
 				interaction.reply({content:'Uh oh, something went wrong while running that command. Please open an issue on [GitHub](https://github.com/Team-Neptune/Korral-JS) if the issue persists.'});
 			}
 		} else {
