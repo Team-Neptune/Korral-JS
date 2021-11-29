@@ -200,6 +200,10 @@ export const moderationCommands:MessageCommand[] = [
         usage: '<user> <reason>',
         staffOnly: true,
         execute(message, args) {
+            if(!config.warnBehavior || config.warnBehavior.length == 0)
+                return message.reply({
+                    content:`You need at least one *WarnBehavior* set in the config to use this command.`
+                })
             const mentionedUser = message.mentions.members.first()
             if(!mentionedUser)
                 return message.channel.send(`Please mention a member.`)
@@ -230,8 +234,8 @@ export const moderationCommands:MessageCommand[] = [
             warnings[mentionedUser.id].push(reason);
     
             writeFileSync('./warnings.json', JSON.stringify(warnings))
-            const warnAction = config.warnBehavior[warnings[mentionedUser.id].length-1].action
-            const warnMessage = config.warnBehavior[warnings[mentionedUser.id].length-1].message.replace(reasonRegex, reason)
+            const warnAction = config.warnBehavior[warnings[mentionedUser.id]?.length-1]?.action || "NONE"
+            const warnMessage = config.warnBehavior[warnings[mentionedUser.id]?.length-1]?.message.replace(reasonRegex, reason) || config.warnBehavior[0]?.message.replace(reasonRegex, reason)
             switch (warnAction) {
                 case "NONE":
                     mentionedUser.send(warnMessage);
