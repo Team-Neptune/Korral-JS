@@ -1,4 +1,4 @@
-import { GuildMemberRoleManager, TextChannel } from "discord.js";
+import { GuildMemberRoleManager, MessageEmbed, TextChannel } from "discord.js";
 import { config } from "../../config";
 import ButtonCommand from "../classes/ButtonCommand";
 
@@ -21,13 +21,21 @@ export default new ButtonCommand({
             ephemeral:true
         })
         .then(() => {
-            (interaction.client.channels.cache.get(threadChannelId) as TextChannel).send({
-                embeds:[
-                    {
-                        "description":`🔒 Ticket has been closed by <@${currentUserId}>`,
-                        "color":16711680
+            let embeds:MessageEmbed[] = [
+                new MessageEmbed(                {
+                    "description":`🔒 Ticket has been closed by <@${currentUserId}>`,
+                    "color":16711680
+                })
+            ];
+            if(config.ticketCloseMessage)
+                embeds.push(new MessageEmbed({
+                    "description":config.ticketCloseMessage,
+                    "footer":{
+                        text:"The message above is set by the server"
                     }
-                ]
+                }));
+            (interaction.client.channels.cache.get(threadChannelId) as TextChannel).send({
+                embeds
             })
             .then(() => {
                 return interaction.client.closeSupportThread({
