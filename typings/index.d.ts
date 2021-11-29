@@ -6,12 +6,12 @@ export interface MessageCommand {
   name:string,
   description:string,
   usage?:string,
-  aliases?:Array<string>
+  aliases?:string[]
   cooldown?:number,
   staffOnly:boolean,
-  allowedChannels?:Array<string>,
-  disallowedChannels?:Array<string>,
-  execute(message:Message, args:Array<String>)
+  allowedChannels?:string[],
+  disallowedChannels?:string[],
+  execute(message:Message, args:string[])
 }
 
 type WarnAction = "NONE" | "KICK" | "BAN"
@@ -22,7 +22,8 @@ interface WarnBehavior {
 }
 
 export interface Config {
-  prefix: Array<string>,
+  /** (Message Commands: Deprecated) Prefix for using text-based commands */
+  prefix: string[],
   token: string,
   botLog: string,
   modLog: string,
@@ -30,7 +31,7 @@ export interface Config {
   userLogging:boolean,
   staffRoles:Array<string>,
   /** The behavior of warnings (first item in array is action for the first warning) */
-  warnBehavior:Array<WarnBehavior>,
+  warnBehavior:WarnBehavior[],
   supportChannelId:string,
   supportRoleId:string,
   bitly_token?:string
