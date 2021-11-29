@@ -1,16 +1,17 @@
-import { TextChannel } from "discord.js";
+import { GuildMemberRoleManager, TextChannel } from "discord.js";
 import { config } from "../../config";
 import ButtonCommand from "../classes/ButtonCommand";
 
 export default new ButtonCommand({
     customId:"close_ticket",
     checkType:"STARTS_WITH",
-    execute(interaction){
+    async execute(interaction){
         let ticketUserId = interaction.customId.split("close_ticket_")[1];
         let supportThread = interaction.client.getSupportThreadData(ticketUserId)
         let currentUserId = interaction.member.user.id;
         let threadChannelId = supportThread.threadChannelId;
-        if(currentUserId != ticketUserId && (interaction.member.roles as string[])?.find(roleId => config.staffRoles.includes(roleId) || config.supportRoleId == roleId))
+        console.log(interaction.member.roles)
+        if(currentUserId != ticketUserId && !(interaction.member.roles as GuildMemberRoleManager).cache.find(role => config.staffRoles.includes(role.id) || config.supportRoleId == role.id))
             return interaction.reply({
                 content:`You can't close a ticket that isn't yours.`,
                 ephemeral:true
