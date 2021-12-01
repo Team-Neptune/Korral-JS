@@ -45,10 +45,14 @@ export interface Config {
   supportRoleId:string,
   /** bit.ly token for /lmgtfy command */
   bitly_token?:string,
-  /** Message to be sent when ticket is closed */
-  ticketCloseMessage?:string,
   /** Where to send messages quoted using the 'Quote Message' CTX command */
   messageQuoteChannelId?:string,
+  closingTicketsSettings?:{
+    /** Minimum amount of seconds the ticket has to be open before it can be closed */
+    ticketsMinimumAge?:number,
+    /** Message to be sent when ticket is closed */
+    closeMessage?:string
+  }
 }
 
 export interface GitHubRelease {
