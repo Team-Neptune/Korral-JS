@@ -8,10 +8,34 @@ export default new Command({
         let topic = interaction.options.data.find(o => o.name == "topic");
         let supportRoleOnly = interaction.options.data.find(o => o.name == "private")?.value == true  || false;
         let threadStarter = interaction.member.user.id;
+        let currentThread = interaction.client.getSupportThreadData(threadStarter);
         if(topic.value.toString().length > 90 || topic.value.toString().length < 1)
             return interaction.reply({
                 content:`Topic must be 1-90 characters`,
                 ephemeral:true
+            })
+        if(currentThread?.active)
+            return interaction.followUp({
+              content:`You already have a ticket opened. Please use your current ticket or close your current ticket to open a new one.`,
+              components:[
+                {
+                  type:"ACTION_ROW",
+                  components:[
+                    {
+                      type:"BUTTON",
+                      label:"View Current Ticket",
+                      style:"LINK",
+                      url:`https://discord.com/channels/${interaction.guildId}/${currentThread?.threadChannelId}`
+                    },
+                    {
+                      type:"BUTTON",
+                      label:"Close Current Ticket",
+                      style:"DANGER",
+                      customId:`close_ticket_${threadStarter}`
+                    }
+                  ]
+                }
+              ]
             })
         interaction.deferReply({
             "ephemeral":true
