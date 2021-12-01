@@ -15,7 +15,7 @@ export default new Command({
                         type:1,
                         components:[
                             {
-                                "customId":`open_ticket`,
+                                "customId":`open_ticket_prompt`,
                                 "label":"Open Ticket",
                                 "type":2,
                                 "style":2,

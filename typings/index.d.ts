@@ -47,6 +47,13 @@ export interface Config {
   bitly_token?:string,
   /** Where to send messages quoted using the 'Quote Message' CTX command */
   messageQuoteChannelId?:string,
+  /** Prompt displayed before opening a ticket */
+  openingTicketPrompt?:{
+    /** Prompt enabled */
+    enabled:boolean,
+    /** Message to show before opening a ticket */
+    message:string
+  },
   closingTicketsSettings?:{
     /** Minimum amount of seconds the ticket has to be open before it can be closed */
     ticketsMinimumAge?:number,
