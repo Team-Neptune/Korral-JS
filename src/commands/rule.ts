@@ -3,7 +3,7 @@ import Command from "../classes/Command";
 
 export default new Command({
     execute(interaction){
-        const ruleNum = interaction.options.getString("number");
+        const ruleNum = interaction.options.getInteger("number");
         const target = interaction.options.getUser("target", false)?.id || false;
         let rules = JSON.parse(readFileSync("./tn_rules.json").toString());
         if (!rules[`${ruleNum}`])
