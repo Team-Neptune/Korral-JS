@@ -144,13 +144,14 @@ process.on('unhandledRejection', error => {
 //Code for interactions (Slash Commands, Buttons, CTX comamnds)
 client.on("interactionCreate", interaction => {
 	if(!interaction.channel)return;
+	let isStaff = (interaction.member?.roles as GuildMemberRoleManager)?.cache.find(role => config.staffRoles.includes(role.id)) || (interaction.member?.roles as string[]).find(roleId => config.staffRoles.includes(roleId));
 	if(interaction.isCommand()){
 		const command = client.commands.get(interaction.commandName);
 	
 		if (command) {
 		
 			try {
-				if(command.staffOnly && !(interaction.member?.roles as GuildMemberRoleManager).cache.find(role => config.staffRoles.includes(role.id)))
+				if(command.staffOnly && !isStaff)
 					return interaction.reply({
 						content:`This is a staff only command.`,
 						ephemeral:true
@@ -173,7 +174,7 @@ client.on("interactionCreate", interaction => {
 		if (command) {
 		
 			try {
-				if(command.staffOnly && !(interaction.member?.roles as GuildMemberRoleManager).cache.find(role => config.staffRoles.includes(role.id)))
+				if(command.staffOnly && !isStaff)
 					return interaction.reply({
 						content:`This is a staff only command.`,
 						ephemeral:true
@@ -196,7 +197,7 @@ client.on("interactionCreate", interaction => {
 		if (command) {
 		
 			try {
-				if(command.staffOnly && !(interaction.member?.roles as GuildMemberRoleManager).cache.find(role => config.staffRoles.includes(role.id)))
+				if(command.staffOnly && !isStaff)
 					return interaction.reply({
 						content:`This is a staff only command.`,
 						ephemeral:true
