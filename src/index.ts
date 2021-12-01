@@ -1,5 +1,5 @@
 import fetch from 'node-fetch'
-import { TextChannel, Client, Collection, MessageEmbed, MessageButton, ThreadChannel } from 'discord.js'
+import { TextChannel, Client, Collection, MessageEmbed, MessageButton, ThreadChannel, GuildMemberRoleManager } from 'discord.js'
 import Command from './classes/Command';
 import {config} from '../config'
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'fs';
@@ -150,6 +150,11 @@ client.on("interactionCreate", interaction => {
 		if (command) {
 		
 			try {
+				if(command.staffOnly && !(interaction.member?.roles as GuildMemberRoleManager).cache.find(role => config.staffRoles.includes(role.id)))
+					return interaction.reply({
+						content:`This is a staff only command.`,
+						ephemeral:true
+					})
 				command.execute(interaction);
 			} catch (error) {
 				console.error(error);
@@ -168,6 +173,11 @@ client.on("interactionCreate", interaction => {
 		if (command) {
 		
 			try {
+				if(command.staffOnly && !(interaction.member?.roles as GuildMemberRoleManager).cache.find(role => config.staffRoles.includes(role.id)))
+					return interaction.reply({
+						content:`This is a staff only command.`,
+						ephemeral:true
+					})
 				command.execute(interaction);
 			} catch (error) {
 				console.error(command.customId, error);
@@ -186,6 +196,11 @@ client.on("interactionCreate", interaction => {
 		if (command) {
 		
 			try {
+				if(command.staffOnly && !(interaction.member?.roles as GuildMemberRoleManager).cache.find(role => config.staffRoles.includes(role.id)))
+					return interaction.reply({
+						content:`This is a staff only command.`,
+						ephemeral:true
+					})
 				command.execute(interaction);
 			} catch (error) {
 				console.error(command.commandName, error);
