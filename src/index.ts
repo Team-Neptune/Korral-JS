@@ -11,6 +11,7 @@ const client = new Client({intents:["GUILDS", "GUILD_MEMBERS", "GUILD_MESSAGES"]
 client.commands = new Collection();
 client.messageCommands = new Collection();
 client.buttonCommands = new Collection();
+client.ctxCommands = new Collection();
 
 let activeTickets:ActiveTickets = {};
 if(existsSync("./activeTickets.json"))
@@ -62,6 +63,7 @@ import {userCommands} from './msg_commands/user'
 import {supportCommands} from './msg_commands/support'
 import {memeCommands} from './msg_commands/meme'
 import {customCommands} from './msg_commands/custom'
+import ContextMenuCommand from './classes/ContextMenuCommand';
 
 botCommands.forEach(c => client.messageCommands.set(c.name, c))
 moderationCommands.forEach(c => client.messageCommands.set(c.name, c))
@@ -100,6 +102,21 @@ async function loadSlashCommands(){
 	}
 }
 
+async function loadCtxCommands(){
+	let commandFiles = readdirSync(`./src/ctx`)
+	.filter(file => file.endsWith('.ts'));
+	
+	for (var commandFileName of commandFiles) {
+		try {
+			var commandImport = await import(`./ctx/${commandFileName.split(".")[0].toString()}`);
+			var command:ContextMenuCommand = commandImport.default;
+			await client.ctxCommands.set(command.commandName, command)
+		} catch (err) {
+			console.error(err)
+		}
+	}
+}
+
 // Required files
 let requiredFiles = ["warnings.json", "userNotes.json"]
 for (let index = 0; index < requiredFiles.length; index++) {
@@ -127,8 +144,9 @@ process.on('unhandledRejection', error => {
 	(client.channels.cache.get(config.botLog) as TextChannel).send(`**Uncaught Promise Rejection**\n\`\`\`console\n${error}\`\`\``)
 });
 
-//Code for interactions (Slash Commands, Buttons)
+//Code for interactions (Slash Commands, Buttons, CTX comamnds)
 client.on("interactionCreate", interaction => {
+	if(!interaction.channel)return;
 	if(interaction.isCommand()){
 		const command = client.commands.get(interaction.commandName);
 	
@@ -161,6 +179,24 @@ client.on("interactionCreate", interaction => {
 		} else {
 			interaction.reply({
 				content:`That button was not found.`,
+				ephemeral:true
+			})
+		}
+	}
+
+	if(interaction.isContextMenu()){
+		const command = client.ctxCommands.get(interaction.commandName);
+		if (command) {
+		
+			try {
+				command.execute(interaction);
+			} catch (error) {
+				console.error(command.commandName, error);
+				interaction.reply({content:'Uh oh, something went wrong while running that command. Please open an issue on [GitHub](https://github.com/Team-Neptune/Korral-JS) if the issue persists.'});
+			}
+		} else {
+			interaction.reply({
+				content:`That Context Menu command was not found.`,
 				ephemeral:true
 			})
 		}
@@ -374,6 +410,7 @@ setInterval(() => {
 async function startBot(){
 	await loadButtonCommands();
 	await loadSlashCommands();
+	await loadCtxCommands();
 	await setupDeepsea();
 	await client.login(config.token);
 	console.log(`Statup functions have been executed!`)
