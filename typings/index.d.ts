@@ -46,7 +46,9 @@ export interface Config {
   /** bit.ly token for /lmgtfy command */
   bitly_token?:string,
   /** Message to be sent when ticket is closed */
-  ticketCloseMessage?:string
+  ticketCloseMessage?:string,
+  /** Where to send messages quoted using the 'Quote Message' CTX command */
+  messageQuoteChannelId?:string,
 }
 
 export interface GitHubRelease {
