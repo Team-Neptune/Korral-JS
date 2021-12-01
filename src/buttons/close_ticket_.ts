@@ -12,13 +12,14 @@ export default new ButtonCommand({
         let threadChannelId = supportThread.threadChannelId;
         var secondsSinceCreation = (Date.now() - supportThread.createdMs) / 1000;
         var remainingTime = config.closingTicketsSettings?.ticketsMinimumAge - secondsSinceCreation;
+        let isStaff = (interaction.member.roles as GuildMemberRoleManager).cache.find(role => config.staffRoles.includes(role.id) || config.supportRoleId == role.id);
         console.log(interaction.member.roles)
-        if(currentUserId != ticketUserId && !(interaction.member.roles as GuildMemberRoleManager).cache.find(role => config.staffRoles.includes(role.id) || config.supportRoleId == role.id))
+        if(currentUserId != ticketUserId && !isStaff)
             return interaction.reply({
                 content:`You can't close a ticket that isn't yours.`,
                 ephemeral:true
             })
-        if(config.closingTicketsSettings?.ticketsMinimumAge > secondsSinceCreation && !(interaction.member.roles as GuildMemberRoleManager).cache.find(role => config.staffRoles.includes(role.id) || config.supportRoleId == role.id))
+        if(config.closingTicketsSettings?.ticketsMinimumAge > secondsSinceCreation && !isStaff)
             return interaction.reply({
                 content:`Sorry, this ticket has to remain open for **${remainingTime > 60? Math.floor(remainingTime / 60) : Math.floor(remainingTime)}** more ${remainingTime > 60 ? `minute${Math.floor(remainingTime / 60) == 1 ? `` : `s`}` : `second${Math.floor(remainingTime) <= 1 ? `` : `s`}`} before it can be closed.`,
                 ephemeral:true
@@ -41,14 +42,16 @@ export default new ButtonCommand({
                         text:"The message above is set by the server"
                     }
                 }));
-            (interaction.client.channels.cache.get(threadChannelId) as TextChannel).send({
+
+            let threadChannel = interaction.client.channels.cache.get(threadChannelId) as TextChannel;
+            threadChannel?.send({
                 embeds
             })
-            .then(() => {
-                return interaction.client.closeSupportThread({
-                    userId:ticketUserId,
-                    channelId:threadChannelId
-                })
+            return interaction.client.closeSupportThread({
+                userId:ticketUserId,
+                channelId:threadChannelId,
+                noApi:threadChannel?false:true
+
             })
         })
     }
