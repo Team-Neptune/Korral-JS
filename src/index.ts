@@ -30,7 +30,8 @@ client.createSupportThread = async (options:{shortDesc:string, userId:string, pr
 	activeTickets[options.userId] = {
 		active:true,
 		threadChannelId:createdChannel.id,
-		userId:options.userId
+		userId:options.userId,
+		createdMs:Date.now()
 	};
 	saveActiveTicketsData();
 	return createdChannel;
@@ -43,11 +44,7 @@ client.closeSupportThread = async (options:{userId:string, channelId?:string, no
 		let supportChannelMessages = await (client.channels.cache.get(config.supportChannelId) as TextChannel).messages.fetch();
 		supportChannelMessages.find(message => message.thread?.id == activeTickets[options.userId].threadChannelId)?.delete()
 	}
-	activeTickets[options.userId] = {
-		active:false,
-		threadChannelId:options.channelId || activeTickets[options.userId]?.threadChannelId,
-		userId:options.userId
-	};
+	activeTickets[options.userId].active = false;
 	saveActiveTicketsData();
 	return channel
 }

@@ -104,7 +104,8 @@ interface PrivateThread {
 interface ActiveTicketsData {
   threadChannelId:string,
   userId:string,
-  active:boolean
+  active:boolean,
+  createdMs:number
 }
 
 interface ActiveTickets {
