@@ -34,10 +34,8 @@ export default new ButtonCommand({
                     "color":16711680
                 })
             ];
-            if(config.ticketCloseMessage)
             if(config.closingTicketsSettings?.closeMessage)
                 embeds.push(new MessageEmbed({
-                    "description":config.ticketCloseMessage,
                     "description":config.closingTicketsSettings.closeMessage,
                     "footer":{
                         text:"The message above is set by the server"
