@@ -144,7 +144,9 @@ process.on('unhandledRejection', error => {
 //Code for interactions (Slash Commands, Buttons, CTX comamnds)
 client.on("interactionCreate", interaction => {
 	if(!interaction.channel)return;
-	let isStaff = (interaction.member?.roles as GuildMemberRoleManager)?.cache.find(role => config.staffRoles.includes(role.id)) || (interaction.member?.roles as string[]).find(roleId => config.staffRoles.includes(roleId));
+	let isStaff = 
+	(interaction.member?.roles as GuildMemberRoleManager)?.cache.find(role => config.staffRoles.includes(role.id)) 
+	|| (interaction.member?.roles as string[])?.find(roleId => config.staffRoles.includes(roleId));
 	if(interaction.isCommand()){
 		const command = client.commands.get(interaction.commandName);
 	
