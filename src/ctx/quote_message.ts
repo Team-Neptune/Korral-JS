@@ -26,8 +26,12 @@ export default new ContextMenuCommand({
                     embeds:[
                         ...quotedMessage.embeds,
                         {
-                            description:`This is a quoted message by <@${quotedMessage.author.id}> (${quotedMessage.author.id}) in <#${interaction.channelId}> (${interaction.channelId})`,
-                            color:"GREY"
+                            description:`This is a quoted message by <@${quotedMessage.author.id}> (${quotedMessage.author.id}) in <#${interaction.channelId}> (${interaction.channelId})\n[Jump to message](https://discord.com/channels/${interaction.guildId}/${interaction.channelId}/${quotedMessage.id})`,
+                            color:"GREY",
+                            footer:{
+                                iconURL:`https://cdn.discordapp.com/avatars/${quotedMessage.author.id}/${quotedMessage.author.avatar}`,
+                                text:`${quotedMessage.author.username}#${quotedMessage.author.discriminator}`
+                            }
                         }
                     ],
                     allowedMentions:{
