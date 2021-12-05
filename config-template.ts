@@ -8,5 +8,7 @@ export const config:Config = {
 	"userLog":"",
 	"userLogging":true,
 	"staffRoles":["", ""],
-	"warnBehavior":[]
+	"warnBehavior":[],
+	"supportChannelId":"",
+	"supportRoleId":""
 }
