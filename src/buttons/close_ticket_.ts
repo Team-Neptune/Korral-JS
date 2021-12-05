@@ -1,4 +1,4 @@
-import { GuildMemberRoleManager, MessageEmbed, TextChannel } from "discord.js";
+import { GuildMemberRoleManager, MessageEmbed, ThreadChannel } from "discord.js";
 import { config } from "../../config";
 import ButtonCommand from "../classes/ButtonCommand";
 
@@ -43,7 +43,7 @@ export default new ButtonCommand({
                     }
                 }));
 
-            let threadChannel = interaction.client.channels.cache.get(threadChannelId) as TextChannel;
+            let threadChannel = interaction.client.channels.cache.get(threadChannelId) as ThreadChannel;
             threadChannel?.send({
                 embeds
             })
@@ -52,7 +52,7 @@ export default new ButtonCommand({
                 channelId:threadChannelId,
                 noApi:threadChannel?false:true
 
-            })
+            }).catch(console.error)
         })
     }
 })
