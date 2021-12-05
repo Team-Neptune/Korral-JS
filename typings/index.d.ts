@@ -31,6 +31,8 @@ export interface Config {
   botLog: string,
   /** Logs of Message Edits/Deletes */
   modLog: string,
+  /** List of channel IDs to not record message logs */
+  modLogBlacklisted?: string[]
   /** Logs of Member Join/Leave  */
   userLog:string,
   /** Member Join/Leave enabled? */
