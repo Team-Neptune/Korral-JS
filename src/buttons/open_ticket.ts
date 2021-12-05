@@ -55,30 +55,40 @@ export default new ButtonCommand({
           `- Are you coming for support with SDSetup or DeepSea?`
         ];
         (interaction.client.channels.cache.get(channel.id) as ThreadChannel).send({
-          "content":`${supportRoleOnly?"\n:lock: *This is a private ticket, so only staff may reply.*":"\n:unlock: *This is a public ticket, everyone may view and reply to it..*"}\n\nHey <@${threadStarter}>, to make it easier for us and others help you with your issue, please tell us a few things about your setup, like:\n\n${questions.join("\n")}`
+          "content":`${supportRoleOnly?"\n:lock: *This is a private ticket, so only staff may reply.*":"\n:unlock: *This is a public ticket, everyone may view and reply to it..*"}\n\nHey <@${threadStarter}>, to make it easier for us and others help you with your issue, please tell us a few things about your setup, like:\n\n${questions.join("\n")}`,
+          "components":[
+            {
+              "type":1,
+              "components":[
+                {
+                  "type":2,
+                  "style":2,
+                  "customId":`close_ticket_${threadStarter}`,
+                  "label":"Close Ticket",
+                  "emoji":"🔒"
+                },
+                {
+                  "type":"BUTTON",
+                  "style":"SECONDARY",
+                  "customId":`switch_ticket_type_${threadStarter}`,
+                  "label":"Switch to Private Ticket"
+                }
+              ]
+            }
+          ]
         }).then(r => {
           r.channel.awaitMessages({
             max:1,
             filter(message){
               return message.author.id == threadStarter;
             }
-          }).then(() => {
+          }).then(async () => {
+            await interaction.client.updateSupportThread({
+              threadId:channel.id,
+              userId:threadStarter
+            });
             (interaction.client.channels.cache.get(channel.id) as ThreadChannel).send({
-              "content":`Thanks! <@&${config.supportRoleId}> will be here to support you shortly.\n\n*(Disclaimer: You may not receive an answer instantly. Many of us have lives outside of Discord and will respond whenever we're able to, whenever that is.)*`,
-              "components":[
-                {
-                  "type":1,
-                  "components":[
-                    {
-                      "type":2,
-                      "style":2,
-                      "customId":`close_ticket_${threadStarter}`,
-                      "label":"Close Ticket",
-                      "emoji":"🔒"
-                    }
-                  ]
-                }
-              ]
+              "content":`Thanks! <@&${config.supportRoleId}> will be here to support you shortly.\n\n*(Disclaimer: You may not receive an answer instantly. Many of us have lives outside of Discord and will respond whenever we're able to, whenever that is.)*`
             })
           })
           interaction.followUp({
