@@ -3,7 +3,7 @@ import { TextChannel, Client, Collection, MessageEmbed, MessageButton, ThreadCha
 import Command from './classes/Command';
 import {config} from '../config'
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'fs';
-import { ActiveTickets, PrivateThread, PrivateThreadSettings, PublicThread } from '../typings';
+import { ActiveTickets, PrivateThread, PrivateThreadSettings, PublicThread, TicketType } from '../typings';
 import ButtonCommand from './classes/ButtonCommand';
 import DeepSea from './deepsea'
 
@@ -20,6 +20,17 @@ function saveActiveTicketsData(){
 	writeFileSync("./activeTickets.json", JSON.stringify(activeTickets))
 }
 
+let privateThreads:PrivateThread = {}
+let publicThreads:PublicThread = {}
+if(existsSync("./privateThreads.json"))
+	privateThreads = JSON.parse(readFileSync("./privateThreads.json").toString());
+if(existsSync("./publicThreads.json"))
+	publicThreads = JSON.parse(readFileSync("./publicThreads.json").toString());
+function saveThreadsData(){
+	writeFileSync("./publicThreads.json", JSON.stringify(publicThreads))
+	writeFileSync("./privateThreads.json", JSON.stringify(privateThreads))
+}
+
 client.createSupportThread = async (options:{shortDesc:string, userId:string, privateTicket:boolean}) => {
 	const channel = client.channels.cache.get(config.supportChannelId) as TextChannel;
 	const createdChannel = await channel.threads.create({
@@ -31,11 +42,90 @@ client.createSupportThread = async (options:{shortDesc:string, userId:string, pr
 		active:true,
 		threadChannelId:createdChannel.id,
 		userId:options.userId,
-		createdMs:Date.now()
+		createdMs:Date.now(),
+		type:options.privateTicket?"PRIVATE":"PUBLIC"
 	};
+	if(options.privateTicket){
+		let authorizedUsers = [options.userId];
+		let authorizedRoles = config.staffRoles;
+		authorizedUsers.push(client.user.id);
+		authorizedRoles.push(config.supportRoleId)
+
+		privateThreads[createdChannel.id] = {
+			authorizedRoles,
+			authorizedUsers,
+			ownerId:authorizedUsers[0]
+		}
+		saveThreadsData();
+	} else {
+		let authorizedUsers = [options.userId];
+		let authorizedRoles = config.staffRoles;
+		authorizedUsers.push(client.user.id);
+		authorizedRoles.push(config.supportRoleId)
+
+		publicThreads[createdChannel.id] = {
+			ownerId:authorizedUsers[0]
+		}
+		saveThreadsData();
+	}
 	saveActiveTicketsData();
 	return createdChannel;
 }
+
+client.updateSupportThread = async (options:{userId:string, threadId:string, newType?:TicketType, newName?:string}) => {
+	if(!publicThreads[options.threadId] && !privateThreads[options.threadId])
+		return false;
+	let threadChannel = client.channels.cache.get(options.threadId) as ThreadChannel;
+	let newThreadChannelName:string = threadChannel.name;
+
+	if(options.newType){
+		activeTickets[options.userId].type = options.newType;
+		saveActiveTicketsData()
+	}
+
+	if(options.newType == "PUBLIC"){
+		publicThreads[options.threadId] = publicThreads[options.threadId] || privateThreads[options.threadId];
+
+		privateThreads[options.threadId] = undefined;
+
+		newThreadChannelName = newThreadChannelName.replace("🔒", "🔓")
+		// await threadChannel.setName(threadChannel.name
+		// 	.replace("🔓", "🔒")
+		// 	.replace(threadChannel.name.split(" - ")[1], options.newName || threadChannel.name.split(" - ")[1])
+		// )
+		saveThreadsData()
+	}
+
+	if(options.newType == "PRIVATE"){
+		let authorizedUsers = [options.userId, client.user.id];
+		let authorizedRoles = [...config.staffRoles, config.supportRoleId];
+		
+		privateThreads[options.threadId] = privateThreads[options.threadId] || {
+			authorizedRoles,
+			authorizedUsers,
+			ownerId:options.userId
+		};
+		publicThreads[options.threadId] = undefined;
+
+		newThreadChannelName = newThreadChannelName.replace("🔓", "🔒")
+		saveThreadsData()
+	}
+
+	if(options.newName){
+		newThreadChannelName = newThreadChannelName.replace(threadChannel.name.split(" - ")[1], options.newName)
+	}
+
+	if((options.newType != activeTickets[options.userId].type) && newThreadChannelName != threadChannel.name){
+		try {
+			threadChannel.setName(newThreadChannelName).then(console.log).catch(console.error)
+		} catch(err){
+			console.error(err)
+		}
+	}
+
+	return true;
+};
+
 client.closeSupportThread = async (options:{userId:string, channelId?:string, noApi?:boolean}) => {
 	var channel = (client.channels.cache.get(options.channelId || activeTickets[options.userId]?.threadChannelId) as ThreadChannel)
 	if(!options.noApi){
@@ -256,17 +346,6 @@ client.on("threadDelete", async (thread) => {
 
 })
 
-let privateThreads:PrivateThread = {}
-let publicThreads:PublicThread = {}
-if(existsSync("./privateThreads.json"))
-	privateThreads = JSON.parse(readFileSync("./privateThreads.json").toString());
-if(existsSync("./publicThreads.json"))
-	publicThreads = JSON.parse(readFileSync("./publicThreads.json").toString());
-function saveThreadsData(){
-	writeFileSync("./publicThreads.json", JSON.stringify(publicThreads))
-	writeFileSync("./privateThreads.json", JSON.stringify(privateThreads))
-}
-
 function keepThreadsOpen(){
 	(client.channels.cache.get(config.supportChannelId) as TextChannel).threads.fetchActive(true).then(threads => {
 		threads.threads.each(channel => {
@@ -304,34 +383,6 @@ setInterval(keepThreadsOpen, 22 * 60 * 60 * 1000)
 client.on("messageCreate", (message) => {
 	if(message.channel.isThread() == false) return;
 
-	// Setting thread/ticket to "public"
-	if(message.channel.type == "GUILD_PUBLIC_THREAD" && message.channel.parentId == config.supportChannelId && message.author.id == client.user.id && message.type == "DEFAULT" && message.content.includes("public ticket")){
-		let authorizedUsers = message.mentions.users.map(u => u.id);
-		let authorizedRoles = config.staffRoles;
-		authorizedUsers.push(client.user.id);
-		authorizedRoles.push(config.supportRoleId)
-
-		publicThreads[message.channel.id] = {
-			ownerId:authorizedUsers[0]
-		}
-		return saveThreadsData();
-	}
-
-	// Setting thread/ticket to "private"
-	if(message.channel.type == "GUILD_PUBLIC_THREAD" && message.channel.parentId == config.supportChannelId && message.author.id == client.user.id && message.type == "DEFAULT" && message.content.includes("private ticket")){
-		let authorizedUsers = message.mentions.users.map(u => u.id);
-		let authorizedRoles = config.staffRoles;
-		authorizedUsers.push(client.user.id);
-		authorizedRoles.push(config.supportRoleId)
-
-		privateThreads[message.channel.id] = {
-			authorizedRoles,
-			authorizedUsers,
-			ownerId:authorizedUsers[0]
-		}
-		return saveThreadsData();
-	}
-
 	//Not found in private threads
 	if(!privateThreads[message.channel.id]) return;
 
@@ -368,7 +419,10 @@ client.on("messageCreate", (message) => {
 			authorizedUsers:privateThreads[message.channel.id].authorizedUsers,
 			ownerId:privateThreads[message.channel.id].ownerId
 		}
-		if(thisTicketAllowed.authorizedUsers.includes(message.author.id) || message.member.roles.cache.find(r => thisTicketAllowed.authorizedRoles.includes(r.id)) && message.mentions.users.size > 0){
+
+		console.log(message.content.includes("--"), (thisTicketAllowed.authorizedUsers.includes(message.author.id) || message.member.roles.cache.find(r => thisTicketAllowed.authorizedRoles.includes(r.id))), message.mentions.users.size > 0)
+
+		if(!message.content.includes("--") && (thisTicketAllowed.authorizedUsers.includes(message.author.id) || message.member.roles.cache.find(r => thisTicketAllowed.authorizedRoles.includes(r.id))) && message.mentions.users.size > 0){
 			message.mentions.users = message.mentions.users.filter(u => !privateThreads[message.channel.id].authorizedUsers.includes(u.id));
 			if(message.mentions.users.size == 0) return;
 			message.mentions.users.each(u => {
@@ -376,11 +430,29 @@ client.on("messageCreate", (message) => {
 					privateThreads[message.channel.id].authorizedUsers.push(u.id);
 				}
 			})
+			saveThreadsData()
 			message.reply({
 				embeds:[
 					{
 						description:`✅ Added ${message.mentions.users.map(u => `<@${u.id}>`).join(", ")} to this ticket.`,
 						color:"GREEN"
+					}
+				]
+			})
+		}
+
+		if(message.content.includes("--") && (thisTicketAllowed.authorizedUsers.includes(message.author.id) || message.member.roles.cache.find(r => thisTicketAllowed.authorizedRoles.includes(r.id))) && message.mentions.users.size > 0){
+			console.log(message.mentions.users, "BEFORE")
+			message.mentions.users = message.mentions.users.filter(u => privateThreads[message.channel.id].authorizedUsers.includes(u.id));
+			console.log(message.mentions.users, "AFTER")
+			if(message.mentions.users.size == 0) return;
+			privateThreads[message.channel.id].authorizedUsers = privateThreads[message.channel.id].authorizedUsers.filter(authorizedUserId => !message.mentions.users.has(authorizedUserId));
+			saveThreadsData()
+			message.reply({
+				embeds:[
+					{
+						description:`❌ Removed ${message.mentions.users.map(u => `<@${u.id}>`).join(", ")} from this ticket.`,
+						color:"RED"
 					}
 				]
 			})
