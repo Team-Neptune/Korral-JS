@@ -86,6 +86,7 @@ declare module 'discord.js' {
         privateTicket:boolean
       }):Promise<ThreadChannel>
       getSupportThreadData(userId:string):ActiveTicketsData
+      updateSupportThread(options:{userId:string, threadId:string, newType?:TicketType, newName?:string}):Promise<boolean>
       closeSupportThread(options:{
         userId:string,
         channelId?:string,
@@ -114,11 +115,14 @@ interface PrivateThread {
 	[threadId:string]:PrivateThreadSettings
 }
 
+type TicketType = "PUBLIC" | "PRIVATE"
+
 interface ActiveTicketsData {
   threadChannelId:string,
   userId:string,
   active:boolean,
-  createdMs:number
+  createdMs:number,
+  type:TicketType
 }
 
 interface ActiveTickets {
