@@ -1,7 +1,7 @@
 import {MessageEmbed} from 'discord.js'
-import {Command} from '../../typings'
 import {writeFileSync, existsSync} from 'fs'
-export const userCommands:Array<Command> = [
+import { MessageCommand } from '../../typings';
+export const userCommands:MessageCommand[] = [
     {
         "name":"avatar",
         "description":"Grabs the current users avatar",

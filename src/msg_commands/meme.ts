@@ -1,7 +1,7 @@
 import {MessageEmbed} from 'discord.js'
-import {Command} from '../../typings'
+import {MessageCommand} from '../../typings'
 import {writeFileSync, existsSync} from 'fs'
-export const memeCommands:Array<Command> = [
+export const memeCommands:MessageCommand[] = [
     {
         name: 'eggsfat',
         description: 'Yes',

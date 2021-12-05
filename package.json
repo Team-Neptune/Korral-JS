@@ -1,11 +1,11 @@
 {
   "name": "komet-js",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "Its Komet but for JS!",
   "main": "index.js",
   "dependencies": {
     "bent": "^7.3.0",
-    "discord.js": "^13.1.0",
+    "discord.js": "^13.3.1",
     "JSON": "^1.0.0",
     "moment": "^2.24.0",
     "node-fetch": "^2.6.1",
@@ -28,8 +28,5 @@
   "bugs": {
     "url": "https://github.com/hax4dazy/Komet-JS/issues"
   },
-  "homepage": "https://github.com/hax4dazy/Komet-JS#readme",
-  "devDependencies": {
-    "@types/node": "^15.0.3"
-  }
+  "homepage": "https://github.com/hax4dazy/Komet-JS#readme"
 }

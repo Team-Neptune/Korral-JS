@@ -1,45 +1,227 @@
-console.log('Loading, please wait a moment.')
-import * as fs from 'fs'
 import fetch from 'node-fetch'
-import { TextChannel, Client, Collection, MessageEmbed, MessageButton } from 'discord.js'
-import { Command } from '../typings';
+import { TextChannel, Client, Collection, MessageEmbed, MessageButton, ThreadChannel, GuildMemberRoleManager } from 'discord.js'
+import Command from './classes/Command';
 import {config} from '../config'
+import { existsSync, readdirSync, readFileSync, writeFileSync } from 'fs';
+import { ActiveTickets, PrivateThread, PrivateThreadSettings, PublicThread, TicketType } from '../typings';
+import ButtonCommand from './classes/ButtonCommand';
+import DeepSea from './deepsea'
 
-const client = new Client({intents:["GUILDS", "GUILD_MEMBERS", "GUILD_MESSAGES"], allowedMentions:{"parse":[]}});
-client.commands = new Collection()
+const client = new Client({intents:["GUILDS", "GUILD_MEMBERS", "GUILD_MESSAGES"]});
+client.commands = new Collection();
+client.messageCommands = new Collection();
+client.buttonCommands = new Collection();
+client.ctxCommands = new Collection();
 
-//Commands
-import {botCommands} from './commands/bot'
-import {moderationCommands} from './commands/moderation'
-import {userCommands} from './commands/user'
-import {supportCommands} from './commands/support'
-import {memeCommands} from './commands/meme'
-import {customCommands} from './commands/custom'
+let activeTickets:ActiveTickets = {};
+if(existsSync("./activeTickets.json"))
+	activeTickets = JSON.parse(readFileSync("./activeTickets.json").toString());
+function saveActiveTicketsData(){
+	writeFileSync("./activeTickets.json", JSON.stringify(activeTickets))
+}
 
-botCommands.forEach(c => client.commands.set(c.name, c))
-moderationCommands.forEach(c => client.commands.set(c.name, c))
-userCommands.forEach(c => client.commands.set(c.name, c))
-supportCommands.forEach(c => client.commands.set(c.name, c))
-memeCommands.forEach(c => client.commands.set(c.name, c))
-customCommands.forEach(c => client.commands.set(c.name, c))
+let privateThreads:PrivateThread = {}
+let publicThreads:PublicThread = {}
+if(existsSync("./privateThreads.json"))
+	privateThreads = JSON.parse(readFileSync("./privateThreads.json").toString());
+if(existsSync("./publicThreads.json"))
+	publicThreads = JSON.parse(readFileSync("./publicThreads.json").toString());
+function saveThreadsData(){
+	writeFileSync("./publicThreads.json", JSON.stringify(publicThreads))
+	writeFileSync("./privateThreads.json", JSON.stringify(privateThreads))
+}
 
+client.createSupportThread = async (options:{shortDesc:string, userId:string, privateTicket:boolean}) => {
+	const channel = client.channels.cache.get(config.supportChannelId) as TextChannel;
+	const createdChannel = await channel.threads.create({
+		name:`${options.privateTicket?"🔒":"🔓"} - ${options.shortDesc}`,
+		autoArchiveDuration:1440,
+		type:"GUILD_PUBLIC_THREAD"
+	})
+	activeTickets[options.userId] = {
+		active:true,
+		threadChannelId:createdChannel.id,
+		userId:options.userId,
+		createdMs:Date.now(),
+		type:options.privateTicket?"PRIVATE":"PUBLIC"
+	};
+	if(options.privateTicket){
+		let authorizedUsers = [options.userId];
+		let authorizedRoles = config.staffRoles;
+		authorizedUsers.push(client.user.id);
+		authorizedRoles.push(config.supportRoleId)
 
+		privateThreads[createdChannel.id] = {
+			authorizedRoles,
+			authorizedUsers,
+			ownerId:authorizedUsers[0]
+		}
+		saveThreadsData();
+	} else {
+		let authorizedUsers = [options.userId];
+		let authorizedRoles = config.staffRoles;
+		authorizedUsers.push(client.user.id);
+		authorizedRoles.push(config.supportRoleId)
+
+		publicThreads[createdChannel.id] = {
+			ownerId:authorizedUsers[0]
+		}
+		saveThreadsData();
+	}
+	saveActiveTicketsData();
+	return createdChannel;
+}
+
+client.updateSupportThread = async (options:{userId:string, threadId:string, newType?:TicketType, newName?:string}) => {
+	if(!publicThreads[options.threadId] && !privateThreads[options.threadId])
+		return false;
+	let threadChannel = client.channels.cache.get(options.threadId) as ThreadChannel;
+	let newThreadChannelName:string = threadChannel.name;
+
+	if(options.newType){
+		activeTickets[options.userId].type = options.newType;
+		saveActiveTicketsData()
+	}
+
+	if(options.newType == "PUBLIC"){
+		publicThreads[options.threadId] = publicThreads[options.threadId] || privateThreads[options.threadId];
+
+		privateThreads[options.threadId] = undefined;
+
+		newThreadChannelName = newThreadChannelName.replace("🔒", "🔓")
+		// await threadChannel.setName(threadChannel.name
+		// 	.replace("🔓", "🔒")
+		// 	.replace(threadChannel.name.split(" - ")[1], options.newName || threadChannel.name.split(" - ")[1])
+		// )
+		saveThreadsData()
+	}
+
+	if(options.newType == "PRIVATE"){
+		let authorizedUsers = [options.userId, client.user.id];
+		let authorizedRoles = [...config.staffRoles, config.supportRoleId];
+		
+		privateThreads[options.threadId] = privateThreads[options.threadId] || {
+			authorizedRoles,
+			authorizedUsers,
+			ownerId:options.userId
+		};
+		publicThreads[options.threadId] = undefined;
+
+		newThreadChannelName = newThreadChannelName.replace("🔓", "🔒")
+		saveThreadsData()
+	}
+
+	if(options.newName){
+		newThreadChannelName = newThreadChannelName.replace(threadChannel.name.split(" - ")[1], options.newName)
+	}
+
+	if((options.newType != activeTickets[options.userId].type) && newThreadChannelName != threadChannel.name){
+		try {
+			threadChannel.setName(newThreadChannelName).then(console.log).catch(console.error)
+		} catch(err){
+			console.error(err)
+		}
+	}
+
+	return true;
+};
+
+client.closeSupportThread = async (options:{userId:string, channelId?:string, noApi?:boolean}) => {
+	var channel = (client.channels.cache.get(options.channelId || activeTickets[options.userId]?.threadChannelId) as ThreadChannel)
+	if(!options.noApi){
+		await channel.setLocked(true, "Ticket has been closed")
+		await channel.setArchived(true, "Ticket has been closed")
+		let supportChannelMessages = await (client.channels.cache.get(config.supportChannelId) as TextChannel).messages.fetch();
+		supportChannelMessages.find(message => message.thread?.id == activeTickets[options.userId].threadChannelId)?.delete()
+	}
+	activeTickets[options.userId].active = false;
+	saveActiveTicketsData();
+	return channel
+}
+
+client.getSupportThreadData = (userId:string) => {
+	return activeTickets[userId];
+}
+
+//Message Commands
+import {botCommands} from './msg_commands/bot'
+import {moderationCommands} from './msg_commands/moderation'
+import {userCommands} from './msg_commands/user'
+import {supportCommands} from './msg_commands/support'
+import {memeCommands} from './msg_commands/meme'
+import {customCommands} from './msg_commands/custom'
+import ContextMenuCommand from './classes/ContextMenuCommand';
+
+botCommands.forEach(c => client.messageCommands.set(c.name, c))
+moderationCommands.forEach(c => client.messageCommands.set(c.name, c))
+userCommands.forEach(c => client.messageCommands.set(c.name, c))
+supportCommands.forEach(c => client.messageCommands.set(c.name, c))
+memeCommands.forEach(c => client.messageCommands.set(c.name, c))
+customCommands.forEach(c => client.messageCommands.set(c.name, c))
+
+async function loadButtonCommands(){
+	let buttonCommandFiles = readdirSync(`./src/buttons`)
+	.filter(file => file.endsWith('.ts'));
+	
+	for (var buttonFileName of buttonCommandFiles) {
+		try {
+			var commandImport = await import(`./buttons/${buttonFileName.split(".")[0].toString()}`);
+			var command:ButtonCommand = commandImport.default;
+			await client.buttonCommands.set(command.customId, command)
+		} catch (err) {
+			console.error(err)
+		}
+	}
+}
+
+async function loadSlashCommands(){
+	let commandFiles = readdirSync(`./src/commands`)
+	.filter(file => file.endsWith('.ts'));
+	
+	for (var commandFileName of commandFiles) {
+		try {
+			var commandImport = await import(`./commands/${commandFileName.split(".")[0].toString()}`);
+			var command:Command = commandImport.default;
+			await client.commands.set(commandFileName.split(".")[0].toString(), command)
+		} catch (err) {
+			console.error(err)
+		}
+	}
+}
+
+async function loadCtxCommands(){
+	let commandFiles = readdirSync(`./src/ctx`)
+	.filter(file => file.endsWith('.ts'));
+	
+	for (var commandFileName of commandFiles) {
+		try {
+			var commandImport = await import(`./ctx/${commandFileName.split(".")[0].toString()}`);
+			var command:ContextMenuCommand = commandImport.default;
+			await client.ctxCommands.set(command.commandName, command)
+		} catch (err) {
+			console.error(err)
+		}
+	}
+}
+
+// Required files
 let requiredFiles = ["warnings.json", "userNotes.json"]
 for (let index = 0; index < requiredFiles.length; index++) {
 	const element = requiredFiles[index];
-	if(!fs.existsSync(`./${element}`)){
-		fs.writeFileSync(`./${element}`, JSON.stringify({}))
+	if(!existsSync(`./${element}`)){
+		writeFileSync(`./${element}`, JSON.stringify({}))
 	}
 }
 
 client.once('ready', () => {
 	console.log(`Ready as ${client.user.tag} (${client.user.id}) | ${client.guilds.cache.size} ${client.guilds.cache.size==1?"guild":"guilds"}`);
+	console.log(`Supports: Interactions & Message Commands (Deprecated)`)
 	const StartupEmbed = new MessageEmbed()
 		.setColor('#00FF00')
 		.setDescription(`**${client.user.tag}** is ready. Currently in ${client.guilds.cache.size} ${client.guilds.cache.size==1?"guild":"guilds"}.`)
 		.setTimestamp()
-	client.channels.fetch(config.botLog).then(c => {
-		(c as TextChannel).send({embeds:[StartupEmbed]});
+	client.channels.fetch(config.botLog).then((channel:TextChannel) => {
+		channel.send({embeds:[StartupEmbed]});
 	})
 	.catch(console.error)
 })
@@ -49,13 +231,92 @@ process.on('unhandledRejection', error => {
 	(client.channels.cache.get(config.botLog) as TextChannel).send(`**Uncaught Promise Rejection**\n\`\`\`console\n${error}\`\`\``)
 });
 
-//this is the code for the /commands folder
-client.on("messageCreate", message => {
+//Code for interactions (Slash Commands, Buttons, CTX comamnds)
+client.on("interactionCreate", interaction => {
+	if(!interaction.channel){
+		console.log(`MISSING INTERACTION.CHANNEL`, `Channel ID: ${interaction.channelId}`, `ID: ${interaction.id}`, `Guild ID: ${interaction.guildId}`, `User ID: ${interaction.member?.user.id}`);
+		return;
+	};
+	console.log(interaction.member.user.id, interaction.member.roles)
+	let isStaff = (interaction.member?.roles as GuildMemberRoleManager)?.cache?.find(role => config.staffRoles.includes(role.id));
+	if(interaction.isCommand()){
+		const command = client.commands.get(interaction.commandName);
+	
+		if (command) {
+		
+			try {
+				if(command.staffOnly && !isStaff)
+					return interaction.reply({
+						content:`This is a staff only command.`,
+						ephemeral:true
+					})
+				command.execute(interaction);
+			} catch (error) {
+				console.error(error);
+				interaction.reply({content:'Uh oh, something went wrong while running that command. Please open an issue on [GitHub](https://github.com/Team-Neptune/Korral-JS) if the issue persists.'});
+			}
+		} else {
+			interaction.reply({
+				content:`That command was not found.`,
+				ephemeral:true
+			})
+		}
+	}
+
+	if(interaction.isButton()){
+		const command = client.buttonCommands.find(bc => bc.checkType == "STARTS_WITH" && interaction.customId.startsWith(bc.customId)) || client.buttonCommands.find(bc => bc.checkType == "EQUALS" && interaction.customId == bc.customId);
+		if (command) {
+		
+			try {
+				if(command.staffOnly && !isStaff)
+					return interaction.reply({
+						content:`This is a staff only command.`,
+						ephemeral:true
+					})
+				command.execute(interaction);
+			} catch (error) {
+				console.error(command.customId, error);
+				interaction.reply({content:'Uh oh, something went wrong while running that command. Please open an issue on [GitHub](https://github.com/Team-Neptune/Korral-JS) if the issue persists.'});
+			}
+		} else {
+			interaction.reply({
+				content:`That button was not found.`,
+				ephemeral:true
+			})
+		}
+	}
+
+	if(interaction.isContextMenu()){
+		const command = client.ctxCommands.get(interaction.commandName);
+		if (command) {
+		
+			try {
+				if(command.staffOnly && !isStaff)
+					return interaction.reply({
+						content:`This is a staff only command.`,
+						ephemeral:true
+					})
+				command.execute(interaction);
+			} catch (error) {
+				console.error(command.commandName, error);
+				interaction.reply({content:'Uh oh, something went wrong while running that command. Please open an issue on [GitHub](https://github.com/Team-Neptune/Korral-JS) if the issue persists.'});
+			}
+		} else {
+			interaction.reply({
+				content:`That Context Menu command was not found.`,
+				ephemeral:true
+			})
+		}
+	}
+});
+
+//Code for the /msg_commands folder (Message Commands - deprecated)
+client.on('messageCreate', message => {
 	if(message.channel.type != "DM" && !message.author.bot && config.prefix.find(p => message.content.startsWith(p))){
 		const usedPrefix = config.prefix.find(p => message.content.startsWith(p))
 		const args = message.content.slice(usedPrefix.length).split(/ +/);
 		const commandName = args.shift().toLowerCase();
-		const command = client.commands.get(commandName) || client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
+		const command = client.messageCommands.get(commandName) || client.messageCommands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
 	
 		if (command) {
 			if ((command.disallowedChannels && command.disallowedChannels.includes(message.channel.id)) || (command.allowedChannels && !command.allowedChannels.includes(message.channel.id)) || command.staffOnly == true && !message.member.roles.cache.some(role => config.staffRoles.includes(role.id))){
@@ -66,46 +327,24 @@ client.on("messageCreate", message => {
 				command.execute(message, args);
 			} catch (error) {
 				console.error(error);
-				message.channel.send({content:'Uh oh, something went wrong while running that command. Contact TechGeekGamer#7205 if the issue persists.'});
+				message.channel.send({content:'Uh oh, something went wrong while running that command. Please open an issue on [GitHub](https://github.com/Team-Neptune/Korral-JS) if the issue persists.'});
 			}
 		}
 	}
 });
 
-// Support channel (Remove thread creation messages)
-client.on("messageCreate", (message) => {
-	if(message.channelId == config.supportChannelId && message.type == "THREAD_CREATED" && message.channel.type == "GUILD_TEXT")
-		if(message.deletable)
-			message.delete()
+// // Support channel (Remove thread creation messages when thread is manually deleted)
+client.on("threadDelete", async (thread) => {
+	let supportThreadUserId = Object.keys(activeTickets).find(userId => activeTickets[userId].active == true && activeTickets[userId].threadChannelId == thread.id);
+	if(!supportThreadUserId) return;
+	client.closeSupportThread({
+		userId:supportThreadUserId,
+		noApi:true
+	});
+	let supportChannelMessages = await (client.channels.cache.get(config.supportChannelId) as TextChannel).messages.fetch();
+	supportChannelMessages.find(message => message.thread?.id == activeTickets[supportThreadUserId].threadChannelId)?.delete();
+
 })
-
-interface ThreadSettings {
-	ownerId:string
-}
-
-interface PrivateThreadSettings extends ThreadSettings {
-	authorizedUsers:string[],
-	authorizedRoles:string[]
-}
-
-interface PublicThread {
-	[threadId:string]:ThreadSettings
-}
-
-interface PrivateThread {
-	[threadId:string]:PrivateThreadSettings
-}
-
-let privateThreads:PrivateThread = {}
-let publicThreads:PublicThread = {}
-if(fs.existsSync("./privateThreads.json"))
-	privateThreads = JSON.parse(fs.readFileSync("./privateThreads.json").toString());
-if(fs.existsSync("./publicThreads.json"))
-	publicThreads = JSON.parse(fs.readFileSync("./publicThreads.json").toString());
-function saveThreadsData(){
-	fs.writeFileSync("./publicThreads.json", JSON.stringify(publicThreads))
-	fs.writeFileSync("./privateThreads.json", JSON.stringify(privateThreads))
-}
 
 function keepThreadsOpen(){
 	(client.channels.cache.get(config.supportChannelId) as TextChannel).threads.fetchActive(true).then(threads => {
@@ -144,34 +383,6 @@ setInterval(keepThreadsOpen, 22 * 60 * 60 * 1000)
 client.on("messageCreate", (message) => {
 	if(message.channel.isThread() == false) return;
 
-	// Setting thread/ticket to "public"
-	if(message.channel.type == "GUILD_PUBLIC_THREAD" && message.channel.parentId == config.supportChannelId && message.author.id == client.user.id && message.type == "DEFAULT" && message.content.includes("public ticket")){
-		let authorizedUsers = message.mentions.users.map(u => u.id);
-		let authorizedRoles = config.staffRoles;
-		authorizedUsers.push(client.user.id);
-		authorizedRoles.push(config.supportRoleId)
-
-		publicThreads[message.channel.id] = {
-			ownerId:authorizedUsers[0]
-		}
-		return saveThreadsData();
-	}
-
-	// Setting thread/ticket to "private"
-	if(message.channel.type == "GUILD_PUBLIC_THREAD" && message.channel.parentId == config.supportChannelId && message.author.id == client.user.id && message.type == "DEFAULT" && message.content.includes("private ticket")){
-		let authorizedUsers = message.mentions.users.map(u => u.id);
-		let authorizedRoles = config.staffRoles;
-		authorizedUsers.push(client.user.id);
-		authorizedRoles.push(config.supportRoleId)
-
-		privateThreads[message.channel.id] = {
-			authorizedRoles,
-			authorizedUsers,
-			ownerId:authorizedUsers[0]
-		}
-		return saveThreadsData();
-	}
-
 	//Not found in private threads
 	if(!privateThreads[message.channel.id]) return;
 
@@ -208,7 +419,10 @@ client.on("messageCreate", (message) => {
 			authorizedUsers:privateThreads[message.channel.id].authorizedUsers,
 			ownerId:privateThreads[message.channel.id].ownerId
 		}
-		if(thisTicketAllowed.authorizedUsers.includes(message.author.id) || message.member.roles.cache.find(r => thisTicketAllowed.authorizedRoles.includes(r.id)) && message.mentions.users.size > 0){
+
+		console.log(message.content.includes("--"), (thisTicketAllowed.authorizedUsers.includes(message.author.id) || message.member.roles.cache.find(r => thisTicketAllowed.authorizedRoles.includes(r.id))), message.mentions.users.size > 0)
+
+		if(!message.content.includes("--") && (thisTicketAllowed.authorizedUsers.includes(message.author.id) || message.member.roles.cache.find(r => thisTicketAllowed.authorizedRoles.includes(r.id))) && message.mentions.users.size > 0){
 			message.mentions.users = message.mentions.users.filter(u => !privateThreads[message.channel.id].authorizedUsers.includes(u.id));
 			if(message.mentions.users.size == 0) return;
 			message.mentions.users.each(u => {
@@ -216,11 +430,29 @@ client.on("messageCreate", (message) => {
 					privateThreads[message.channel.id].authorizedUsers.push(u.id);
 				}
 			})
+			saveThreadsData()
 			message.reply({
 				embeds:[
 					{
 						description:`✅ Added ${message.mentions.users.map(u => `<@${u.id}>`).join(", ")} to this ticket.`,
 						color:"GREEN"
+					}
+				]
+			})
+		}
+
+		if(message.content.includes("--") && (thisTicketAllowed.authorizedUsers.includes(message.author.id) || message.member.roles.cache.find(r => thisTicketAllowed.authorizedRoles.includes(r.id))) && message.mentions.users.size > 0){
+			console.log(message.mentions.users, "BEFORE")
+			message.mentions.users = message.mentions.users.filter(u => privateThreads[message.channel.id].authorizedUsers.includes(u.id));
+			console.log(message.mentions.users, "AFTER")
+			if(message.mentions.users.size == 0) return;
+			privateThreads[message.channel.id].authorizedUsers = privateThreads[message.channel.id].authorizedUsers.filter(authorizedUserId => !message.mentions.users.has(authorizedUserId));
+			saveThreadsData()
+			message.reply({
+				embeds:[
+					{
+						description:`❌ Removed ${message.mentions.users.map(u => `<@${u.id}>`).join(", ")} from this ticket.`,
+						color:"RED"
 					}
 				]
 			})
@@ -252,5 +484,25 @@ client.on('messageUpdate', (oldMessage, newMessage) => {
 		(newMessage.guild.channels.cache.get(config.modLog) as TextChannel).send(`:pencil: **Message Edit**:\nfrom ${newMessage.author.tag} (${newMessage.author.id}) | in <#${newMessage.channel.id}>:\n\`${oldMessage.content}\`\n → \n\`${newMessage.content}\``)
 })
 
-//Login
-client.login(config.token);
+// Update the cached DeepSea release data
+async function setupDeepsea() {
+	var deepsea = new DeepSea()
+	var res = await deepsea.update()
+	console.log(`Cached DeepSea has been updated`)
+}
+
+// Update cached data every 60 minutes (1 Hour)
+setInterval(() => {
+	setupDeepsea()
+}, 60 * 60 * 1000)
+
+async function startBot(){
+	await loadButtonCommands();
+	await loadSlashCommands();
+	await loadCtxCommands();
+	await setupDeepsea();
+	await client.login(config.token);
+	console.log(`Statup functions have been executed!`)
+}
+
+startBot()

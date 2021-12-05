@@ -3,6 +3,7 @@
     "compilerOptions": {
       "outDir": "dist",
       "target": "ES5",
-      "moduleResolution": "node"
+      "moduleResolution": "node",
+      "sourceMap": true
     }
   }

@@ -1,7 +1,7 @@
-import {Command} from '../../typings'
 import { MessageEmbed } from 'discord.js'
 import {config} from '../../config'
-export const supportCommands:Array<Command> = [
+import { MessageCommand } from '../../typings'
+export const supportCommands:MessageCommand[] = [
     {
         name: 'exfat',
         description: 'Displays info on why not to use exfat',
