@@ -143,13 +143,12 @@ process.on('unhandledRejection', error => {
 
 //Code for interactions (Slash Commands, Buttons, CTX comamnds)
 client.on("interactionCreate", interaction => {
-	let isStaff = 
-	(interaction.member?.roles as GuildMemberRoleManager)?.cache.find(role => config.staffRoles.includes(role.id)) 
-	|| (interaction.member?.roles as string[])?.find(roleId => config.staffRoles.includes(roleId));
 	if(!interaction.channel){
 		console.log(`MISSING INTERACTION.CHANNEL`, `Channel ID: ${interaction.channelId}`, `ID: ${interaction.id}`, `Guild ID: ${interaction.guildId}`, `User ID: ${interaction.member?.user.id}`);
 		return;
 	};
+	console.log(interaction.member.user.id, interaction.member.roles)
+	let isStaff = (interaction.member?.roles as GuildMemberRoleManager)?.cache?.find(role => config.staffRoles.includes(role.id));
 	if(interaction.isCommand()){
 		const command = client.commands.get(interaction.commandName);
 	
