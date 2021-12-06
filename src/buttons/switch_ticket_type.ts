@@ -1,4 +1,5 @@
-import { MessageComponent } from "discord.js";
+import { GuildMemberRoleManager, MessageComponent } from "discord.js";
+import { config } from "../../config";
 import { TicketType } from "../../typings";
 import ButtonCommand from "../classes/ButtonCommand";
 
@@ -13,7 +14,12 @@ export default new ButtonCommand({
                 content:`Unable to find that thread`,
                 ephemeral:true
             })
-        
+        let isStaff = (interaction.member.roles as GuildMemberRoleManager).cache.find(role => config.staffRoles.includes(role.id) || config.supportRoleId == role.id);
+        if(!isStaff)
+            return interaction.reply({
+                content:`This is a staff only command.`,
+                ephemeral:true
+            })
         let newType:TicketType;
         if(threadData.type == "PUBLIC")
             newType = "PRIVATE";
