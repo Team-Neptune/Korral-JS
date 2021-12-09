@@ -3,7 +3,7 @@ import Command from "../classes/Command";
 
 const message_guild_id = "703301751171973190"
 const message_channel_id = "703302552594284594"
-const message_id = "824322420529823764"
+const message_id = "809485735060307990"
 
 export default new Command({
     execute(interaction){
