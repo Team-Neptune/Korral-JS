@@ -475,12 +475,14 @@ client.on('guildMemberRemove', member => {
 
 //Log deleted messages
 client.on('messageDelete', message => {
+	if(message.author.id == client.user.id)return;
 	if(config.modLogBlacklisted?.includes(message.channelId)) return;
 	(message.guild.channels.cache.get(config.modLog) as TextChannel).send(`:wastebasket: **Message Delete**:\nfrom ${message.author.tag} (${message.author.id}) | in <#${message.channel.id}>:\n\`${message.content}\``)
 });
 
 //Log message edits
 client.on('messageUpdate', (oldMessage, newMessage) => {
+	if(oldMessage.author.id == client.user.id)return;
 	if(config.modLogBlacklisted?.includes(newMessage.channelId)) return;
 	if(oldMessage.author.id == newMessage.author.id && !newMessage.author.bot && oldMessage.content != newMessage.content)
 		(newMessage.guild.channels.cache.get(config.modLog) as TextChannel).send(`:pencil: **Message Edit**:\nfrom ${newMessage.author.tag} (${newMessage.author.id}) | in <#${newMessage.channel.id}>:\n\`${oldMessage.content}\`\n → \n\`${newMessage.content}\``)
