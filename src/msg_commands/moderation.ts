@@ -13,6 +13,10 @@ export const moderationCommands:MessageCommand[] = [
             if(!message.guild.me.permissions.has("BAN_MEMBERS"))
                 return message.channel.send(`I don't have the valid permissions to ban a member.`)
             const member = message.mentions.members.first()
+            if(!member)
+                return message.reply({
+                    content:"I'm sorry this user doesn't exist"
+                })
             var removed = args.splice(0, 1)
             const reason = args.join(" ")
             
