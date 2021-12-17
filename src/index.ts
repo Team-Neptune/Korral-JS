@@ -321,13 +321,13 @@ client.on('messageCreate', message => {
 		if (command) {
 			if ((command.disallowedChannels && command.disallowedChannels.includes(message.channel.id)) || (command.allowedChannels && !command.allowedChannels.includes(message.channel.id)) || command.staffOnly == true && !message.member.roles.cache.some(role => config.staffRoles.includes(role.id))){
 				message.channel.send({content:`**Invalid permissions**: You don't appear to have the correct permissions to run this commands, or it may be disabled in this channel.`});
-			}
-		
-			try {
-				command.execute(message, args);
-			} catch (error) {
-				console.error(error);
-				message.channel.send({content:'Uh oh, something went wrong while running that command. Please open an issue on [GitHub](https://github.com/Team-Neptune/Korral-JS) if the issue persists.'});
+			}else{
+				try {
+					command.execute(message, args);
+				} catch (error) {
+					console.error(error);
+					message.channel.send({content:'Uh oh, something went wrong while running that command. Please open an issue on [GitHub](https://github.com/Team-Neptune/Korral-JS) if the issue persists.'});
+				}
 			}
 		}
 	}
