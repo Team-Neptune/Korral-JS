@@ -2,6 +2,8 @@ import { GuildMemberRoleManager, MessageEmbed, ThreadChannel } from "discord.js"
 import { config } from "../../config";
 import ButtonCommand from "../classes/ButtonCommand";
 
+const userPingReplaceRegExp = new RegExp(/\!{(USER_PING)\}!/, "g");
+
 export default new ButtonCommand({
     customId:"close_ticket",
     checkType:"STARTS_WITH",
@@ -37,7 +39,7 @@ export default new ButtonCommand({
             ];
             if(config.closingTicketsSettings?.closeMessage)
                 embeds.push(new MessageEmbed({
-                    "description":config.closingTicketsSettings.closeMessage,
+                    "description":config.closingTicketsSettings.closeMessage.replace(userPingReplaceRegExp, `<@${ticketUserId}>`),
                     "footer":{
                         text:"The message above is set by the server"
                     }
