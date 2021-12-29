@@ -1,6 +1,6 @@
 import {config} from '../../config'
 import { TextChannel, MessageEmbed } from 'discord.js'
-import {writeFileSync, existsSync} from 'fs'
+import {writeFileSync, existsSync, readFileSync} from 'fs'
 import { MessageCommand } from '../../typings'
 export const moderationCommands:MessageCommand[] = [
     {
@@ -44,7 +44,7 @@ export const moderationCommands:MessageCommand[] = [
             if(!message.mentions.members.first())
                 return message.channel.send(`You need to mention at least **one** member.`)
             // all requirements are met
-            var warnings = require('../../warnings.json')
+            var warnings = JSON.parse(readFileSync(config.warningJsonLocation).toString())
             var notes = require('../../userNotes.json')
     
             message.mentions.members.forEach(mentionedUser => {
@@ -66,7 +66,6 @@ export const moderationCommands:MessageCommand[] = [
                 message.channel.send({embeds:[embed]})
             });
     
-            delete require.cache[require.resolve(`../../warnings.json`)]
             delete require.cache[require.resolve(`../../userNotes.json`)]
         }
     },
@@ -120,7 +119,7 @@ export const moderationCommands:MessageCommand[] = [
     
             // all requirements are met
     
-            var userLog = require('../../warnings.json')
+            var userLog = JSON.parse(readFileSync(config.warningJsonLocation).toString())
             if (!userLog[mentionedUser.id]) {
                 message.channel.send(`This user has no warnings.`);
                 return;
@@ -135,7 +134,6 @@ export const moderationCommands:MessageCommand[] = [
             writeFileSync('./warnings.json', JSON.stringify(userLog))
     
             message.channel.send(`Warning removed.`);
-            delete require.cache[require.resolve(`../../warnings.json`)]
         }
     },
     {
@@ -163,7 +161,6 @@ export const moderationCommands:MessageCommand[] = [
     
             writeFileSync('./userNotes.json', JSON.stringify(notes))
             message.channel.send(`<@${mentionedUser.id}> had a note added. User has ${notes[mentionedUser.id].length} note(s).`)
-            delete require.cache[require.resolve(`../../warnings.json`)]
         }
     },
     {
@@ -227,7 +224,7 @@ export const moderationCommands:MessageCommand[] = [
             if (message.author.id == mentionedUser.id)
                 return message.channel.send(`You can't perform this action on yourself.`);
     
-            var warnings = require('../../warnings.json')
+            var warnings = JSON.parse(readFileSync(config.warningJsonLocation).toString())
     
             if (mentionedUser.roles.cache.some(role => config.staffRoles.includes(role.id)))
                 return message.channel.send(`You can't perform that action on this user.`);
@@ -271,7 +268,6 @@ export const moderationCommands:MessageCommand[] = [
 
             message.channel.send(`<@${mentionedUser.id}> got warned. User has ${warnings[mentionedUser.id].length} warning(s).`);
             (message.guild.channels.cache.get(config.modLog) as TextChannel).send(`<@${message.author.id}> warned <@${mentionedUser.id}> (${mentionedUser.user.tag}) - warn #${warnings[mentionedUser.id].length}\n Reason: "${reason}"`)
-            delete require.cache[require.resolve(`../../warnings.json`)]
     
         }
     },
@@ -326,7 +322,7 @@ export const moderationCommands:MessageCommand[] = [
                 return message.channel.send(`'warnings.json' doesn't exist. Please do at least one warning to create the file.`)
     
             // all requirements are met
-            var warnings = require('../../warnings.json')
+            var warnings = JSON.parse(readFileSync(config.warningJsonLocation).toString())
     
             if (!warnings[(args[0] as unknown as number)])
                 return message.channel.send(`This user does not have any userlog entries`);
@@ -336,8 +332,6 @@ export const moderationCommands:MessageCommand[] = [
                 embed.addField('Warning: ' + (parseInt(index) + 1), warning)
             });
             message.channel.send({embeds:[embed]})
-    
-            delete require.cache[require.resolve(`../../warnings.json`)]
         }
     }
 ]
