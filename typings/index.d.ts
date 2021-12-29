@@ -62,6 +62,8 @@ export interface Config {
     /** Message to be sent when ticket is closed */
     closeMessage?:string
   }
+  /** Location of warnings.json */
+  warningJsonLocation:string
 }
 
 export interface GitHubRelease {
