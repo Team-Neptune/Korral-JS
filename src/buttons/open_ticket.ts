@@ -5,11 +5,12 @@ import ButtonCommand from "../classes/ButtonCommand";
 export default new ButtonCommand({
   customId:"open_ticket",
   checkType:"EQUALS",
-  execute(interaction){
+  async execute(interaction){
     let threadStarter = interaction.member.user.id
     let supportRoleOnly = false;
+    let threadStarterMember = await interaction.guild.members.fetch(threadStarter);
     let topic = {
-      value:`${interaction.member.user.username}#${interaction.member.user.discriminator}`
+      value:`${threadStarterMember.nickname || threadStarterMember.user.tag}`
     }
     if(topic.value.length > 90 || topic.value.length < 1)
       return interaction.reply({
