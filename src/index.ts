@@ -239,9 +239,39 @@ client.on("interactionCreate", interaction => {
 	};
 	console.log(interaction.member.user.id, interaction.member.roles)
 	let isStaff = (interaction.member?.roles as GuildMemberRoleManager)?.cache?.find(role => config.staffRoles.includes(role.id));
-	if(interaction.isCommand()){
+
+	if(interaction.isMessageComponent() && interaction.customId.startsWith("collecter")) return;
+
+	if(interaction.isCommand() && !interaction.options.getSubcommandGroup(false)){
+		console.log(interaction)
 		const command = client.commands.get(interaction.commandName);
 	
+		if (command) {
+		
+			try {
+				if(command.staffOnly && !isStaff)
+					return interaction.reply({
+						content:`This is a staff only command.`,
+						ephemeral:true
+					})
+				command.execute(interaction);
+			} catch (error) {
+				console.error(error);
+				interaction.reply({content:'Uh oh, something went wrong while running that command. Please open an issue on [GitHub](https://github.com/Team-Neptune/Korral-JS) if the issue persists.'});
+			}
+		} else {
+			interaction.reply({
+				content:`That command was not found.`,
+				ephemeral:true
+			})
+		}
+	}
+
+	if(interaction.isCommand() && interaction.options.getSubcommandGroup(false)){
+		console.log(interaction.options)
+		const command = client.commands.find(command => command.subCommandGroup == interaction.options.getSubcommandGroup() && command.commandName == interaction.options.getSubcommand());
+	
+		console.log(interaction.options.getSubcommand(), command)
 		if (command) {
 		
 			try {
