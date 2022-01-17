@@ -135,35 +135,6 @@ export const moderationCommands:MessageCommand[] = [
             writeFileSync('./warnings.json', JSON.stringify(userLog))
     
             message.channel.send(`Warning removed.`);
-            delete require.cache[require.resolve(`../../warnings.json`)]
-        }
-    },
-    {
-        name: 'note',
-        description: 'Adds a note to a user.',
-        usage: '<user> <note>',
-        staffOnly: true,
-        execute(message, args) {
-            const mentionedUser = message.mentions.members.first();
-            if(!mentionedUser)
-                return message.channel.send(`No user was mentioned.`);
-            
-            if (!args[1])
-                return message.channel.send(`Please provide a note.`)
-            var removed = args.splice(0, 1)
-            let reason = args.join(' ')
-    
-            // all requirements are met
-            var notes = require('../../userNotes.json')
-    
-            if (!notes[mentionedUser.id])
-                notes[mentionedUser.id] = [];
-    
-            notes[mentionedUser.id].push(reason);
-    
-            writeFileSync('./userNotes.json', JSON.stringify(notes))
-            message.channel.send(`<@${mentionedUser.id}> had a note added. User has ${notes[mentionedUser.id].length} note(s).`)
-            delete require.cache[require.resolve(`../../warnings.json`)]
         }
     },
     {

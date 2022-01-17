@@ -64,6 +64,8 @@ export interface Config {
   }
   /** Location of warnings.json */
   warningJsonLocation:string
+  /** Location of userNotes.json */
+  noteJsonLocation:string
 }
 
 export interface GitHubRelease {
