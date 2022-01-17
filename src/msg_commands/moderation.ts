@@ -37,40 +37,6 @@ export const moderationCommands:MessageCommand[] = [
         }
     },
     {
-        name: 'userlog',
-        description: 'View the userlog of a user.',
-        staffOnly: true,
-        execute(message, args) {
-            if(!message.mentions.members.first())
-                return message.channel.send(`You need to mention at least **one** member.`)
-            // all requirements are met
-            var warnings = require('../../warnings.json')
-            var notes = require('../../userNotes.json')
-    
-            message.mentions.members.forEach(mentionedUser => {
-                if (!warnings[mentionedUser.id] && !notes[mentionedUser.id])
-                    return message.channel.send(`${mentionedUser.user.tag} does not have any warnings or notes.`);
-        
-                const embed = new MessageEmbed()
-                embed.setAuthor(mentionedUser.user.tag, mentionedUser.user.displayAvatarURL({dynamic:true}))
-                if(warnings[mentionedUser.id]){
-                    warnings[mentionedUser.id].forEach(function (warning, index) {
-                        embed.addField('Warning: ' + (parseInt(index) + 1), warning)
-                    });
-                }
-                if(notes[mentionedUser.id]){
-                    notes[mentionedUser.id].forEach(function (warning, index) {
-                        embed.addField('Note: ' + (parseInt(index) + 1), warning)
-                    });
-                }
-                message.channel.send({embeds:[embed]})
-            });
-    
-            delete require.cache[require.resolve(`../../warnings.json`)]
-            delete require.cache[require.resolve(`../../userNotes.json`)]
-        }
-    },
-    {
         name: 'kick',
         description: 'Kicks a user from the server.',
         aliases: ['boot'],
