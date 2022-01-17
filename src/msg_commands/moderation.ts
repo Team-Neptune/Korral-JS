@@ -4,39 +4,6 @@ import {writeFileSync, existsSync} from 'fs'
 import { MessageCommand } from '../../typings'
 export const moderationCommands:MessageCommand[] = [
     {
-        name:"ban",
-        description:"Ban a member from the server.",
-        aliases:["banish"],
-        usage:"<member mention> <reason>",
-        staffOnly:true,
-        execute(message, args){
-            if(!message.guild.me.permissions.has("BAN_MEMBERS"))
-                return message.channel.send(`I don't have the valid permissions to ban a member.`)
-            const member = message.mentions.members.first()
-            if(!member)
-                return message.reply({
-                    content:"I'm sorry this user doesn't exist"
-                })
-            var removed = args.splice(0, 1)
-            const reason = args.join(" ")
-            
-            const modLogEntries = [
-                `:no_entry: Ban: <@${message.author.id}> banned <@${member.id}> | ${member.user.tag}`,
-                `:label: User ID: ${member.user.id}`,
-                `:pencil2: Reason: "${reason}"`
-            ]
-            
-            member.send(`You were banned from ${message.guild.name}. The given reason was: "${reason}"`)
-            .then(() => {
-                message.mentions.members.first().ban({reason: `${message.author.tag}, ${reason}`});
-                (message.guild.channels.cache.get(config.modLog) as TextChannel).send(modLogEntries.join("\n"))
-            })
-            .catch(() => {
-                (message.guild.channels.cache.get(config.modLog) as TextChannel).send(modLogEntries.join("\n"))
-            })
-        }
-    },
-    {
         name: 'kick',
         description: 'Kicks a user from the server.',
         aliases: ['boot'],
