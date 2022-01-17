@@ -272,20 +272,6 @@ export const moderationCommands:MessageCommand[] = [
         }
     },
     {
-        name: 'userinfo',
-        description: 'Views info about the mentioned member(s).',
-        staffOnly: true,
-        execute(message, args) {
-            if(!message.mentions.members.first())
-                return message.channel.send(`Please mention a member.`)
-            message.mentions.members.forEach(mentionedMember => {
-                const embed = new MessageEmbed()
-                embed.setDescription(`Username: ${mentionedMember.user.tag}\nID: ${mentionedMember.user.id}\nAvatar: [here](${mentionedMember.user.displayAvatarURL({dynamic:true})})\nBot: ${mentionedMember.user.bot}\nCreation: ${mentionedMember.user.createdAt}\nDisplay Name: ${mentionedMember.nickname || "None."}\nJoined: ${mentionedMember.joinedAt}\nHighest Role: ${mentionedMember.roles.highest || "None."}`)
-                message.channel.send({embeds:[embed]})
-            });
-        }
-    },
-    {
         name: 'userlogid',
         description: 'Views the user warn log',
         staffOnly: true,
