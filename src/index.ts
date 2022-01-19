@@ -242,7 +242,8 @@ client.on("interactionCreate", interaction => {
 
 	if(interaction.isMessageComponent() && interaction.customId.startsWith("collecter")) return;
 
-	if(interaction.isCommand() && !interaction.options.getSubcommandGroup(false)){
+	// Normal Slash Command
+	if(interaction.isCommand() && !(interaction.options.getSubcommandGroup(false) || interaction.options.getSubcommand(false))){
 		console.log(interaction)
 		const command = client.commands.get(interaction.commandName);
 	
@@ -267,11 +268,22 @@ client.on("interactionCreate", interaction => {
 		}
 	}
 
-	if(interaction.isCommand() && interaction.options.getSubcommandGroup(false)){
-		console.log(interaction.options)
-		const command = client.commands.find(command => command.subCommandGroup == interaction.options.getSubcommandGroup() && command.commandName == interaction.options.getSubcommand());
-	
-		console.log(interaction.options.getSubcommand(), command)
+	// Slash Command with subcommand/subcommand groups
+	if(interaction.isCommand() && (interaction.options.getSubcommandGroup(false) || interaction.options.getSubcommand(false))){
+		console.log("commandName", interaction.commandName)
+		console.log("getSubcommand", interaction.options.getSubcommand(false))
+		console.log("getSubcommandGroup", interaction.options.getSubcommandGroup(false))
+
+		let commandName = interaction.options.getSubcommand(false);
+		let subCommandGroup = interaction.options.getSubcommandGroup(false) || interaction.commandName;
+
+		console.log("real cmd name", commandName)
+		console.log('real subcmdgrp', subCommandGroup)
+
+		const command = client.commands.find(command => command.subCommandGroup == subCommandGroup 
+			&& command.commandName == commandName);
+
+			console.log("cmd", command)
 		if (command) {
 		
 			try {
