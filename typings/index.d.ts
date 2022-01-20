@@ -66,6 +66,8 @@ export interface Config {
   warningJsonLocation:string
   /** Location of userNotes.json */
   noteJsonLocation:string
+  /** Guild ID for setting up application commands */
+  testingGuildId?:string
 }
 
 export interface GitHubRelease {
