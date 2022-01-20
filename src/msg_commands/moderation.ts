@@ -43,38 +43,6 @@ export const moderationCommands:MessageCommand[] = [
         }
     },
     {
-        name: 'purge',
-        description: 'Deletes multiple messages at once.',
-        usage: '<amount>',
-        cooldown: 0,
-        staffOnly:true,
-        execute(message, args) {
-            let deleteNum = Number(args[0]);
-            if(!args[0])
-                return message.channel.send(`Please provide the amount of messages to delete`);
-            if(deleteNum > 99)
-                return message.channel.send(`You can only delete up to 99 messages.`);
-            message.delete()
-            .then(() => {
-                (message.channel as TextChannel)
-                .bulkDelete(deleteNum)
-                .then(() => {
-                    message.channel.send(`Deleted ${deleteNum.toString()} messages.`)
-                    .then(m => {
-                        setTimeout(() => {
-                            m.delete();
-                        }, 5000);
-                    })
-                    .catch(console.error)
-                })
-                .catch(() => {
-                    message.channel.send(`Failed to delete messages. They may be older than 20 days.`)
-                })
-            })
-            .catch(console.error)
-        },
-    },
-    {
         name: 'say',
         description: 'Has the bot speak in the channel it is ran in.',
         usage: '<text>',
