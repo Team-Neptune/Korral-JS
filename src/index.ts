@@ -242,6 +242,41 @@ client.on("interactionCreate", interaction => {
 
 	if(interaction.isMessageComponent() && interaction.customId.startsWith("collecter")) return;
 
+	function logStaffCommands(interaction:Interaction, command?:Command){
+		let modLogEntries = [
+			`:tools: Staff Command: <@${interaction.user.id}> | ${interaction.user.tag}`,
+			`:label: User ID: ${interaction.user.id}`
+		];
+		if(interaction.isButton()){
+			modLogEntries.push(`:keyboard: Command: ${interaction.customId}`);
+			(interaction.guild.channels.cache.get(config.modLog) as TextChannel).send({
+				content:modLogEntries.join("\n"),
+				allowedMentions:{
+					parse:[]
+				}
+			})
+		}
+		if(interaction.isCommand()){
+			if(!command) return;
+			modLogEntries.push(`:keyboard: Command: ${command.commandName}`);
+			(interaction.guild.channels.cache.get(config.modLog) as TextChannel).send({
+				content:modLogEntries.join("\n"),
+				allowedMentions:{
+					parse:[]
+				}
+			})
+		}
+		if(interaction.isContextMenu()){
+			modLogEntries.push(`:keyboard: Command: ${interaction.commandName}`);
+			(interaction.guild.channels.cache.get(config.modLog) as TextChannel).send({
+				content:modLogEntries.join("\n"),
+				allowedMentions:{
+					parse:[]
+				}
+			})
+		}
+	}
+
 	// Normal Slash Command
 	if(interaction.isCommand() && !(interaction.options.getSubcommandGroup(false) || interaction.options.getSubcommand(false))){
 		console.log(interaction)
