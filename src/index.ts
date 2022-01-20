@@ -290,6 +290,9 @@ client.on("interactionCreate", interaction => {
 						content:`This is a staff only command.`,
 						ephemeral:true
 					})
+				if(command.staffOnly){
+					logStaffCommands(interaction, command)
+				}
 				command.execute(interaction);
 			} catch (error) {
 				console.error(error);
@@ -320,6 +323,9 @@ client.on("interactionCreate", interaction => {
 						content:`This is a staff only command.`,
 						ephemeral:true
 					})
+				if(command.staffOnly){
+					logStaffCommands(interaction, command)
+				}
 				command.execute(interaction);
 			} catch (error) {
 				console.error(error);
@@ -343,6 +349,9 @@ client.on("interactionCreate", interaction => {
 						content:`This is a staff only command.`,
 						ephemeral:true
 					})
+				if(command.staffOnly){
+					logStaffCommands(interaction)
+				}
 				command.execute(interaction);
 			} catch (error) {
 				console.error(command.customId, error);
@@ -366,6 +375,9 @@ client.on("interactionCreate", interaction => {
 						content:`This is a staff only command.`,
 						ephemeral:true
 					})
+				if(command.staffOnly){
+					logStaffCommands(interaction)
+				}
 				command.execute(interaction);
 			} catch (error) {
 				console.error(command.commandName, error);
