@@ -1,6 +1,8 @@
 import Command from "../classes/Command";
 
 export default new Command({
+  commandName:"avatar",
+  subCommandGroup:"utility",
     execute(interaction){
       const user = interaction.options.getUser("user", false) || interaction.user;
       const size = interaction.options.getString("size", false)

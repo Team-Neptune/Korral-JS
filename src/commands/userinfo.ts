@@ -6,7 +6,7 @@ import { GuildMember, GuildMemberRoleManager, MessageEmbed, TextChannel } from "
 export default new Command({
   staffOnly:true,
   commandName:"info",
-  subCommandGroup:"user",
+  subCommandGroup:"mod",
   async execute(interaction){
     let mentionedUser = interaction.options.getUser("user")
     let mentionedMember = interaction.guild.members.cache.get(mentionedUser.id)

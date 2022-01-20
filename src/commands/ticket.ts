@@ -3,6 +3,8 @@ import { config } from "../../config";
 import Command from "../classes/Command";
 
 export default new Command({
+  commandName:"create",
+  subCommandGroup:"tickets",
     execute(interaction){
         // 1-90 char only
         let supportRoleOnly = interaction.options.data.find(o => o.name == "private")?.value == true  || false;

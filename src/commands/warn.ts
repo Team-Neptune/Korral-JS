@@ -6,7 +6,7 @@ import { GuildMember, GuildMemberRoleManager, TextChannel } from "discord.js";
 export default new Command({
   staffOnly:true,
   commandName:"warn",
-  subCommandGroup:"user",
+  subCommandGroup:"mod",
   async execute(interaction){
     if(!config.warnBehavior || config.warnBehavior.length == 0)
       return interaction.reply({

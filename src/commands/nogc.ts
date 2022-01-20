@@ -6,6 +6,8 @@ const message_channel_id = "703302552594284594"
 const message_id = "809485735060307990"
 
 export default new Command({
+    commandName:"nogc",
+    subCommandGroup:"switch",
     execute(interaction){
         interaction.deferReply({ephemeral:false}).then(async () => {
             let channel = interaction.client.guilds.cache.get(message_guild_id).channels.cache.get(message_channel_id) as TextChannel;

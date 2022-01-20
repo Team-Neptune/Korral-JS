@@ -2,6 +2,8 @@ import Command from "../classes/Command";
 import DeepSea from "../deepsea"
 
 export default new Command({
+  commandName:"deepsea",
+  subCommandGroup:"switch",
     execute(interaction){
       let deepsea = new DeepSea()
       let releases = deepsea.get()

@@ -6,7 +6,7 @@ import { GuildMember, GuildMemberRoleManager, MessageEmbed, TextChannel } from "
 export default new Command({
   staffOnly:true,
   commandName:"log",
-  subCommandGroup:"user",
+  subCommandGroup:"mod",
   async execute(interaction){
     let mentionedUser = interaction.options.getUser("user")
     var warnings = JSON.parse(readFileSync(config.warningJsonLocation).toString())

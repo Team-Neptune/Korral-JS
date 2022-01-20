@@ -6,7 +6,7 @@ import { GuildMember, GuildMemberRoleManager, MessageEmbed, TextChannel } from "
 export default new Command({
   staffOnly:true,
   commandName:"note",
-  subCommandGroup:"user",
+  subCommandGroup:"mod",
   async execute(interaction){
     const mentionedUser = interaction.options.getUser("user");
     if(!mentionedUser)

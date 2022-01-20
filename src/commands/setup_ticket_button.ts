@@ -3,6 +3,8 @@ import { config } from "../../config";
 import Command from "../classes/Command";
 
 export default new Command({
+    commandName:"setup",
+    subCommandGroup:"tickets",
     execute(interaction){
         interaction.reply({
             "content":`Ready to open tickets from <#${config.supportChannelId}>`,
