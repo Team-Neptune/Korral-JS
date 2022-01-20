@@ -4,34 +4,6 @@ import {writeFileSync, existsSync} from 'fs'
 import { MessageCommand } from '../../typings'
 export const moderationCommands:MessageCommand[] = [
     {
-        name: 'kick',
-        description: 'Kicks a user from the server.',
-        aliases: ['boot'],
-        usage: '<user> <reason>',
-        staffOnly:true,
-        execute(message, args) {
-            const mentionedMember = message.mentions.members.first();
-                
-            if (message.author.id == mentionedMember.id){
-                message.channel.send(`You can't perform this action on yourself.`);
-                return;
-            }
-            if (mentionedMember.roles.cache.some(role => role.id === `${config.staffRoles}`)){
-                message.channel.send(`You can't perform that action on this user.`);
-                return;
-            }
-
-            // Code hopefully works
-            var remove = args.splice(0, 1)
-            const reason = args.join(' ')
-
-            message.channel.send('<@'+mentionedMember.id+'> was kicked from the server.');
-            (message.guild.channels.cache.get(config.modLog) as TextChannel).send(`:boot: Kick: <@${message.author.id}> kicked <@${mentionedMember.id}> | ${mentionedMember.user.tag}\n:label: User ID: ${mentionedMember.id}\n:pencil2: Reason: "${reason}"`)
-            mentionedMember.send(`You have been kicked from the server. You may rejoin at anytime.\n\nReason for kick: ${reason}`)
-            mentionedMember.kick(reason)
-        }
-    },
-    {
         name: 'deletewarn',
         aliases: ['delwarn'],
         description: 'Deletes a warning',
