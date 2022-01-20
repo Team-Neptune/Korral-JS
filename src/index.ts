@@ -305,15 +305,8 @@ client.on("interactionCreate", interaction => {
 
 	// Slash Command with subcommand/subcommand groups
 	if(interaction.isCommand() && (interaction.options.getSubcommandGroup(false) || interaction.options.getSubcommand(false))){
-		console.log("commandName", interaction.commandName)
-		console.log("getSubcommand", interaction.options.getSubcommand(false))
-		console.log("getSubcommandGroup", interaction.options.getSubcommandGroup(false))
-
 		let commandName = interaction.options.getSubcommand(false);
 		let subCommandGroup = interaction.options.getSubcommandGroup(false) || interaction.commandName;
-
-		console.log("real cmd name", commandName)
-		console.log('real subcmdgrp', subCommandGroup)
 
 		const command = client.commands.find(command => command.subCommandGroup == subCommandGroup 
 			&& command.commandName == commandName);
