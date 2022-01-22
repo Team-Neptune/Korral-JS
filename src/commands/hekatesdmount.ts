@@ -1,6 +1,8 @@
 import Command from "../classes/Command";
 
 export default new Command({
+    commandName:"hekatesdmount",
+    subCommandGroup:"switch",
     execute(interaction){
         interaction.reply({
             content:`https://cdn.discordapp.com/attachments/710631969993654334/872967960946413618/select_tools_menu.png`,

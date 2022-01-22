@@ -1,5 +1,5 @@
 import fetch from 'node-fetch'
-import { TextChannel, Client, Collection, MessageEmbed, MessageButton, ThreadChannel, GuildMemberRoleManager } from 'discord.js'
+import { TextChannel, Client, Collection, MessageEmbed, MessageButton, ThreadChannel, GuildMemberRoleManager, ApplicationCommand, Interaction } from 'discord.js'
 import Command from './classes/Command';
 import {config} from '../config'
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'fs';
@@ -143,21 +143,14 @@ client.getSupportThreadData = (userId:string) => {
 	return activeTickets[userId];
 }
 
-//Message Commands
-import {botCommands} from './msg_commands/bot'
-import {moderationCommands} from './msg_commands/moderation'
-import {userCommands} from './msg_commands/user'
-import {supportCommands} from './msg_commands/support'
-import {memeCommands} from './msg_commands/meme'
-import {customCommands} from './msg_commands/custom'
 import ContextMenuCommand from './classes/ContextMenuCommand';
+import commands from './commands';
 
-botCommands.forEach(c => client.messageCommands.set(c.name, c))
-moderationCommands.forEach(c => client.messageCommands.set(c.name, c))
-userCommands.forEach(c => client.messageCommands.set(c.name, c))
-supportCommands.forEach(c => client.messageCommands.set(c.name, c))
-memeCommands.forEach(c => client.messageCommands.set(c.name, c))
-customCommands.forEach(c => client.messageCommands.set(c.name, c))
+async function setupApplicationCommands(guildId?:string):Promise<Collection<string, ApplicationCommand>> {
+	if(guildId)
+		return await client.guilds.cache.get(guildId).commands.set(commands)
+	return await client.application.commands.set(commands)
+}
 
 async function loadButtonCommands(){
 	let buttonCommandFiles = readdirSync(`./src/buttons`)
@@ -239,7 +232,47 @@ client.on("interactionCreate", interaction => {
 	};
 	console.log(interaction.member.user.id, interaction.member.roles)
 	let isStaff = (interaction.member?.roles as GuildMemberRoleManager)?.cache?.find(role => config.staffRoles.includes(role.id));
-	if(interaction.isCommand()){
+
+	if(interaction.isMessageComponent() && interaction.customId.startsWith("collecter")) return;
+
+	function logStaffCommands(interaction:Interaction, command?:Command){
+		let modLogEntries = [
+			`:tools: Staff Command: <@${interaction.user.id}> | ${interaction.user.tag}`,
+			`:label: User ID: ${interaction.user.id}`
+		];
+		if(interaction.isButton()){
+			modLogEntries.push(`:keyboard: Command: ${interaction.customId}`);
+			(interaction.guild.channels.cache.get(config.modLog) as TextChannel).send({
+				content:modLogEntries.join("\n"),
+				allowedMentions:{
+					parse:[]
+				}
+			})
+		}
+		if(interaction.isCommand()){
+			if(!command) return;
+			modLogEntries.push(`:keyboard: Command: ${command.commandName}`);
+			(interaction.guild.channels.cache.get(config.modLog) as TextChannel).send({
+				content:modLogEntries.join("\n"),
+				allowedMentions:{
+					parse:[]
+				}
+			})
+		}
+		if(interaction.isContextMenu()){
+			modLogEntries.push(`:keyboard: Command: ${interaction.commandName}`);
+			(interaction.guild.channels.cache.get(config.modLog) as TextChannel).send({
+				content:modLogEntries.join("\n"),
+				allowedMentions:{
+					parse:[]
+				}
+			})
+		}
+	}
+
+	// Normal Slash Command
+	if(interaction.isCommand() && !(interaction.options.getSubcommandGroup(false) || interaction.options.getSubcommand(false))){
+		console.log(interaction)
 		const command = client.commands.get(interaction.commandName);
 	
 		if (command) {
@@ -250,6 +283,42 @@ client.on("interactionCreate", interaction => {
 						content:`This is a staff only command.`,
 						ephemeral:true
 					})
+				if(command.staffOnly){
+					logStaffCommands(interaction, command)
+				}
+				command.execute(interaction);
+			} catch (error) {
+				console.error(error);
+				interaction.reply({content:'Uh oh, something went wrong while running that command. Please open an issue on [GitHub](https://github.com/Team-Neptune/Korral-JS) if the issue persists.'});
+			}
+		} else {
+			interaction.reply({
+				content:`That command was not found.`,
+				ephemeral:true
+			})
+		}
+	}
+
+	// Slash Command with subcommand/subcommand groups
+	if(interaction.isCommand() && (interaction.options.getSubcommandGroup(false) || interaction.options.getSubcommand(false))){
+		let commandName = interaction.options.getSubcommand(false);
+		let subCommandGroup = interaction.options.getSubcommandGroup(false) || interaction.commandName;
+
+		const command = client.commands.find(command => command.subCommandGroup == subCommandGroup 
+			&& command.commandName == commandName);
+
+			console.log("cmd", command)
+		if (command) {
+		
+			try {
+				if(command.staffOnly && !isStaff)
+					return interaction.reply({
+						content:`This is a staff only command.`,
+						ephemeral:true
+					})
+				if(command.staffOnly){
+					logStaffCommands(interaction, command)
+				}
 				command.execute(interaction);
 			} catch (error) {
 				console.error(error);
@@ -273,6 +342,9 @@ client.on("interactionCreate", interaction => {
 						content:`This is a staff only command.`,
 						ephemeral:true
 					})
+				if(command.staffOnly){
+					logStaffCommands(interaction)
+				}
 				command.execute(interaction);
 			} catch (error) {
 				console.error(command.customId, error);
@@ -296,9 +368,12 @@ client.on("interactionCreate", interaction => {
 						content:`This is a staff only command.`,
 						ephemeral:true
 					})
+				if(command.staffOnly){
+					logStaffCommands(interaction)
+				}
 				command.execute(interaction);
 			} catch (error) {
-				console.error(command.commandName, error);
+				console.error(command, error);
 				interaction.reply({content:'Uh oh, something went wrong while running that command. Please open an issue on [GitHub](https://github.com/Team-Neptune/Korral-JS) if the issue persists.'});
 			}
 		} else {
@@ -311,7 +386,7 @@ client.on("interactionCreate", interaction => {
 });
 
 //Code for the /msg_commands folder (Message Commands - deprecated)
-client.on('messageCreate', message => {
+client.on('messageCreate', async (message) => {
 	if(message.channel.type != "DM" && !message.author.bot && config.prefix.find(p => message.content.startsWith(p))){
 		const usedPrefix = config.prefix.find(p => message.content.startsWith(p))
 		const args = message.content.slice(usedPrefix.length).split(/ +/);
@@ -506,6 +581,10 @@ async function startBot(){
 	await loadCtxCommands();
 	await setupDeepsea();
 	await client.login(config.token);
+	if(!existsSync("./commands_setup.flag")){
+		await setupApplicationCommands(config.testingGuildId || undefined)
+		writeFileSync("./commands_setup.flag", "Commands successfully created")
+	}
 	console.log(`Statup functions have been executed!`)
 }
 

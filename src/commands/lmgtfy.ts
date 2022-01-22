@@ -2,12 +2,14 @@ import Command from "../classes/Command";
 import fetch from 'node-fetch'
 import { config } from "../../config";
 export default new Command({
+  commandName:"lmgtfy",
+  subCommandGroup:"utility",
     execute(interaction){
         if(!config.bitly_token)
           return interaction.reply({
               content:"`config.bitly_token` is not provided in the config."
           })
-        const searchTerm:string = interaction.options.data[0].value.toString()
+        const searchTerm:string = interaction.options.getString("search_term")
         const target = interaction.options.data[1]?.value.toString() || false
         let searchURL:string = `https://letmegooglethat.com/?${new URLSearchParams(`q=${searchTerm}`)}`
         fetch("https://api-ssl.bitly.com/v4/shorten", {

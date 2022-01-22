@@ -2,6 +2,8 @@ import { readFileSync } from "fs";
 import Command from "../classes/Command";
 
 export default new Command({
+  commandName:"rule",
+  subCommandGroup:"utility",
     execute(interaction){
         const ruleNum = interaction.options.getInteger("number");
         const target = interaction.options.getUser("target", false)?.id || false;

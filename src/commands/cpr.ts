@@ -1,6 +1,8 @@
 import Command from "../classes/Command";
 
 export default new Command({
+  commandName:"cpr",
+  subCommandGroup:"switch",
     execute(interaction){
         let target = interaction.options?.data.find(o => o.name == 'target')?.value?.toString() || false;
         interaction.reply({

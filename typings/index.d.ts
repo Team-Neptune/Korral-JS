@@ -64,6 +64,10 @@ export interface Config {
   }
   /** Location of warnings.json */
   warningJsonLocation:string
+  /** Location of userNotes.json */
+  noteJsonLocation:string
+  /** Guild ID for setting up application commands */
+  testingGuildId?:string
 }
 
 export interface GitHubRelease {
@@ -100,7 +104,7 @@ declare module 'discord.js' {
 }
 
 
-type SDLayoutOS = "win10" | "winxp" | "macos" | "mint20"
+type SDLayoutOS = "win" | "macos"
 
 interface ThreadSettings {
 	ownerId:string

@@ -1,8 +1,10 @@
 import Command from "../classes/Command";
 
 export default new Command({
+    commandName:"nag",
+    subCommandGroup:"switch",
     execute(interaction){
-        switch (interaction.options.data[0].value.toString()) {
+        switch (interaction.options.getString("type")) {
             case "gl":
                 interaction.reply({
                     content:"1. Open Goldleaf\n2. Select `Console and Goldleaf settings`\n3. Select on `Firmware and Updates`\n4. Select `Delete pending`"

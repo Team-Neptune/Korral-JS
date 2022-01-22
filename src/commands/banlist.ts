@@ -5,6 +5,8 @@ const message_channel_id = "703302552594284594"
 const message_id = "824322420529823764"
 
 export default new Command({
+    commandName:"banlist",
+    subCommandGroup:"switch",
     execute(interaction){
         interaction.deferReply({ephemeral:false}).then(async () => {
             let channel = interaction.client.guilds.cache.get(message_guild_id).channels.cache.get(message_channel_id) as TextChannel;

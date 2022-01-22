@@ -12,3 +12,4 @@ privateThreads.json
 publicThreads.json
 storage/deepsea_db.json
 activeTickets.json
+commands_setup.flag
