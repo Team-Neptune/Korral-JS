@@ -104,7 +104,7 @@ declare module 'discord.js' {
 }
 
 
-type SDLayoutOS = "win10" | "winxp" | "macos" | "mint20"
+type SDLayoutOS = "win" | "macos"
 
 interface ThreadSettings {
 	ownerId:string
