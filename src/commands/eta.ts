@@ -1,6 +1,8 @@
 import Command from "../classes/Command";
 
 export default new Command({
+    commandName:"eta",
+    subCommandGroup:"meme",
     execute(interaction){
         const messages = [
             "Soon:tm:",
