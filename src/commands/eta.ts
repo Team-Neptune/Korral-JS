@@ -13,6 +13,14 @@ export default new Command({
             "chese",
             "when hax learns vuejs",
             "when techgeekgamer learns stuff",
+            "when cheese flies",
+            "when hax becomes one with the chese",
+            "when deepsea becomes a cake",
+            "when daniel is banned",
+            "when daniel become good programmer",
+            "when hax stops playing apex",
+            "when hax stops golfing",
+            "when hax finally [explains](https://cdn.discordapp.com/attachments/744457183843844147/934593115623419904/unknown.png)"
         ]
         const index = Math.floor(Math.random() * messages.length)
         const msg = messages[index]
