@@ -3,6 +3,8 @@ import { config } from "../../config";
 import Command from "../classes/Command";
 
 export default new Command({
+    commandName:"close",
+    subCommandGroup:"tickets",
     execute(interaction){
         let user = interaction.options.getUser("user")
         let ticket = interaction.client.getSupportThreadData(user.id)
