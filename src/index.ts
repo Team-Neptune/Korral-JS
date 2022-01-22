@@ -145,17 +145,11 @@ client.getSupportThreadData = (userId:string) => {
 
 //Message Commands
 import {botCommands} from './msg_commands/bot'
-import {userCommands} from './msg_commands/user'
-import {supportCommands} from './msg_commands/support'
 import {memeCommands} from './msg_commands/meme'
-import {customCommands} from './msg_commands/custom'
 import ContextMenuCommand from './classes/ContextMenuCommand';
 
 botCommands.forEach(c => client.messageCommands.set(c.name, c))
-userCommands.forEach(c => client.messageCommands.set(c.name, c))
-supportCommands.forEach(c => client.messageCommands.set(c.name, c))
 memeCommands.forEach(c => client.messageCommands.set(c.name, c))
-customCommands.forEach(c => client.messageCommands.set(c.name, c))
 
 async function loadButtonCommands(){
 	let buttonCommandFiles = readdirSync(`./src/buttons`)
