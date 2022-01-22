@@ -1,5 +1,5 @@
 import fetch from 'node-fetch'
-import { TextChannel, Client, Collection, MessageEmbed, MessageButton, ThreadChannel, GuildMemberRoleManager } from 'discord.js'
+import { TextChannel, Client, Collection, MessageEmbed, MessageButton, ThreadChannel, GuildMemberRoleManager, ApplicationCommand, Interaction } from 'discord.js'
 import Command from './classes/Command';
 import {config} from '../config'
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'fs';
@@ -144,7 +144,13 @@ client.getSupportThreadData = (userId:string) => {
 }
 
 import ContextMenuCommand from './classes/ContextMenuCommand';
+import commands from './commands';
 
+async function setupApplicationCommands(guildId?:string):Promise<Collection<string, ApplicationCommand>> {
+	if(guildId)
+		return await client.guilds.cache.get(guildId).commands.set(commands)
+	return await client.application.commands.set(commands)
+}
 
 async function loadButtonCommands(){
 	let buttonCommandFiles = readdirSync(`./src/buttons`)
@@ -367,7 +373,7 @@ client.on("interactionCreate", interaction => {
 				}
 				command.execute(interaction);
 			} catch (error) {
-				console.error(command.commandName, error);
+				console.error(command, error);
 				interaction.reply({content:'Uh oh, something went wrong while running that command. Please open an issue on [GitHub](https://github.com/Team-Neptune/Korral-JS) if the issue persists.'});
 			}
 		} else {
@@ -380,7 +386,7 @@ client.on("interactionCreate", interaction => {
 });
 
 //Code for the /msg_commands folder (Message Commands - deprecated)
-client.on('messageCreate', message => {
+client.on('messageCreate', async (message) => {
 	if(message.channel.type != "DM" && !message.author.bot && config.prefix.find(p => message.content.startsWith(p))){
 		const usedPrefix = config.prefix.find(p => message.content.startsWith(p))
 		const args = message.content.slice(usedPrefix.length).split(/ +/);
@@ -575,6 +581,10 @@ async function startBot(){
 	await loadCtxCommands();
 	await setupDeepsea();
 	await client.login(config.token);
+	if(!existsSync("./commands_setup.flag")){
+		await setupApplicationCommands(config.testingGuildId || undefined)
+		writeFileSync("./commands_setup.flag", "Commands successfully created")
+	}
 	console.log(`Statup functions have been executed!`)
 }
 
