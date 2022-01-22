@@ -143,11 +143,8 @@ client.getSupportThreadData = (userId:string) => {
 	return activeTickets[userId];
 }
 
-//Message Commands
-import {botCommands} from './msg_commands/bot'
 import ContextMenuCommand from './classes/ContextMenuCommand';
 
-botCommands.forEach(c => client.messageCommands.set(c.name, c))
 
 async function loadButtonCommands(){
 	let buttonCommandFiles = readdirSync(`./src/buttons`)
