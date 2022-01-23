@@ -522,7 +522,26 @@ client.on('guildMemberAdd', member => {
 );
 
 //Member leave
-client.on('guildMemberRemove', member => {
+client.on('guildMemberRemove', async (member) => {
+	let threadData = client.getSupportThreadData(member.id)
+	if(threadData?.active){
+		try {
+			let threadChannel = member.client.channels.cache.get(threadData.threadChannelId) as ThreadChannel;
+			await threadChannel.send({
+				embeds:[
+					new MessageEmbed({
+						"description":`🔒 Ticket has been closed due to thread starter leaving the server.`,
+						"color":16711680
+					})
+				]
+			})
+			await client.closeSupportThread({
+				userId:threadData.userId,
+				channelId:threadData.threadChannelId,
+				noApi:false
+			})
+		} catch {}
+	}
 	if(config.userLogging == false)return;
 	(client.channels.cache.get(config.userLog) as TextChannel).send(`:arrow_left: Leave: <@${member.id}> | ${member.user.tag}\n:label: User ID: ${member.id}\n:hash: Server Member Count: ${member.guild.memberCount}`)
 });
