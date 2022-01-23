@@ -5,6 +5,7 @@ import Command from "../classes/Command";
 export default new Command({
     commandName:"setup",
     subCommandGroup:"tickets",
+    staffOnly:true,
     execute(interaction){
         interaction.reply({
             "content":`Ready to open tickets from <#${config.supportChannelId}>`,
