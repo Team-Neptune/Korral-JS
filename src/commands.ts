@@ -245,6 +245,11 @@ const modCommands:ApplicationCommandOptionData[] = [
 const switchCommands:ApplicationCommandOptionData[] = [
     {
         "type": 1,
+        "name": "reinstall",
+        "description": "Guide to manually (re)install DeepSea"
+    },
+    {
+        "type": 1,
         "name": "dns",
         "description": "View information about DNS servers you can use."
     },
