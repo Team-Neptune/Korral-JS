@@ -288,6 +288,16 @@ const switchCommands:ApplicationCommandOptionData[] = [
     },
     {
         "type": 1,
+        "name": "banlist",
+        "description": "View list of possible ban reasons"
+    },
+    {
+        "type": 1,
+        "name": "nogc",
+        "description": "Fix issues with gamecard reader"
+    },
+    {
+        "type": 1,
         "name": "sd",
         "description": "Displays info about making sure the SD card layout is correct",
         "options": [
