@@ -236,6 +236,8 @@ client.on("interactionCreate", interaction => {
 	if(interaction.isMessageComponent() && interaction.customId.startsWith("collecter")) return;
 
 	function logStaffCommands(interaction:Interaction, command?:Command){
+		if(config.staffCommandLogging == false)
+			return;
 		let modLogEntries = [
 			`:tools: Staff Command: <@${interaction.user.id}> | ${interaction.user.tag}`,
 			`:label: User ID: ${interaction.user.id}`

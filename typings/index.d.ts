@@ -37,6 +37,8 @@ export interface Config {
   userLog:string,
   /** Member Join/Leave enabled? */
   userLogging:boolean,
+  /** Staff command usage logged to Config.modLog */
+  staffCommandLogging?:boolean
   /** Role IDs that can use staff only commands */
   staffRoles:string[],
   /** The behavior of warnings (first item in array is action for the first warning) */
