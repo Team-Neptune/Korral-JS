@@ -208,7 +208,7 @@ for (let index = 0; index < requiredFiles.length; index++) {
 
 client.once('ready', () => {
 	console.log(`Ready as ${client.user.tag} (${client.user.id}) | ${client.guilds.cache.size} ${client.guilds.cache.size==1?"guild":"guilds"}`);
-	console.log(`Supports: Interactions & Message Commands (Deprecated)`)
+	console.log(`Supports: Interactions`)
 	const StartupEmbed = new MessageEmbed()
 		.setColor('#00FF00')
 		.setDescription(`**${client.user.tag}** is ready. Currently in ${client.guilds.cache.size} ${client.guilds.cache.size==1?"guild":"guilds"}.`)
@@ -383,29 +383,6 @@ client.on("interactionCreate", interaction => {
 				content:`That Context Menu command was not found.`,
 				ephemeral:true
 			})
-		}
-	}
-});
-
-//Code for the /msg_commands folder (Message Commands - deprecated)
-client.on('messageCreate', async (message) => {
-	if(message.channel.type != "DM" && !message.author.bot && config.prefix.find(p => message.content.startsWith(p))){
-		const usedPrefix = config.prefix.find(p => message.content.startsWith(p))
-		const args = message.content.slice(usedPrefix.length).split(/ +/);
-		const commandName = args.shift().toLowerCase();
-		const command = client.messageCommands.get(commandName) || client.messageCommands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
-	
-		if (command) {
-			if ((command.disallowedChannels && command.disallowedChannels.includes(message.channel.id)) || (command.allowedChannels && !command.allowedChannels.includes(message.channel.id)) || command.staffOnly == true && !message.member.roles.cache.some(role => config.staffRoles.includes(role.id))){
-				message.channel.send({content:`**Invalid permissions**: You don't appear to have the correct permissions to run this commands, or it may be disabled in this channel.`});
-			}else{
-				try {
-					command.execute(message, args);
-				} catch (error) {
-					console.error(error);
-					message.channel.send({content:'Uh oh, something went wrong while running that command. Please open an issue on [GitHub](https://github.com/Team-Neptune/Korral-JS) if the issue persists.'});
-				}
-			}
 		}
 	}
 });
