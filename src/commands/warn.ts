@@ -99,7 +99,7 @@ export default new Command({
 
 
     interaction.reply({
-      content:`<@${mentionedUser.id}> got warned. User has ${warnings[mentionedUser.id].length} warning(s).`,
+      content:`<@${mentionedUser.id}> got warned. User has ${warnings[mentionedUser.id].length} warning(s).\n**Reason:** ${reason}`,
       ephemeral:false
     });
     (interaction.client.channels.cache.get(config.modLog) as TextChannel).send(`<@${(interaction.member?.user.id || interaction.user.id)}> warned <@${mentionedUser.id}> (${mentionedUser.tag}) - warn #${warnings[mentionedUser.id].length}\n Reason: "${reason}"`)
