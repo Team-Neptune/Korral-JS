@@ -16,7 +16,7 @@ export default new Command({
                 content:`Unable to find a normal release. This should not happen.`
             })
         interaction.reply({
-            content:`**How to manually (re)install DeepSea**\n1. Delete all folders except \`Nintendo\` and \`emummc\` (if they exist)\n2. Download the [latest package](<https://github.com/Team-Neptune/DeepSea/releases/download/${normalDownload.latestTag}/${normalDownload.name}>)\n3. Extract contents of the zip to the SD card.\n\n**Note:** Make sure you delete the folders and not just overwrite them, as this could lead to problems.`
+            content:`**How to manually (re)install DeepSea**\n1. Delete all folders except \`Nintendo\` and \`emummc\` (if they exist)\n2. Download the [latest package](<https://github.com/Team-Neptune/DeepSea/releases/download/${normalDownload.latestTag}/${normalDownload.name}>)\n3. Extract contents of the zip to the SD card\n4. Use the included Hekate payload\n\n**Note:** Make sure you delete the folders and not just overwrite them, as this could lead to problems.`
         })
     }
 })
