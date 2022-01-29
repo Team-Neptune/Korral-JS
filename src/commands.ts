@@ -79,14 +79,27 @@ const ticketCommands:ApplicationCommandOptionData[] = [
     },
     {
         "type": 1,
-        "name": "close",
+        "name": "prompt",
         "description": "Give prompt to close a ticket",
         "options": [
             {
                 "type": 6,
                 "name": "user",
-                "description": "User to close ticket for",
+                "description": "User to prompt",
                 "required": true
+            }
+        ]
+    },
+    {
+        "type": 1,
+        "name": "close",
+        "description": "Close a ticket",
+        "options": [
+            {
+                "type": 6,
+                "name": "user",
+                "description": "(Staff only) User to close ticket for",
+                "required": false
             }
         ]
     }

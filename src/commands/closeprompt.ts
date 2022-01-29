@@ -3,12 +3,12 @@ import { config } from "../../config";
 import Command from "../classes/Command";
 
 export default new Command({
-    commandName:"close",
+    commandName:"prompt",
     subCommandGroup:"tickets",
     execute(interaction){
         let user = interaction.options.getUser("user")
         let ticket = interaction.client.getSupportThreadData(user.id)
-        if(!ticket)
+        if(!ticket || !ticket.active)
             return interaction.reply({
                 content:`Unable to find a ticket with that user`,
                 ephemeral:true
