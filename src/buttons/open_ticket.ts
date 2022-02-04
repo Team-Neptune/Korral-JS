@@ -72,7 +72,8 @@ export default new ButtonCommand({
                   "type":"BUTTON",
                   "style":"SECONDARY",
                   "customId":`staff_controls_${threadStarter}`,
-                  "label":"Staff Controls"
+                  "label":"Staff Controls",
+                  "emoji":"🛠"
                 }
               ]
             }

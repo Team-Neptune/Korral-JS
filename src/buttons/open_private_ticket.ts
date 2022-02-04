@@ -61,13 +61,20 @@ export default new ButtonCommand({
                   {
                       "type":1,
                         "components":[
-                            {
-                                "type":2,
-                                "style":2,
-                                "customId":`close_ticket_${threadStarter}`,
-                                "label":"Close Ticket",
-                                "emoji":"🔒"
-                            }
+                          {
+                            "type":2,
+                            "style":2,
+                            "customId":`close_ticket_${threadStarter}`,
+                            "label":"Close Ticket",
+                            "emoji":"🔒"
+                          },
+                          {
+                            "type":"BUTTON",
+                            "style":"SECONDARY",
+                            "customId":`staff_controls_${threadStarter}`,
+                            "label":"Staff Controls",
+                            "emoji":"🛠"
+                          }
                         ]
                     }
                 ]

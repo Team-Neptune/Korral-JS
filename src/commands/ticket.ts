@@ -71,8 +71,9 @@ export default new Command({
                     {
                       "type":"BUTTON",
                       "style":"SECONDARY",
-                      "customId":`switch_ticket_type_${threadStarter}`,
-                      "label":`Switch to ${supportRoleOnly?"Public":"Private"} Ticket`
+                      "customId":`staff_controls_${threadStarter}`,
+                      "label":"Staff Controls",
+                      "emoji":"🛠"
                     }
                   ]
                 }
