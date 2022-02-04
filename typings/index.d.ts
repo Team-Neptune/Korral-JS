@@ -96,7 +96,7 @@ declare module 'discord.js' {
         privateTicket:boolean
       }):Promise<ThreadChannel>
       getSupportThreadData(userId:string):ActiveTicketsData
-      updateSupportThread(options:{userId:string, threadId:string, newType?:TicketType, newName?:string, locked?:string}):Promise<boolean>
+      updateSupportThread(options:{userId:string, threadId:string, newType?:TicketType, newName?:string, locked?:string, externalChannelId?:string}):Promise<boolean>
       closeSupportThread(options:{
         userId:string,
         channelId?:string,
@@ -135,6 +135,8 @@ interface ActiveTicketsData {
   type:TicketType,
   /** Either not present or User ID */
   locked?:string
+  /** Either not present or Channel ID */
+  externalChannelId?:string
 }
 
 interface ActiveTickets {

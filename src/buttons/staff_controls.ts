@@ -1,4 +1,4 @@
-import { ThreadChannel } from "discord.js";
+import { BaseMessageComponentOptions, MessageActionRow, MessageActionRowOptions, OverwriteResolvable } from "discord.js";
 import { config } from "../../config";
 import { TicketType } from "../../typings";
 import ButtonCommand from "../classes/ButtonCommand";
@@ -12,27 +12,41 @@ export default new ButtonCommand({
     let threadData = interaction.client.getSupportThreadData(threadStarter);
     let randomChars = (Math.random() + 1).toString(36).substring(7).toString();
 
+    let components:(MessageActionRow | (Required<BaseMessageComponentOptions> & MessageActionRowOptions))[] = [
+        {
+            type:"ACTION_ROW",
+            components:[
+                {
+                    "type":"BUTTON",
+                    "style":"SECONDARY",
+                    "customId":`collecter_${randomChars}_switch_ticket_type-${interaction.message?.id}`,
+                    "label":`Toggle Ticket Type`
+                },
+                {
+                    "type":"BUTTON",
+                    "style":"SECONDARY",
+                    "customId":`collecter_${randomChars}_toggle_restricted_ticket-${interaction.message?.id}`,
+                    "label":`Toggle Restricted Management to ${interaction.user.tag}`
+                }
+            ]
+        },
+        {
+            type:"ACTION_ROW",
+            components:[
+                {
+                    "type":"BUTTON",
+                    "style":"SECONDARY",
+                    "customId":`collecter_${randomChars}_full_private-${interaction.message?.id}`,
+                    "label":`Full Private Ticket`,
+                    "disabled":threadData.externalChannelId?true:false
+                }
+            ]
+        }
+    ];
+
     interaction.reply({
         content:`**Staff Ticket Controls**`,
-        components:[
-            {
-                type:"ACTION_ROW",
-                components:[
-                    {
-                        "type":"BUTTON",
-                        "style":"SECONDARY",
-                        "customId":`collecter_${randomChars}_switch_ticket_type-${interaction.message?.id}`,
-                        "label":`Toggle Ticket Type`
-                    },
-                    {
-                        "type":"BUTTON",
-                        "style":"SECONDARY",
-                        "customId":`collecter_${randomChars}_toggle_restricted_ticket-${interaction.message?.id}`,
-                        "label":`Toggle Restricted Management to ${interaction.user.tag}`
-                    }
-                ]
-            }
-        ],
+        components,
         ephemeral:true
     })
 
@@ -77,6 +91,7 @@ export default new ButtonCommand({
             }
             if(res == true){
                 staffControlsMessageInteraction.update({
+                    components,
                     embeds:[
                         {
                             description:`Successfully changed ticket type to ${newType == 'PUBLIC' ? "Public" : "Private"}.`,
@@ -138,6 +153,74 @@ export default new ButtonCommand({
                 })
             }
             return;
+        }
+
+        if(staffControlsMessageInteraction.customId.includes("full_private")){
+            let supportChannelId = staffControlsMessageInteraction.guild.channels.cache.get(config.supportChannelId);
+            let threadChannel = staffControlsMessageInteraction.guild.channels.cache.get(threadData.threadChannelId);
+            if(threadChannel.isText()){
+                let staffOverrides:OverwriteResolvable[] = config.staffRoles.map((roleId) => {
+                    return {
+                        type:"role",
+                        allow:["VIEW_CHANNEL", "SEND_MESSAGES", "READ_MESSAGE_HISTORY", "ATTACH_FILES", "EMBED_LINKS"],
+                        id:roleId
+                    }
+                })
+
+                await staffControlsMessageInteraction.deferUpdate()
+
+                let newChannel = await supportChannelId.guild.channels.create(`Private-${threadChannel.name}`, {
+                    type:"GUILD_TEXT",
+                    parent:supportChannelId.parentId,
+                    topic:`This channel was created by <@${interaction.user.id}> from the ticket: <#${threadData.threadChannelId}>.`,
+                    reason:`${interaction.user?.tag}> from the ticket: ${threadData.threadChannelId}`,
+                    permissionOverwrites:[
+                        ...staffOverrides,
+                        {
+                            type:"role",
+                            id:config.supportRoleId,
+                            allow:["VIEW_CHANNEL", "SEND_MESSAGES", "READ_MESSAGE_HISTORY", "ATTACH_FILES", "EMBED_LINKS"]
+                        },
+                        {
+                            type:"member",
+                            id:threadStarter,
+                            allow:["VIEW_CHANNEL", "SEND_MESSAGES", "READ_MESSAGE_HISTORY", "ATTACH_FILES", "EMBED_LINKS"]
+                        }
+                    ]
+                });
+
+                let res = await interaction.client.updateSupportThread({
+                    externalChannelId:newChannel.id,
+                    userId:threadData.userId,
+                    threadId:threadData.threadChannelId
+                })
+
+                components[1].components[0].disabled = true;
+
+                staffControlsMessageInteraction.editReply({
+                    embeds:[
+                        {
+                            description:`Successfully opened external channel.`,
+                            color:"GREEN"
+                        }
+                    ],
+                    components
+                })
+
+                interaction.channel?.send({
+                    embeds:[
+                        {
+                            description:`A new channel has been opened related to this ticket, <#${newChannel.id}>.`,
+                            color:"BLUE",
+                            footer:{
+                                iconURL:`https://cdn.discordapp.com/avatars/${interaction.member?.user.id}/${interaction.member?.user.avatar}${interaction.member?.user.avatar.startsWith("a_")?".gif":".png"}`,
+                                text:`${interaction.member?.user.username}#${interaction.member?.user.discriminator}`
+                            }
+                        }
+                    ]
+                })
+
+            }
         }
     })
   }
