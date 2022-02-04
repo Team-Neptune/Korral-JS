@@ -71,8 +71,8 @@ export default new ButtonCommand({
                 {
                   "type":"BUTTON",
                   "style":"SECONDARY",
-                  "customId":`switch_ticket_type_${threadStarter}`,
-                  "label":"Switch to Private Ticket"
+                  "customId":`staff_controls_${threadStarter}`,
+                  "label":"Staff Controls"
                 }
               ]
             }

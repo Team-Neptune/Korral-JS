@@ -72,11 +72,16 @@ client.createSupportThread = async (options:{shortDesc:string, userId:string, pr
 	return createdChannel;
 }
 
-client.updateSupportThread = async (options:{userId:string, threadId:string, newType?:TicketType, newName?:string}) => {
+client.updateSupportThread = async (options:{userId:string, threadId:string, newType?:TicketType, newName?:string, locked?:string}) => {
 	if(!publicThreads[options.threadId] && !privateThreads[options.threadId])
 		return false;
 	let threadChannel = client.channels.cache.get(options.threadId) as ThreadChannel;
 	let newThreadChannelName:string = threadChannel.name;
+	
+	if(typeof options.locked == 'undefined' && options.locked === undefined || typeof options.locked == 'string'){
+		activeTickets[options.userId].locked = options.locked;
+		saveActiveTicketsData()
+	}
 
 	if(options.newType){
 		activeTickets[options.userId].type = options.newType;
