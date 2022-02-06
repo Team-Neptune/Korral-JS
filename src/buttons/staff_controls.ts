@@ -26,7 +26,7 @@ export default new ButtonCommand({
                     "type":"BUTTON",
                     "style":"SECONDARY",
                     "customId":`collecter_${randomChars}_toggle_restricted_ticket-${interaction.message?.id}`,
-                    "label":`Toggle Restricted Management to ${interaction.user.tag}`
+                    "label":`${!threadData.locked?'Restrict':'Unrestrict'} Management ${!threadData.locked?'to':'from'} ${(interaction.client.users.cache.get(threadData.locked)?.tag || threadData.locked) || interaction.user.tag}`
                 }
             ]
         },
@@ -125,13 +125,20 @@ export default new ButtonCommand({
                 locked = staffControlsMessageInteraction.user?.id;
             if(typeof threadData.locked == 'string')
                 locked = undefined;
-            console.log("old", threadData.locked)
-            console.log("new", locked)
+            
             let res = await interaction.client.updateSupportThread({
                 userId:threadData.userId,
                 threadId:threadData.threadChannelId,
                 locked
             })
+
+            components[0].components = components[0].components.map(c => {
+                if(c.type == "BUTTON" && c.customId.includes("toggle_restricted_ticket")){
+                    c.label = `${!locked?'Restrict':'Unrestrict'} Management ${!locked?'to':'from'} ${(interaction.client.users.cache.get(locked)?.tag || locked) || interaction.user.tag}`;
+                }
+                return c;
+            })
+            
             if(res === false){
                 staffControlsMessageInteraction.update({
                     embeds:[
@@ -144,6 +151,7 @@ export default new ButtonCommand({
             }
             if(res == true){
                 staffControlsMessageInteraction.update({
+                    components,
                     embeds:[
                         {
                             description:`Successfully ${typeof locked == 'string'?'restricted':'unrestricted'} ticket management ${typeof locked == 'string'?'to':'from'} ${interaction.user?.tag}.`,
@@ -155,6 +163,7 @@ export default new ButtonCommand({
             return;
         }
 
+        // Open new channel
         if(staffControlsMessageInteraction.customId.includes("full_private")){
             let supportChannelId = staffControlsMessageInteraction.guild.channels.cache.get(config.supportChannelId);
             let threadChannel = staffControlsMessageInteraction.guild.channels.cache.get(threadData.threadChannelId);
@@ -173,21 +182,41 @@ export default new ButtonCommand({
                     type:"GUILD_TEXT",
                     parent:supportChannelId.parentId,
                     topic:`This channel was created by <@${interaction.user.id}> from the ticket: <#${threadData.threadChannelId}>.`,
-                    reason:`${interaction.user?.tag}> from the ticket: ${threadData.threadChannelId}`,
-                    permissionOverwrites:[
-                        ...staffOverrides,
-                        {
-                            type:"role",
-                            id:config.supportRoleId,
-                            allow:["VIEW_CHANNEL", "SEND_MESSAGES", "READ_MESSAGE_HISTORY", "ATTACH_FILES", "EMBED_LINKS"]
-                        },
-                        {
-                            type:"member",
-                            id:threadStarter,
-                            allow:["VIEW_CHANNEL", "SEND_MESSAGES", "READ_MESSAGE_HISTORY", "ATTACH_FILES", "EMBED_LINKS"]
-                        }
-                    ]
+                    reason:`${interaction.user?.tag}> from the ticket: ${threadData.threadChannelId}`
                 });
+
+                await newChannel.lockPermissions()
+
+                await newChannel.permissionOverwrites.set([
+                    ...newChannel.permissionOverwrites.cache.map(po => {
+                        return {
+                            id:po.id,
+                            allow:po.allow,
+                            deny:po.deny
+                        }
+                    }),
+                    ...staffOverrides,
+                    {
+                        type:"role",
+                        id:config.supportRoleId,
+                        allow:["VIEW_CHANNEL", "SEND_MESSAGES", "READ_MESSAGE_HISTORY", "ATTACH_FILES", "EMBED_LINKS"]
+                    },
+                    {
+                        type:"member",
+                        id:threadStarter,
+                        allow:["VIEW_CHANNEL", "SEND_MESSAGES", "READ_MESSAGE_HISTORY", "ATTACH_FILES", "EMBED_LINKS"]
+                    },
+                    {
+                        type:"member",
+                        id:interaction.client.user.id,
+                        allow:["VIEW_CHANNEL", "SEND_MESSAGES", "READ_MESSAGE_HISTORY", "ATTACH_FILES", "EMBED_LINKS", "MANAGE_MESSAGES", "MANAGE_CHANNELS"]
+                    },
+                    {
+                        type:"role",
+                        id:staffControlsMessageInteraction.guildId,
+                        deny:["VIEW_CHANNEL"]
+                    }
+                ])
 
                 let res = await interaction.client.updateSupportThread({
                     externalChannelId:newChannel.id,
@@ -197,29 +226,60 @@ export default new ButtonCommand({
 
                 components[1].components[0].disabled = true;
 
-                staffControlsMessageInteraction.editReply({
-                    embeds:[
-                        {
-                            description:`Successfully opened external channel.`,
-                            color:"GREEN"
-                        }
-                    ],
-                    components
-                })
-
-                interaction.channel?.send({
-                    embeds:[
-                        {
-                            description:`A new channel has been opened related to this ticket, <#${newChannel.id}>.`,
-                            color:"BLUE",
-                            footer:{
-                                iconURL:`https://cdn.discordapp.com/avatars/${interaction.member?.user.id}/${interaction.member?.user.avatar}${interaction.member?.user.avatar.startsWith("a_")?".gif":".png"}`,
-                                text:`${interaction.member?.user.username}#${interaction.member?.user.discriminator}`
+                if(res == true){
+                    await staffControlsMessageInteraction.editReply({
+                        embeds:[
+                            {
+                                description:`Successfully opened external channel.`,
+                                color:"GREEN"
                             }
-                        }
-                    ]
-                })
+                        ],
+                        components
+                    })
 
+                    await newChannel.send({
+                        content:`This channel was created by <@${interaction.user.id}> from the ticket: <#${threadData.threadChannelId}>.`,
+                        components:[
+                            {
+                                type:"ACTION_ROW",
+                                components:[
+                                    {
+                                        "type":"BUTTON",
+                                        "style":"SECONDARY",
+                                        "customId":`private_ticket_staff_controls_${threadStarter}`,
+                                        "label":"Staff Controls",
+                                        "emoji":"🛠"
+                                    }
+                                ]
+                            }
+                        ]
+                    })
+    
+                    await interaction.channel?.send({
+                        embeds:[
+                            {
+                                description:`A new channel has been opened related to this ticket, [${newChannel.name}](<https://discord.com/channels/${newChannel.guildId}/${newChannel.id}>).`,
+                                color:"BLUE",
+                                footer:{
+                                    iconURL:`https://cdn.discordapp.com/avatars/${interaction.member?.user.id}/${interaction.member?.user.avatar}${interaction.member?.user.avatar.startsWith("a_")?".gif":".png"}`,
+                                    text:`${interaction.member?.user.username}#${interaction.member?.user.discriminator}`
+                                }
+                            }
+                        ]
+                    })
+                }
+                
+                if(res == false){
+                    staffControlsMessageInteraction.editReply({
+                        embeds:[
+                            {
+                                description:`Failed to open external channel.`,
+                                color:"RED"
+                            }
+                        ],
+                        components
+                    })
+                }
             }
         }
     })
