@@ -2,6 +2,7 @@ import {Message, Collection} from 'discord.js'
 import ButtonCommand from '../src/classes/ButtonCommand'
 import Command from '../src/classes/Command'
 import ContextMenuCommand from '../src/classes/ContextMenuCommand'
+import ModalCommand from '../src/classes/ModalCommand'
 export interface MessageCommand {
   /** Command name */
   name:string,
@@ -89,7 +90,8 @@ declare module 'discord.js' {
       commands: Collection<string, Command>
       messageCommands: Collection<string, MessageCommand>
       buttonCommands: Collection<string, ButtonCommand>
-      ctxCommands: Collection<string, ContextMenuCommand>,
+      ctxCommands: Collection<string, ContextMenuCommand>
+      modalCommands:Collection<string, ModalCommand>
       createSupportThread(options:{
         shortDesc:string,
         userId:string,
