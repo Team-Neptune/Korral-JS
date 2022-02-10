@@ -5,6 +5,31 @@ export default new ButtonCommand({
   customId:"open_ticket_prompt",
   checkType:"EQUALS",
   execute(interaction){
+    let threadStarter = interaction.member.user.id;
+    let currentThread = interaction.client.getSupportThreadData(threadStarter);
+    if(currentThread?.active || false)
+      return interaction.followUp({
+        content:`You already have a ticket opened. Please use your current ticket or close your current ticket to open a new one.`,
+        components:[
+          {
+            type:"ACTION_ROW",
+            components:[
+              {
+                type:"BUTTON",
+                label:"View Current Ticket",
+                style:"LINK",
+                url:`https://discord.com/channels/${interaction.guildId}/${currentThread?.threadChannelId}`
+              },
+              {
+                type:"BUTTON",
+                label:"Close Current Ticket",
+                style:"DANGER",
+                customId:`close_ticket_${threadStarter}`
+              }
+            ]
+          }
+        ]
+      })
     if(config.openingTicketPrompt?.enabled){
       return interaction.reply({
         content:config.openingTicketPrompt.message,
