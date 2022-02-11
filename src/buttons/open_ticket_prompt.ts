@@ -8,7 +8,7 @@ export default new ButtonCommand({
     let threadStarter = interaction.member.user.id;
     let currentThread = interaction.client.getSupportThreadData(threadStarter);
     if(currentThread?.active || false)
-      return interaction.followUp({
+      return interaction.reply({
         content:`You already have a ticket opened. Please use your current ticket or close your current ticket to open a new one.`,
         components:[
           {
@@ -28,7 +28,8 @@ export default new ButtonCommand({
               }
             ]
           }
-        ]
+        ],
+        ephemeral:true
       })
     if(config.openingTicketPrompt?.enabled){
       return interaction.reply({
