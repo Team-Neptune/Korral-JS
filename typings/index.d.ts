@@ -61,9 +61,11 @@ export interface Config {
   },
   closingTicketsSettings?:{
     /** Minimum amount of seconds the ticket has to be open before it can be closed */
-    ticketsMinimumAge?:number,
+    ticketsMinimumAge?:number
     /** Message to be sent when ticket is closed */
     closeMessage?:string
+    /** The channel to send incoming feedback from closing tickets */
+    incomingFeedbackChannel?:string
   }
   /** Location of warnings.json */
   warningJsonLocation:string
