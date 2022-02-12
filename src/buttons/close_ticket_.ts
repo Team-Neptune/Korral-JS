@@ -47,7 +47,7 @@ export default new ButtonCommand({
                                     custom_id: 'feedback_content',
                                     style: 2,
                                     label: 'How was your experience in the ticket?',
-                                    placeholder: 'This is shared with the server admin',
+                                    placeholder: 'This is shared with the server admin(s)',
                                     min_length:10,
                                     required:false
                                 }
