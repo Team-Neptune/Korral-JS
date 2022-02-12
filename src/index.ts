@@ -253,7 +253,6 @@ process.on('unhandledRejection', error => {
 
 // TEMP: Until d.js properly implements Modals
 client.ws.on("INTERACTION_CREATE", (payload) => {
-	console.log("INTERACTION_CREATE", payload)
 	if(payload.type === 5){
 		let commandName = payload.data?.custom_id;
 
@@ -281,7 +280,6 @@ client.ws.on("INTERACTION_CREATE", (payload) => {
 
 //Code for interactions (Slash Commands, Buttons, CTX comamnds)
 client.on("interactionCreate", interaction => {
-	console.log("interactionCreate", interaction)
 	if(!interaction.channel){
 		console.log(`MISSING INTERACTION.CHANNEL`, `Channel ID: ${interaction.channelId}`, `ID: ${interaction.id}`, `Guild ID: ${interaction.guildId}`, `User ID: ${interaction.member?.user.id}`);
 		return;
