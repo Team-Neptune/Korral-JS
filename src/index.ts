@@ -401,19 +401,20 @@ client.on("threadDelete", async (thread) => {
 })
 
 function keepThreadsOpen(){
-	(client.channels.cache.get(config.supportChannelId) as TextChannel).threads.fetchActive(true).then(threads => {
-		threads.threads.each(channel => {
+	(client.channels.cache.get(config.supportChannelId) as TextChannel).threads.fetchActive(true).then(({threads}) => {
+		threads.each(channel => {
 			if(publicThreads[channel.id] || privateThreads[channel.id]){
-				let threadStarter = (publicThreads[channel.id] || privateThreads[channel.id]).ownerId;
+				let threadStarter = client.getSupportThreadData((publicThreads[channel.id] || privateThreads[channel.id]).ownerId);
 				let closeTicketButton = new MessageButton()
 				.setStyle("SECONDARY")
-				.setCustomId(`close_ticket_${threadStarter}`)
+				.setCustomId(`close_ticket_${threadStarter.userId}`)
 				.setLabel("Close Ticket")
 				.setEmoji("🔒");
 				channel.send({
+					content:`<@${threadStarter.userId}>`,
 					embeds:[
 						{
-							description:`This message has been sent to keep this ticket open. If you no longer need this ticket, you can close it with the button below.`
+							description:`Hey there! This message has been set to keep this ticket from closing automatically. If you have already resolved your issue/don't need support anymore, you can close it with the button below. Thanks!`
 						}
 					],
 					components:[
