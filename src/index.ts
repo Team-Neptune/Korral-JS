@@ -513,18 +513,6 @@ client.on("messageCreate", (message) => {
 		}
 	}
 })
-// Welcome message
-client.on("message", (message) => {
-    if(message.type === "GUILD_MEMBER_JOIN")
-        message.channel.send({
-            content:`**o/** Welcome, <@${message.author.id}>!`,
-            embeds:[
-                {
-                    description:`*Welcome to **${message.guild.name}***\n\nIf you come in need of support with anything Atmosphere/SDSetup/DeepSea related, you may go to <#${config.supportChannelId}> and open a ticket by pressing the **Open Ticket** button. We hope you enjoy your stay here!`
-                }
-            ]
-        })
-})
 
 //Member join
 client.on('guildMemberAdd', member => {
