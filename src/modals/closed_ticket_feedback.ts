@@ -16,7 +16,7 @@ export default new ModalCommand({
         if(!config.closingTicketsSettings?.incomingFeedbackChannel) return;
         if(!feedbackContent || feedbackContent?.trim() === '') return;
         let feedbackChannel = client.channels.cache.get(config.closingTicketsSettings?.incomingFeedbackChannel);
-        let ticketChannel = await client.channels.fetch(interaction.channelId);
+        let ticketChannel = await client.channels.fetch(supportThreadData.threadChannelId);
         if(feedbackChannel?.isText() && ticketChannel?.isThread()){
             feedbackChannel.send({
                 embeds:[
@@ -26,7 +26,7 @@ export default new ModalCommand({
                         fields:[
                             {
                                 name:`Ticket`,
-                                value:`[${ticketChannel.name}](https://discord.com/channels/${ticketChannel.parentId}/${ticketChannel.id}) (${supportThreadData.threadChannelId})`,
+                                value:`[${ticketChannel.name}](https://discord.com/channels/${ticketChannel.guildId}/${ticketChannel.id}) (${supportThreadData.threadChannelId})`,
                                 inline:true
                             },
                             {
