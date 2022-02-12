@@ -28,6 +28,13 @@ export default new ButtonCommand({
                     "customId":`collecter_${randomChars}_lock_channel-${interaction.message?.id}`,
                     "label":`Archive Channel`,
                     "disabled":thisChannel.permissionOverwrites.cache.find(po => po.id == thisChannel.guildId && po.deny.has("SEND_MESSAGES"))?true:false
+                },
+                {
+                    "type":"BUTTON",
+                    "style":"DANGER",
+                    "customId":`collecter_${randomChars}_delete_channel-${interaction.message?.id}`,
+                    "label":`Delete Channel`,
+                    "disabled":!interaction.memberPermissions.has("MANAGE_CHANNELS") || !interaction.guild.me.permissions.has("MANAGE_CHANNELS")?true:false
                 }
             ]
         }
@@ -123,6 +130,10 @@ export default new ButtonCommand({
                 }
             }
             return;
+        }
+
+        if(collected.customId.includes("delete_channel")){
+            await collected.channel.delete()
         }
     })
   }
