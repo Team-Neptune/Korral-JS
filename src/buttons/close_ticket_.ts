@@ -31,35 +31,60 @@ export default new ButtonCommand({
                 content:`This ticket's management has been restricted to <@${supportThread.locked}>. Please contact them to perform this action.`,
                 ephemeral:true
             })
-        interaction.reply({
-            content:`<#${threadChannelId}> will be locked soon.`,
-            ephemeral:true
-        })
-        .then(() => {
-            let embeds:MessageEmbed[] = [
-                new MessageEmbed(                {
-                    "description":`🔒 Ticket has been closed by <@${currentUserId}>`,
-                    "color":16711680
-                })
-            ];
-            if(config.closingTicketsSettings?.closeMessage)
-                embeds.push(new MessageEmbed({
-                    "description":config.closingTicketsSettings.closeMessage.replace(userPingReplaceRegExp, `<@${ticketUserId}>`),
-                    "footer":{
-                        text:"The message above is set by the server"
+        
+        if(config.closingTicketsSettings?.incomingFeedbackChannel && currentUserId === supportThread.userId){
+            // @ts-ignore
+            interaction.client.api.interactions(interaction.id)(interaction.token).callback.post({
+                data:{
+                type: 9,
+                data: {
+                    components: [
+                        {
+                            type: 1,
+                            components:[
+                                {
+                                    type: 4,
+                                    custom_id: 'feedback_content',
+                                    style: 2,
+                                    label: 'How was your experience in the ticket?',
+                                    placeholder: 'This is shared with the server admin',
+                                    min_length:10,
+                                    required:false
+                                }
+                            ]
+                        }
+                    ],
+                    title: 'Ticket Feedback',
+                    custom_id: 'closed_ticket_feedback'
                     }
-                }));
-
-            let threadChannel = interaction.client.channels.cache.get(threadChannelId) as ThreadChannel;
-            threadChannel?.send({
-                embeds
+                }
             })
-            return interaction.client.closeSupportThread({
-                userId:ticketUserId,
-                channelId:threadChannelId,
-                noApi:threadChannel?false:true
-
-            }).catch(console.error)
-        })
+            .then(() => {
+                let embeds:MessageEmbed[] = [
+                    new MessageEmbed(                {
+                        "description":`🔒 Ticket has been closed by <@${currentUserId}>`,
+                        "color":16711680
+                    })
+                ];
+                if(config.closingTicketsSettings?.closeMessage)
+                    embeds.push(new MessageEmbed({
+                        "description":config.closingTicketsSettings.closeMessage.replace(userPingReplaceRegExp, `<@${ticketUserId}>`),
+                        "footer":{
+                            text:"The message above is set by the server"
+                        }
+                    }));
+    
+                let threadChannel = interaction.client.channels.cache.get(threadChannelId) as ThreadChannel;
+                threadChannel?.send({
+                    embeds
+                })
+                return interaction.client.closeSupportThread({
+                    userId:ticketUserId,
+                    channelId:threadChannelId,
+                    noApi:threadChannel?false:true
+    
+                }).catch(console.error)
+            })
+        }
     }
 })
