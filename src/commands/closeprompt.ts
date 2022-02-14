@@ -24,6 +24,11 @@ export default new Command({
                 content:`This command must be sent in the ticket channel`,
                 ephemeral:true
             })
+        if(ticket.locked && ticket.locked != interaction.user.id)
+            return interaction.reply({
+                content:`This ticket's management has been restricted to <@${ticket.locked}>. Please contact them to perform this action.`,
+                ephemeral:true
+            })
         interaction.reply({
             content:`Hey <@${user.id}>,\n\n<@${interaction.user.id}> has requested that this ticket be closed. If you're done with your question, you can close it with the button below. If you are not finished, please let us know so we don't close your ticket for inactivity.`,
             components:[

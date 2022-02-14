@@ -28,6 +28,11 @@ export default new Command({
                 content:`You can't close a ticket that isn't yours.`,
                 ephemeral:true
             })
+        if(supportThread.locked && supportThread.locked != interaction.user.id)
+            return interaction.reply({
+                content:`This ticket's management has been restricted to <@${supportThread.locked}>. Please contact them to perform this action.`,
+                ephemeral:true
+            })
         if(config.closingTicketsSettings?.ticketsMinimumAge > secondsSinceCreation && !isStaff)
             return interaction.reply({
                 content:`Sorry, this ticket has to remain open for **${remainingTime > 60? Math.floor(remainingTime / 60) : Math.floor(remainingTime)}** more ${remainingTime > 60 ? `minute${Math.floor(remainingTime / 60) == 1 ? `` : `s`}` : `second${Math.floor(remainingTime) <= 1 ? `` : `s`}`} before it can be closed.`,

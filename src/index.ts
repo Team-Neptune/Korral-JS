@@ -12,6 +12,7 @@ client.commands = new Collection();
 client.messageCommands = new Collection();
 client.buttonCommands = new Collection();
 client.ctxCommands = new Collection();
+client.modalCommands = new Collection();
 
 let activeTickets:ActiveTickets = {};
 if(existsSync("./activeTickets.json"))
@@ -72,11 +73,21 @@ client.createSupportThread = async (options:{shortDesc:string, userId:string, pr
 	return createdChannel;
 }
 
-client.updateSupportThread = async (options:{userId:string, threadId:string, newType?:TicketType, newName?:string}) => {
+client.updateSupportThread = async (options:{userId:string, threadId:string, newType?:TicketType, newName?:string, locked?:string, externalChannelId?:string}) => {
 	if(!publicThreads[options.threadId] && !privateThreads[options.threadId])
 		return false;
 	let threadChannel = client.channels.cache.get(options.threadId) as ThreadChannel;
 	let newThreadChannelName:string = threadChannel.name;
+	
+	if(typeof options.locked == 'undefined' && options.locked === undefined || typeof options.locked == 'string'){
+		activeTickets[options.userId].locked = options.locked;
+		saveActiveTicketsData()
+	}
+
+	if(typeof options.externalChannelId == 'undefined' && options.externalChannelId === undefined || typeof options.externalChannelId == 'string'){
+		activeTickets[options.userId].externalChannelId = options.externalChannelId;
+		saveActiveTicketsData()
+	}
 
 	if(options.newType){
 		activeTickets[options.userId].type = options.newType;
@@ -145,6 +156,7 @@ client.getSupportThreadData = (userId:string) => {
 
 import ContextMenuCommand from './classes/ContextMenuCommand';
 import commands from './commands';
+import ModalCommand from './classes/ModalCommand';
 
 async function setupApplicationCommands(guildId?:string):Promise<Collection<string, ApplicationCommand>> {
 	if(guildId)
@@ -197,6 +209,21 @@ async function loadCtxCommands(){
 	}
 }
 
+async function loadModalCommands(){
+	let commandFiles = readdirSync(`./src/modals`)
+	.filter(file => file.endsWith('.ts'));
+	
+	for (var commandFileName of commandFiles) {
+		try {
+			var commandImport = await import(`./modals/${commandFileName.split(".")[0].toString()}`);
+			var command:ModalCommand = commandImport.default;
+			await client.modalCommands.set(command.customId, command)
+		} catch (err) {
+			console.error(err)
+		}
+	}
+}
+
 // Required files
 let requiredFiles = ["warnings.json", "userNotes.json"]
 for (let index = 0; index < requiredFiles.length; index++) {
@@ -224,13 +251,39 @@ process.on('unhandledRejection', error => {
 	(client.channels.cache.get(config.botLog) as TextChannel).send(`**Uncaught Promise Rejection**\n\`\`\`console\n${error}\`\`\``)
 });
 
+// TEMP: Until d.js properly implements Modals
+client.ws.on("INTERACTION_CREATE", (payload) => {
+	if(payload.type === 5){
+		let commandName = payload.data?.custom_id;
+
+		const command = client.modalCommands.find(modal => modal.customId == commandName);
+
+		if (command) {
+		
+			try {
+				// TEMP: Implement later
+				// if(command.staffOnly && !isStaff)
+				// 	return interaction.reply({
+				// 		content:`This is a staff only command.`,
+				// 		ephemeral:true
+				// 	})
+				// if(command.staffOnly){
+				// 	logStaffCommands(interaction, command)
+				// }
+				command.execute(payload, client);
+			} catch (error) {
+				console.error(error);
+			}
+		}
+	}
+})
+
 //Code for interactions (Slash Commands, Buttons, CTX comamnds)
 client.on("interactionCreate", interaction => {
 	if(!interaction.channel){
 		console.log(`MISSING INTERACTION.CHANNEL`, `Channel ID: ${interaction.channelId}`, `ID: ${interaction.id}`, `Guild ID: ${interaction.guildId}`, `User ID: ${interaction.member?.user.id}`);
 		return;
 	};
-	console.log(interaction.member.user.id, interaction.member.roles)
 	let isStaff = (interaction.member?.roles as GuildMemberRoleManager)?.cache?.find(role => config.staffRoles.includes(role.id));
 
 	if(interaction.isMessageComponent() && interaction.customId.startsWith("collecter")) return;
@@ -274,7 +327,6 @@ client.on("interactionCreate", interaction => {
 
 	// Normal Slash Command
 	if(interaction.isCommand() && !(interaction.options.getSubcommandGroup(false) || interaction.options.getSubcommand(false))){
-		console.log(interaction)
 		const command = client.commands.get(interaction.commandName);
 	
 		if (command) {
@@ -294,10 +346,10 @@ client.on("interactionCreate", interaction => {
 				interaction.reply({content:'Uh oh, something went wrong while running that command. Please open an issue on [GitHub](https://github.com/Team-Neptune/Korral-JS) if the issue persists.'});
 			}
 		} else {
-			interaction.reply({
-				content:`That command was not found.`,
-				ephemeral:true
-			})
+			// interaction.reply({
+			// 	content:`That command was not found.`,
+			// 	ephemeral:true
+			// })
 		}
 	}
 
@@ -309,7 +361,6 @@ client.on("interactionCreate", interaction => {
 		const command = client.commands.find(command => command.subCommandGroup == subCommandGroup 
 			&& command.commandName == commandName);
 
-			console.log("cmd", command)
 		if (command) {
 		
 			try {
@@ -496,9 +547,7 @@ client.on("messageCreate", (message) => {
 		}
 
 		if(message.content.includes("--") && (thisTicketAllowed.authorizedUsers.includes(message.author.id) || message.member.roles.cache.find(r => thisTicketAllowed.authorizedRoles.includes(r.id))) && message.mentions.users.size > 0){
-			console.log(message.mentions.users, "BEFORE")
 			message.mentions.users = message.mentions.users.filter(u => privateThreads[message.channel.id].authorizedUsers.includes(u.id));
-			console.log(message.mentions.users, "AFTER")
 			if(message.mentions.users.size == 0) return;
 			privateThreads[message.channel.id].authorizedUsers = privateThreads[message.channel.id].authorizedUsers.filter(authorizedUserId => !message.mentions.users.has(authorizedUserId));
 			saveThreadsData()
@@ -577,6 +626,7 @@ async function startBot(){
 	await loadButtonCommands();
 	await loadSlashCommands();
 	await loadCtxCommands();
+	await loadModalCommands();
 	await setupDeepsea();
 	await client.login(config.token);
 	if(!existsSync("./commands_setup.flag")){

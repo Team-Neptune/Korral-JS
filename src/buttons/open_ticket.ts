@@ -17,87 +17,85 @@ export default new ButtonCommand({
         content:`Topic must be 1-90 characters`,
         ephemeral:true
       })
-    interaction.deferReply({ephemeral:true}).then(() => {
-      let currentThread = interaction.client.getSupportThreadData(threadStarter);
-      if(currentThread?.active || false)
-        return interaction.followUp({
-          content:`You already have a ticket opened. Please use your current ticket or close your current ticket to open a new one.`,
-          components:[
+    // @ts-ignore
+    interaction.client.api.interactions(interaction.id)(interaction.token).callback.post({
+      data:{
+        type: 9,
+        data: {
+          components: [
             {
-              type:"ACTION_ROW",
+              type: 1,
+              components: [
+                {
+                  type: 4,
+                  custom_id: 'question1',
+                  style: 1,
+                  label: 'Firmware + Atmosphere / DeepSea version',
+                  placeholder: 'FW X.X.X, Atmosphere X.X.X, DeepSea X.X.X',
+                  max_length:50
+                }
+              ]
+            },
+            {
+              type: 1,
               components:[
                 {
-                  type:"BUTTON",
-                  label:"View Current Ticket",
-                  style:"LINK",
-                  url:`https://discord.com/channels/${interaction.guildId}/${currentThread?.threadChannelId}`
-                },
-                {
-                  type:"BUTTON",
-                  label:"Close Current Ticket",
-                  style:"DANGER",
-                  customId:`close_ticket_${threadStarter}`
+                  type: 4,
+                  custom_id: 'question2',
+                  style: 1,
+                  label: 'Do you use Hekate or Fusee?',
+                  placeholder: 'Hekate / Fusee',
+                  min_length:5,
+                  max_length:50
                 }
               ]
-            }
-          ]
-        })
-      interaction.client.createSupportThread({
-        shortDesc:topic.value.toString(), 
-        userId:threadStarter, 
-        privateTicket: supportRoleOnly
-      })
-      .then(channel => {                
-        const questions = [
-          `- Firmware and CFW / Atmosphere / DeepSea version`,
-          `- Do you use hekate or fusee-primary?`,
-          `- If you have an error screen with ID or code, what does it say? A screenshot/picture could be helpful.`,
-          `- What, if anything, have you tried to fix the issue?`,
-          `- Are you coming for support with SDSetup or DeepSea?`
-        ];
-        (interaction.client.channels.cache.get(channel.id) as ThreadChannel).send({
-          "content":`${supportRoleOnly?"\n:lock: *This is a private ticket, so only staff may reply.*":"\n:unlock: *This is a public ticket, everyone may view and reply to it..*"}\n\nHey <@${threadStarter}>, to make it easier for us and others help you with your issue, please tell us a few things about your setup, like:\n\n${questions.join("\n")}`,
-          "components":[
+            },
             {
-              "type":1,
-              "components":[
+              type: 1,
+              components:[
                 {
-                  "type":2,
-                  "style":2,
-                  "customId":`close_ticket_${threadStarter}`,
-                  "label":"Close Ticket",
-                  "emoji":"🔒"
-                },
+                  type: 4,
+                  custom_id: 'question3',
+                  style: 1,
+                  label: 'Do you have an error code and screen?',
+                  placeholder: 'Error Code 0000-0000 / Screenshot link',
+                  required:false
+                }
+              ]
+            },
+            {
+              type: 1,
+              components:[
                 {
-                  "type":"BUTTON",
-                  "style":"SECONDARY",
-                  "customId":`switch_ticket_type_${threadStarter}`,
-                  "label":"Switch to Private Ticket"
+                  type: 4,
+                  custom_id: 'question4',
+                  style: 1,
+                  label: 'Coming for support with SDSetup or DeepSea?',
+                  placeholder: 'SDSetup / DeepSea / Something else',
+                  max_length:50
+                }
+              ]
+            },
+            {
+              type: 1,
+              components:[
+                {
+                  type: 4,
+                  custom_id: 'question5',
+                  style: 2,
+                  label: 'Describe your issue and what led up to it',
+                  placeholder: 'Well, I was playing Splatoon 2 until...',
+                  min_length:20
                 }
               ]
             }
-          ]
-        }).then(r => {
-          r.channel.awaitMessages({
-            max:1,
-            filter(message){
-              return message.author.id == threadStarter;
-            }
-          }).then(async () => {
-            await interaction.client.updateSupportThread({
-              threadId:channel.id,
-              userId:threadStarter
-            });
-            (interaction.client.channels.cache.get(channel.id) as ThreadChannel).send({
-              "content":`Thanks! <@&${config.supportRoleId}> will be here to support you shortly.\n\n*(Disclaimer: You may not receive an answer instantly. Many of us have lives outside of Discord and will respond whenever we're able to, whenever that is.)*`
-            })
-          })
-          interaction.followUp({
-            content:`Ticket is ready in <#${channel.id}>`,
-            ephemeral:true
-          })
-        })
-      })
-    })
+          ],
+          title: 'Open Support Ticket',
+          custom_id: 'open_ticket_modal'
+        }
+      }
+    }).then((err) => {
+      console.log(err)
+    });
   }
 })

@@ -2,6 +2,7 @@ import {Message, Collection} from 'discord.js'
 import ButtonCommand from '../src/classes/ButtonCommand'
 import Command from '../src/classes/Command'
 import ContextMenuCommand from '../src/classes/ContextMenuCommand'
+import ModalCommand from '../src/classes/ModalCommand'
 export interface MessageCommand {
   /** Command name */
   name:string,
@@ -60,9 +61,11 @@ export interface Config {
   },
   closingTicketsSettings?:{
     /** Minimum amount of seconds the ticket has to be open before it can be closed */
-    ticketsMinimumAge?:number,
+    ticketsMinimumAge?:number
     /** Message to be sent when ticket is closed */
     closeMessage?:string
+    /** The channel to send incoming feedback from closing tickets */
+    incomingFeedbackChannel?:string
   }
   /** Location of warnings.json */
   warningJsonLocation:string
@@ -89,14 +92,15 @@ declare module 'discord.js' {
       commands: Collection<string, Command>
       messageCommands: Collection<string, MessageCommand>
       buttonCommands: Collection<string, ButtonCommand>
-      ctxCommands: Collection<string, ContextMenuCommand>,
+      ctxCommands: Collection<string, ContextMenuCommand>
+      modalCommands:Collection<string, ModalCommand>
       createSupportThread(options:{
         shortDesc:string,
         userId:string,
         privateTicket:boolean
       }):Promise<ThreadChannel>
       getSupportThreadData(userId:string):ActiveTicketsData
-      updateSupportThread(options:{userId:string, threadId:string, newType?:TicketType, newName?:string}):Promise<boolean>
+      updateSupportThread(options:{userId:string, threadId:string, newType?:TicketType, newName?:string, locked?:string, externalChannelId?:string}):Promise<boolean>
       closeSupportThread(options:{
         userId:string,
         channelId?:string,
@@ -132,7 +136,11 @@ interface ActiveTicketsData {
   userId:string,
   active:boolean,
   createdMs:number,
-  type:TicketType
+  type:TicketType,
+  /** Either not present or User ID */
+  locked?:string
+  /** Either not present or Channel ID */
+  externalChannelId?:string
 }
 
 interface ActiveTickets {
