@@ -1,3 +1,4 @@
+import { config } from "../../config";
 import ModalCommand from "../classes/ModalCommand";
 
 export default new ModalCommand({
@@ -49,6 +50,35 @@ export default new ModalCommand({
                         }
                     ]
                 })
+                let modLogs = client.channels.cache.get(config.modLog);
+                if(modLogs.isText())
+                    await modLogs.send({
+                        embeds:[
+                            {
+                                title:"Ticket Closure",
+                                footer:{
+                                    text:ticketCloser.tag,
+                                    iconURL:ticketCloser.displayAvatarURL({dynamic:true})
+                                },
+                                fields:[
+                                    {
+                                        name:`Reason`,
+                                        value:reasonForClosing
+                                    },
+                                    {
+                                        name:`Ticket`,
+                                        value:`[${ticketChannel.name}](https://discord.com/channels/${ticketChannel.guildId}/${ticketChannel.id})`,
+                                        inline:true
+                                    },
+                                    {
+                                        name:`Closer`,
+                                        value:`<@${ticketCloser.id}> (${ticketCloser.tag})`,
+                                        inline:true
+                                    }
+                                ]
+                            }
+                        ]
+                    })
                 await ticketChannel.setLocked(true)
                 await ticketChannel.setArchived(true)
             }
