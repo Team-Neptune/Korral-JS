@@ -29,24 +29,18 @@ export default new ModalCommand({
         privateTicket: supportRoleOnly,
       })
       .then((channel) => {
-        const promptedQuestions = [
-          `Firmware + Atmosphere / DeepSea version`,
-          `Do you use Hekate or Fusee-Primary?`,
-          `Do you have an error code/screen?`,
-          `Coming for support with SDSetup or DeepSea?`,
-          `Describe your issue and what led up to it`,
-        ];
+        const promptedQuestions =
+          interaction.data.components[0]?.components[0]?.custom_id == "user"
+            ? [`User ID`, `Issue`]
+            : [
+                `Firmware + Atmosphere / DeepSea version`,
+                `Do you use Hekate or Fusee-Primary?`,
+                `Do you have an error code/screen?`,
+                `Coming for support with SDSetup or DeepSea?`,
+                `Describe your issue and what led up to it`,
+              ];
         let questionResponses: PromptedQuestion[] = promptedQuestions.map(
           (question, index) => {
-            if (
-              interaction.data.components[index]?.components[0]?.custom_id ==
-              "user"
-            ) {
-              return {
-                question,
-                response: "Not provided",
-              };
-            }
             return {
               question,
               response:

@@ -522,8 +522,13 @@ const utilityCommands: ApplicationCommandOptionData[] = [
 const commands: ApplicationCommandData[] = [
   // CTX
   {
-    type: 3,
+    type: "MESSAGE",
     name: "Quote Message",
+    defaultPermission: true,
+  },
+  {
+    type: "USER",
+    name: "(Staff) Open Ticket",
     defaultPermission: true,
   },
 
