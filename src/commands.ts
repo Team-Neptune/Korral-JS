@@ -109,6 +109,12 @@ const ticketCommands: ApplicationCommandOptionData[] = [
         description: "User to prompt",
         required: true,
       },
+      {
+        type: "STRING",
+        name: "message",
+        description: "The text to put after Hey {user},",
+        required: false,
+      },
     ],
   },
   {
