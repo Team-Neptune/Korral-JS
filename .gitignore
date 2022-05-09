@@ -13,3 +13,4 @@ publicThreads.json
 storage/deepsea_db.json
 activeTickets.json
 commands_setup.flag
+database_created.flag
