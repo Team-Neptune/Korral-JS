@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <meta name="author" content="">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+
+<body>
+    <div id="app">
+        <div class="card w-75 mx-auto mb-2 shadow">
+            <div class="card-body">
+                <div class="container">
+                    <div class="mx-auto">
+                        <img src="https://cdn.discordapp.com/icons/703301751171973190/fa38ea7fad7d145e72976f6c7f7d9e2d.png?size=256"
+                            class="rounded img-fluid" style="width: 64px;" alt="...">
+                        <br>
+                        <span class="h3">{{ serverName }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card w-100 mx-auto" v-for="message in filteredMessages">
+            <div class="card-body">
+                <div>
+                    <img :src="message.message_author_avatar_url" class="rounded img-fluid" style="width: 64px;"
+                        alt="...">
+                    <h5 class="card-title">{{message.message_author_name}}</h5>
+                </div>
+                <div v-html="message.message_content"></div>
+            </div>
+        </div>
+    </div>
+</body>
+<style>
+    #app {
+        margin: 10px;
+    }
+</style>
+<script>
+    var app = new Vue({
+        el: '#app',
+        data: {
+            serverName: 'REPLACE:GUILD_NAME',
+            ticketMessages: 'REPLACE:MESSAGES'
+        },
+        computed: {
+            messages() {
+                if (typeof this.ticketMessages == "string" && this.ticketMessages.startsWith("REPLACE:")) return []
+                return this.ticketMessages
+            },
+            filteredMessages() {
+                return this.messages.filter(m => !m.message_deleted).map(m => {
+                    m.message_content = marked.parse(m.message_content);
+                    return m;
+                })
+            }
+        }
+    })
+</script>
+
+</html>
