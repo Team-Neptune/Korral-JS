@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <meta name="author" content="">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script type="module" src="https://unpkg.com/@skyra/discord-components-core"></script>
+</head>
+
+<body style="background-color: #36393e;">
+    <div id="app">
+        <div class="card w-75 mx-auto m-3 shadow">
+            <div class="card-body">
+                <div class="container">
+                    <div class="mx-auto">
+                        <img :src="serverIcon" class="rounded img-fluid" style="width: 64px;" alt="...">
+                        <br>
+                        <span class="h3">{{ serverName }}: <a
+                                :href="filteredMessages.find(m => m.message_index == 0).message_link"
+                                target="_blank">#{{ channelName
+                                }}</a></span>
+                    </div>
+                </div>
+                <div class="alert alert-secondary" role="alert" style="text-align: right;">
+                    Website created by <a href="https://daniel.is-coding-on-the.net/" target="_blank">Daniel💻</a> from
+                    <a href="https://github.com/Team-Neptune" target="_blank">Team Neptune 🌊</a>
+                </div>
+            </div>
+        </div>
+        <main>
+            <discord-messages>
+                <discord-message v-for="message in filteredMessages" :author="message.message_author_name"
+                    :avatar="message.message_author_avatar_url">
+                    <div v-html=" message.message_content">
+                    </div>
+                    <discord-embed v-for="embed in message.message_embeds" slot="embeds"
+                        :color="`#${embed.color.toString(16)}`" :embed-title="embed.title">
+                        <discord-embed-description slot="description" v-html="embed.description">
+                        </discord-embed-description>
+                    </discord-embed>
+                </discord-message>
+            </discord-messages>
+        </main>
+        <style>
+            #app {
+                margin: 10px;
+            }
+        </style>
+        <script>
+            var app = new Vue({
+                el: '#app',
+                data: {
+                    serverName: 'REPLACE:GUILD_NAME',
+                    serverIcon: 'REPLACE:GUILD_ICON',
+                    channelName: 'REPLACE:CHANNEL_NAME',
+                    ticketMessages: 'REPLACE:MESSAGES',
+                    CONTENT_USER_MENTION_REGEX: /&lt\;@!?(\d{17,19})\&gt\;/g,
+                    EMBED_USER_MENTION_REGEX: /<@!?(\d{17,19})>/g,
+                    CONTENT_ROLES_REGEX: /&lt\;@&amp;(\d{17,19})\&gt\;/g,
+                    EMBED_ROLES_REGEX: /<@&(\d{17,19})>/g,
+                    CHANNELS_PATTERN: /<#(\d{17,19})>/g,
+                    cache_mentions: []
+                },
+                computed: {
+                    cachedMentioned() {
+                        return this.cache_mentions;
+                    },
+                    messages() {
+                        if (typeof this.ticketMessages == "string" && this.ticketMessages.startsWith("REPLACE:")) return []
+                        return this.ticketMessages
+                    },
+                    filteredMessages() {
+                        return this.messages.filter(m => !m.message_deleted)
+                            .sort((a, b) => a.message_index - b.message_index)
+                            .map(m => {
+                                if (m.message_mentions && m.message_mentions.filter(m => !this.cachedMentioned.find(cm => cm.id == m.id)).length != 0)
+                                    m.message_mentions.filter(m => !this.cachedMentioned.find(cm => cm.id == m.id)).forEach(m => this.cache_mentions.push(m));
+
+                                m.message_content = marked.parse(m.message_content);
+                                // User Mentions: Content
+                                (m.message_content.match(this.CONTENT_USER_MENTION_REGEX) || []).forEach(val => {
+                                    let userId = val.replace("&lt;@", "").replace("&gt\;", "")
+                                    m.message_content = m.message_content.replace(val, `<discord-mention color="${this.cachedMentioned.find(u => u.id == userId).color}">${this.cachedMentioned.find(u => u.id == userId) && this.cachedMentioned.find(u => u.id == userId).name || 'Unknown User'}</discord-mention>`)
+                                    return val;
+                                });
+                                console.log(m.message_content);
+                                // Role Mentions: Content
+                                (m.message_content.match(this.CONTENT_ROLES_REGEX) || []).forEach(val => {
+                                    console.log("CONTENT ROLE", val)
+                                    let roleId = val.replace("&lt;@&amp;", "").replace("&gt\;", "")
+                                    m.message_content = m.message_content.replace(val, `<discord-mention color="${this.cachedMentioned.find(u => u.id == roleId).color}" type="role">${this.cachedMentioned.find(u => u.id == roleId) && this.cachedMentioned.find(u => u.id == roleId).name || 'Unknown Role'}</discord-mention>`)
+                                    return val;
+                                });
+                                // Message Embeds
+                                if (m.message_embeds)
+                                    m.message_embeds.forEach((embedObj, index) => {
+                                        console.log("embedObj", embedObj, index);
+                                        let embed = m.message_embeds[index];
+                                        // User Mentions: Embeds
+                                        (embed.description.match(this.EMBED_USER_MENTION_REGEX) || []).forEach(val => {
+                                            let userId = val.replace(/<@!?/g, "").replace(">", "")
+                                            embed.description = embed.description.replace(val, `<discord-mention color="${this.cachedMentioned.find(u => u.id == userId).color}">${(this.cachedMentioned.find(u => u.id == userId) && this.cachedMentioned.find(u => u.id == userId).name) || 'Unknown User'}</discord-mention>`)
+                                        });
+                                        // Role Mentions: Embeds
+                                        (embed.description.match(this.EMBED_ROLES_REGEX) || []).forEach(val => {
+                                            let roleId = val.replace(/<@&/g, "").replace(">", "")
+                                            embed.description = embed.description.replace(val, `<discord-mention color="${this.cachedMentioned.find(u => u.id == roleId).color}" type="role">${(this.cachedMentioned.find(u => u.id == roleId) && this.cachedMentioned.find(u => u.id == roleId).name) || 'Unknown Role'}</discord-mention>`)
+                                        });
+                                    });
+                                return m;
+                            })
+                    }
+                }
+            })
+        </script>
+
+</html>
