@@ -1,11 +1,22 @@
 import fetch from 'node-fetch'
-import { TextChannel, Client, Collection, MessageEmbed, MessageButton, ThreadChannel, GuildMemberRoleManager, ApplicationCommand, Interaction } from 'discord.js'
+import { TextChannel, Client, Collection, MessageEmbed, MessageButton, ThreadChannel, GuildMemberRoleManager, ApplicationCommand, Interaction, MessageAttachment } from 'discord.js'
 import Command from './classes/Command';
 import {config} from '../config'
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'fs';
 import { ActiveTickets, PrivateThread, PrivateThreadSettings, PublicThread, TicketType } from '../typings';
 import ButtonCommand from './classes/ButtonCommand';
-import DeepSea from './deepsea'
+import DeepSea from './deepsea';
+import ContextMenuCommand from './classes/ContextMenuCommand';
+import commands from './commands';
+import ModalCommand from './classes/ModalCommand';
+import Database, { TicketTranscriptEntry } from './db';
+import santizieHtml, {IOptions} from 'sanitize-html'
+
+const santizieHtmlOptions:IOptions = {
+	allowedTags: [],
+	allowedAttributes: {},
+	allowedIframeHostnames: []
+}
 
 const client = new Client({intents:["GUILDS", "GUILD_MEMBERS", "GUILD_MESSAGES"]});
 client.commands = new Collection();
@@ -13,6 +24,9 @@ client.messageCommands = new Collection();
 client.buttonCommands = new Collection();
 client.ctxCommands = new Collection();
 client.modalCommands = new Collection();
+
+client.database = new Database(config.database)
+
 
 let activeTickets:ActiveTickets = {};
 if(existsSync("./activeTickets.json"))
@@ -147,16 +161,50 @@ client.closeSupportThread = async (options:{userId:string, channelId?:string, no
 	}
 	activeTickets[options.userId].active = false;
 	saveActiveTicketsData();
+	let ticketData = await client.database?.getTicketTranscript(options.channelId);
+	if(ticketData && !options.noApi){
+		ticketData.map(t => {
+			t.message_link = `https://discord.com/channels/${channel.guildId}/${t.ticket_channel_id}/${t.message_id}`
+			t.message_author_name = client.users.cache.get(t.message_author_id)?.tag || "Unknown user"
+			return t;
+		})
+		let html = readFileSync(config.databaseHTMLFileLocation).toString()
+		.replace(/REPLACE:GUILD_NAME/g, channel.guild.name)
+		.replace(/REPLACE:GUILD_ICON/g, channel.guild.iconURL({dynamic:true}))
+		.replace(/REPLACE:CHANNEL_NAME/g, channel.name)
+		.replace(/'REPLACE:MESSAGES'/g, JSON.stringify(ticketData.map(t => {
+			t.message_author_name = santizieHtml(t.message_author_name, santizieHtmlOptions)
+			t.message_content = santizieHtml(t.message_content, santizieHtmlOptions)
+			return t;
+		})));
+		let file = Buffer.from(html)
+		try {
+			await client.users.cache.get(options.userId).send({
+				files:[
+					// @ts-expect-error
+					new MessageAttachment(file, `transcript_${options.userId}_${channel}.html`, {
+						id:channel.id
+					})
+				]
+			})
+			if(config.closingTicketsSettings?.incomingFeedbackChannel)
+				(await client.channels.cache.get(config.closingTicketsSettings?.incomingFeedbackChannel) as TextChannel).send({
+					files:[
+						// @ts-expect-error
+						new MessageAttachment(file, `transcript_${options.userId}_${channel}.html`, {
+							id:channel.id
+						})
+					]
+				})
+		} catch {}
+		file = undefined;
+	}
 	return channel
 }
 
 client.getSupportThreadData = (userId:string) => {
 	return activeTickets[userId];
 }
-
-import ContextMenuCommand from './classes/ContextMenuCommand';
-import commands from './commands';
-import ModalCommand from './classes/ModalCommand';
 
 async function setupApplicationCommands(guildId?:string):Promise<Collection<string, ApplicationCommand>> {
 	if(guildId)
@@ -486,7 +534,44 @@ setInterval(keepThreadsOpen, 22 * 60 * 60 * 1000)
 
 // Support threads
 client.on("messageCreate", (message) => {
-	if(message.channel.isThread() == false) return;
+	if(message.channel.isThread() == false || message.type !== "DEFAULT") return;
+	console.log("INCOMING MESSAGE", message)
+	if(message.channel.isThread() && message.channel.parentId == config.supportChannelId && (publicThreads[message.channelId] || privateThreads[message.channelId])){
+		let ticketAuthorId = (publicThreads[message.channelId] || privateThreads[message.channelId]).ownerId;
+		let ticketData = message.client.getSupportThreadData(ticketAuthorId);
+		try {
+			let dataToAdd:TicketTranscriptEntry = {
+				id:message.id || (Math.random() + 1).toString(36).substring(7).toString(),
+				message_content:message.content?.toString() || null,
+				message_author_id:message.author.id || null,
+				message_author_avatar_url:message.author.displayAvatarURL({dynamic:true}) || null,
+				message_id:message.id || null,
+				message_mentions:[message.mentions?.users?.map(u => {
+					let guildMember = message.guild.members.cache.get(u.id);
+					return {
+						name:guildMember.nickname || u.tag,
+						id:u.id,
+						color:guildMember.roles.highest.hexColor || ""
+					}
+				}), message.mentions?.roles?.map(r => {
+					return {
+						name:r.name,
+						id:r.id,
+						color:r.hexColor
+					}
+				})].flat(),
+
+				ticket_author:ticketAuthorId,
+				ticket_channel_id:ticketData.threadChannelId,
+				ticket_public:ticketData.type === "PUBLIC"?true:false
+			};
+			if(message.embeds?.length > 0)
+				dataToAdd.message_embeds = message.embeds;
+			// if(message.components?.length > 0)
+			// 	dataToAdd.message_components = message.toJSON().components;
+			message.client.database?.addTicketData(dataToAdd)
+		} catch {}
+	}
 
 	//Not found in private threads
 	if(!privateThreads[message.channel.id]) return;
@@ -597,6 +682,13 @@ client.on('guildMemberRemove', async (member) => {
 
 //Log deleted messages
 client.on('messageDelete', message => {
+	if(message.channel.isThread() && message.channel.parentId == config.supportChannelId && (publicThreads[message.channelId] || privateThreads[message.channelId])){
+		try {
+			message.client.database?.removeTicketMessageData(message.id)
+		} catch (err) {
+			console.error(err)
+		}
+	}
 	if(message.author.id == client.user.id)return;
 	if(config.modLogBlacklisted?.includes(message.channelId)) return;
 	(message.guild.channels.cache.get(config.modLog) as TextChannel).send(`:wastebasket: **Message Delete**:\nfrom ${message.author.tag} (${message.author.id}) | in <#${message.channel.id}>:\n\`${message.content}\``)
