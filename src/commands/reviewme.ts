@@ -13,6 +13,13 @@ export default new Command({
     let randomChars = (Math.random() + 1).toString(36).substring(7).toString();
     let mentionedUser = interaction.options.getUser("user");
     let reasonForReview = interaction.options.getString("reason");
+
+    if (mentionedUser.id == interaction.user.id)
+      return interaction.reply({
+        content: `You can't request a review from yourself.`,
+        ephemeral: true,
+      });
+
     const embed = new MessageEmbed()
       .setTitle("Review Requested")
       .setDescription(reasonForReview)
