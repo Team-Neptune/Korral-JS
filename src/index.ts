@@ -349,7 +349,7 @@ client.ws.on("INTERACTION_CREATE", (payload) => {
     let commandName = payload.data?.custom_id;
 
     const command = client.modalCommands.find((modal) =>
-      modal.customId.startsWith(commandName)
+      commandName.startsWith(modal.customId)
     );
 
     if (command) {
