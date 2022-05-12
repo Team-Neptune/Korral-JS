@@ -280,6 +280,25 @@ const modCommands: ApplicationCommandOptionData[] = [
       },
     ],
   },
+  {
+    type: 1,
+    name: "review_me",
+    description: "Have someone give you a review",
+    options: [
+      {
+        type: 6,
+        name: "user",
+        description: "User who you want a review from",
+        required: true,
+      },
+      {
+        type: 3,
+        name: "reason",
+        description: "Reason for asking for a review (Be descriptive)",
+        required: true,
+      },
+    ],
+  },
 ];
 
 const switchCommands: ApplicationCommandOptionData[] = [
