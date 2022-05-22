@@ -540,6 +540,12 @@ const utilityCommands: ApplicationCommandOptionData[] = [
         description: "Message text",
         required: true,
       },
+      {
+        type: "BOOLEAN",
+        name: "disable_ping",
+        description: "Whether or not to have pings (allowed_mentions)",
+        required: false,
+      },
     ],
   },
 ];
