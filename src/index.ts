@@ -354,15 +354,29 @@ client.ws.on("INTERACTION_CREATE", (payload) => {
 
     if (command) {
       try {
-        // TEMP: Implement later
-        // if(command.staffOnly && !isStaff)
-        // 	return interaction.reply({
-        // 		content:`This is a staff only command.`,
-        // 		ephemeral:true
-        // 	})
-        // if(command.staffOnly){
-        // 	logStaffCommands(interaction, command)
-        // }
+        let isStaff = (
+          client.guilds.cache
+            .get(payload.guild_id)
+            ?.members.cache.get(payload.member?.user.id)
+            ?.roles as GuildMemberRoleManager
+        )?.cache?.find((role) => config.staffRoles.includes(role.id));
+
+        if (command.staffOnly && !isStaff)
+          return (
+            // @ts-expect-error
+            client.api
+              // @ts-expect-error
+              .interactions(payload.id)(payload.token)
+              .callback.post({
+                data: {
+                  type: 4,
+                  data: {
+                    content: `This is a staff only command.`,
+                    flags: 64,
+                  },
+                },
+              })
+          );
         command.execute(payload, client);
       } catch (error) {
         console.error(error);
