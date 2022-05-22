@@ -546,6 +546,12 @@ const utilityCommands: ApplicationCommandOptionData[] = [
         description: "Whether or not to have pings (allowed_mentions)",
         required: false,
       },
+      {
+        type: "BOOLEAN",
+        name: "use_modal",
+        description: "Use Modal to send text instead of provided text param",
+        required: false,
+      },
     ],
   },
 ];
