@@ -505,7 +505,7 @@ const utilityCommands: ApplicationCommandOptionData[] = [
             value: 4,
           },
           {
-            name: "Rule 5 - We loosely follow the Discord TOS",
+            name: "Rule 5 - Direct Messages & Moderators",
             value: 5,
           },
           {
