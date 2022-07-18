@@ -60,7 +60,7 @@ client.createSupportThread = async (options: {
   ) as TextChannel;
   const createdChannel = await channel.threads.create({
     name: `${options.privateTicket ? "🔒" : "🔓"} - ${options.shortDesc}`,
-    autoArchiveDuration: 1440,
+    autoArchiveDuration: 10080,
     type: "GUILD_PUBLIC_THREAD",
   });
   activeTickets[options.userId] = {
@@ -315,16 +315,14 @@ for (let index = 0; index < requiredFiles.length; index++) {
 
 client.once("ready", () => {
   console.log(
-    `Ready as ${client.user.tag} (${client.user.id}) | ${
-      client.guilds.cache.size
+    `Ready as ${client.user.tag} (${client.user.id}) | ${client.guilds.cache.size
     } ${client.guilds.cache.size == 1 ? "guild" : "guilds"}`
   );
   console.log(`Supports: Interactions`);
   const StartupEmbed = new MessageEmbed()
     .setColor("#00FF00")
     .setDescription(
-      `**${client.user.tag}** is ready. Currently in ${
-        client.guilds.cache.size
+      `**${client.user.tag}** is ready. Currently in ${client.guilds.cache.size
       } ${client.guilds.cache.size == 1 ? "guild" : "guilds"}.`
     )
     .setTimestamp();
@@ -615,41 +613,6 @@ client.on("threadDelete", async (thread) => {
     ?.delete();
 });
 
-function keepThreadsOpen() {
-  (client.channels.cache.get(config.supportChannelId) as TextChannel).threads
-    .fetchActive(true)
-    .then((threads) => {
-      threads.threads.each((channel) => {
-        if (publicThreads[channel.id] || privateThreads[channel.id]) {
-          let threadStarter = (
-            publicThreads[channel.id] || privateThreads[channel.id]
-          ).ownerId;
-          let closeTicketButton = new MessageButton()
-            .setStyle("SECONDARY")
-            .setCustomId(`close_ticket_${threadStarter}`)
-            .setLabel("Close Ticket")
-            .setEmoji("🔒");
-          channel.send({
-            embeds: [
-              {
-                description: `This message has been sent to keep this ticket open. If you no longer need this ticket, you can close it with the button below.`,
-              },
-            ],
-            components: [
-              {
-                type: 1,
-                components: [closeTicketButton],
-              },
-            ],
-          });
-        }
-      });
-    });
-}
-
-setInterval(keepThreadsOpen, 22 * 60 * 60 * 1000);
-// 22 Hours
-
 // Support threads
 client.on("messageCreate", (message) => {
   if (message.channel.isThread() == false) return;
@@ -716,9 +679,9 @@ client.on("messageCreate", (message) => {
     console.log(
       message.content.includes("--"),
       thisTicketAllowed.authorizedUsers.includes(message.author.id) ||
-        message.member.roles.cache.find((r) =>
-          thisTicketAllowed.authorizedRoles.includes(r.id)
-        ),
+      message.member.roles.cache.find((r) =>
+        thisTicketAllowed.authorizedRoles.includes(r.id)
+      ),
       message.mentions.users.size > 0
     );
 
@@ -816,7 +779,7 @@ client.on("guildMemberRemove", async (member) => {
         channelId: threadData.threadChannelId,
         noApi: false,
       });
-    } catch {}
+    } catch { }
   }
   if (config.userLogging == false) return;
   (client.channels.cache.get(config.userLog) as TextChannel).send(
