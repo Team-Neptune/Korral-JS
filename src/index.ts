@@ -341,6 +341,21 @@ process.on("unhandledRejection", (error) => {
   );
 });
 
+client.ws.on("THREAD_CREATE", (data) => {
+  if (!config.supportForumChannel || !config.supportRoleId) return;
+  if (data.parent_id != config.supportForumChannel) return;
+  if (data.last_message_id) return;
+  // @ts-expect-error
+  client.api.channels(data.id).messages.post({
+    data: {
+      content: `Hey <@${data.owner_id}>, thank you for opening a ticket! The <@&${config.supportRoleId}> will be with you as soon as possible, please be patient.\n\n*Please keep in mind the support team has a life outside of Discord, so response time may take a while.*`,
+      allowed_mentions: {
+        parse: ["roles"]
+      }
+    }
+  })
+})
+
 // TEMP: Until d.js properly implements Modals
 client.ws.on("INTERACTION_CREATE", (payload) => {
   if (payload.type === 5) {
