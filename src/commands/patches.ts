@@ -1,11 +1,11 @@
 import Command from "../classes/Command";
 
 export default new Command({
-    commandName:"patches",
-    subCommandGroup:"switch",
-    execute(interaction){
+    commandName: "patches",
+    subCommandGroup: "switch",
+    execute(interaction) {
         interaction.reply({
-            content:`For pirated eshop-games, forwarders and other unofficial stuff you need signature patches. You can download them separatly via the included "Switch AIO updater" homebrew. As their general purpose is to allow piracy, we're not providing any help with installation or problems of said patches or pirated games afterwards.`
+            content: `Sigpatches are not supported in this server as they are used to promote piracy; however, more information regarding sigpatches can be found online. We will not provide assistance with locating these patches.`
         })
     }
 })
