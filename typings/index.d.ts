@@ -75,6 +75,8 @@ export interface Config {
   testingGuildId?: string;
   /** Channel where requested reviews are sent */
   incomingReviewChannel?: string;
+  /** If using new forum channels, ping a role in it */
+  supportForumChannel?: string;
 }
 
 export interface GitHubRelease {
